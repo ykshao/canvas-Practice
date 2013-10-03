@@ -1,0 +1,22 @@
+* {
+	margin: 0;
+	padding: 0;
+	user-select: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+}
+
+body { font: 14px Helvetica, Sans-Serif; }
+
+.youtube{
+	width:853px;
+	padding:10px;
+	height:500px;
+	position:absolute;
+	margin-top:-240px;
+	margin-left:-426px;
+	top:50%;
+	left:50%;
+	background-color: rgba(0,0,0,.3);
+	border-radius: 5px;
+}
