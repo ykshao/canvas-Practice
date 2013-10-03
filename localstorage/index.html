@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1">
+        <meta name="description" content="">
+
+        <title>Creative jQuery 3.3</title>
+
+        <link rel="stylesheet" href="../css/normalize.css">
+        
+        <style>
+            
+        </style>
+        <script src="../js/modernizr.custom.min.js"></script>
+        <script src="../js/jquery-1.10.2.min.js"></script>
+        <script src="../js/jquery.easing.1.3.js"></script>
+
+        <script>
+            $(document).ready(function(){
+                localStorage.clear();
+                // textResult(localStorage.getItem('foo'));
+                // localStorage.setItem('foo', 'bar')
+                // textResult(localStorage.getItem('foo'));
+                var d = new Date();
+                // textResult(d);
+                textResult(getFullDate());
+                textResult(getLocation("pathname"));
+                var a = 2;
+
+            })
+
+            function textResult(txt){
+                $("body").append("<p>"+txt+"</p>");
+            }
+
+            function getFullDate(){
+                var d = new Date(); 
+                return d.getFullYear()+""+d.getMonth()+""+d.getDate()
+            }
+
+
+            function getLocation(obj){
+                return window.location[obj];
+            }
+
+
+            // window.location.hostname;   // => kftc.local
+            // window.location.href;       // => http://kftc.local:8088/test.jsp
+            // window.location.host;       // => kftc.local:8088
+            // window.location.port;       // => 8088
+            // window.location.pathname;   // => test.jsp
+            // window.location.search;     // => ?gg=1  
+
+        </script>
+    </head>
+    <body>
+        <img src="/magazine/issue1/common/operate-keyboard.png" alt="keyboard">
+        <img src="/magazine/issue1/common/operate-mouse.png" alt="mouse">
+    </body>
+</html>

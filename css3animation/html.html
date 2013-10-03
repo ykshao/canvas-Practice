@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1">
+        <meta name="description" content="">
+
+        <title>Creative jQuery 3.3</title>
+
+        <link rel="stylesheet" href="../css/normalize.css">
+            
+        <style>
+            #box { 
+                position:relative; 
+                width : 300px;
+                height: 200px;
+                top:100px;
+                margin: 0 auto;
+                background-color: #11ddd3;
+
+                 -webkit-animation-name:flip;
+                 -webkit-animation-duration:2s;
+                 -webkit-animation-timing-function:linear;
+                 -webkit-animation-delay:0s;
+                 -webkit-animation-iteration-count:infinite;
+                 -webkit-animation-direction:alternate;
+                 -webkit-animation-play-state:running;
+
+            }
+            
+            @keyframes flip { 
+                0%      { background-color: red; top:300px;}
+                25%     { background-color: blue; top:300px;}
+                50%     { background-color: black; top:200px;}
+                75%     { background-color: yellow; top:400px;}
+                100%    { background-color: green; top:0px;}
+            }
+
+            @-webkit-keyframes flip { 
+                0%      { background-color: red; top:300px;}
+                25%     { background-color: blue; top:300px;}
+                50%     { background-color: black; top:200px;}
+                75%     { background-color: yellow; top:400px;}
+                100%    { background-color: green; top:0px;}
+            }
+        </style>
+        <script src="../js/modernizr.custom.min.js"></script>
+        <script src="../js/jquery-1.10.2.min.js"></script>
+        <script src="../js/jquery.easing.1.3.js"></script>
+    </head>
+    <body>
+        <div id="box">lorem</div>  
+    </body>
+</html>

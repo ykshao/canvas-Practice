@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1">
+        <meta name="description" content="">
+
+        <title>Border</title>
+
+        <link rel="stylesheet" href="../css/normalize.css">
+        
+        <style>
+            .img-wrap { 
+                position: relative;
+                width: 700px;
+                height: 466px;
+                margin: 0 auto;
+                top:100px;
+                overflow: hidden;
+                /*border: 15px solid #FF005C;*/
+            }
+            .eff-border { 
+                position: absolute;
+                display: block;
+                overflow: hidden;
+                width: 700px;
+                height: 466px;
+                border-width: 15px;
+                border-color : #FF005C;
+                border-style: solid;
+                margin: 0px;
+            }
+        </style>
+        <script src="../js/modernizr.custom.min.js"></script>
+        <script src="../js/jquery-1.10.2.min.js"></script>
+        <script src="../js/jquery.easing.1.3.js"></script>
+
+        <script>
+            $(document).ready(function(){
+                $(".img-wrap").on('mouseover',function(){
+                    $('.eff-border').stop().animate({margin : "0px",width:"670px", height:"436px"},300,"easeOutExpo");
+                });
+
+                $(".img-wrap").on('mouseout',function(){
+                    $('.eff-border').stop().animate({margin : "-15px",width:"100%", height:"100%"},300,"easeOutExpo");
+                })
+            });
+        </script>
+    </head>
+    <body>
+        <div class="img-wrap">
+            <span class="eff-border"></span>
+            <img src="../img/1.jpg" width="700" height="466">
+        </div>
+    </body>
+</html>
