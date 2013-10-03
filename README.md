@@ -1,4 +1,4 @@
-Example
+Practice
 =======
 
 htmlt,css,js example
