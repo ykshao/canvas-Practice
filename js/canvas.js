@@ -1,8 +1,10 @@
 /**
- * @author shiftBrain DevJam
- * canvas groung ver1 
- * 2012.02.23
+ * 2013.10.
+ * Scenes ver 0.01
+ * Author : Heonwongeun
+ * FaceBook : https://www.facebook.com/heo.wongeun
  */
+
 (function(){
     var Canvas = function(canvasID){
         var root = this;
@@ -15,16 +17,23 @@
         init();
     }
     
+
+    /* ************************************************************
+        Rendering Animation
+    ************************************************************ */
+    
     Canvas.prototype.renderStart = function(){
-        requestAnimationFrame(rendering);
-        var animation = this.animation;
-        function rendering(){
-            animation();
-            requestAnimationFrame(rendering);
+        var scope = this;
+        this.requestAnimID  = window.requestAnimationFrame(rendering);
+        this.rendering      = rendering;
+
+        function rendering(time){
+            scope.animation(time);
+            scope.requestAnimID = requestAnimationFrame(rendering);
         }
     };
     Canvas.prototype.renderStop = function(){
-        
+        window.cancelAnimationFrame(this.requestAnimID);
     };
 
     Canvas.prototype.animation = function(){
@@ -34,10 +43,8 @@
     Canvas.prototype.constructor = Canvas;
     this.Canvas = Canvas;
 
-    // function rendering(){
-    //     console.log('asd');
-    //     requestAnimationFrame(rendering);
-    // }
+
+
     //--------------------------------------------------------------------------------
     // window loaded
     //--------------------------------------------------------------------------------
