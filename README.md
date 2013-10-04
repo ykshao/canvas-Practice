@@ -1,7 +1,7 @@
 Practice
 =======
 
-htmlt,css,js example
+html,css,js
 
 hello!
 
