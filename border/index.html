@@ -8,50 +8,63 @@
 
         <title>Border</title>
 
-        <link rel="stylesheet" href="../css/normalize.css">
+        <link rel="stylesheet" href="css/normalize.css">
         
         <style>
-            .img-wrap { 
+            #img-wrap { 
                 position: relative;
                 width: 700px;
                 height: 466px;
                 margin: 0 auto;
                 top:100px;
                 overflow: hidden;
-                /*border: 15px solid #FF005C;*/
+                background-color: #ff0;
             }
-            .eff-border { 
+            .border-anim { 
                 position: absolute;
-                display: block;
-                overflow: hidden;
-                width: 700px;
-                height: 466px;
-                border-width: 15px;
-                border-color : #FF005C;
-                border-style: solid;
-                margin: 0px;
+                width: 100%;
+                height: 100%;
+                -webkit-box-sizing   : border-box;
+                -moz-box-sizing      : border-box;
+                box-sizing           : border-box;
+                border: 10px solid #f00;
             }
+            #img-wrap img { position: absolute; width: 100%; height: 100%;}
         </style>
-        <script src="../js/modernizr.custom.min.js"></script>
-        <script src="../js/jquery-1.10.2.min.js"></script>
-        <script src="../js/jquery.easing.1.3.js"></script>
+        <script src="js/modernizr.custom.min.js"></script>
+        <script src="js/jquery-1.10.2.min.js"></script>
+        <script src="js/jquery.easing.1.3.js"></script>
 
         <script>
             $(document).ready(function(){
-                $(".img-wrap").on('mouseover',function(){
-                    $('.eff-border').stop().animate({margin : "0px",width:"670px", height:"436px"},300,"easeOutExpo");
-                });
+                $('.border-anim').each(function(){
+                    var border          = $(this),
+                        parent          = border.parent(),
+                        border_width    = border.data('border-width');
+                        border.css({'border-width':border_width});
 
-                $(".img-wrap").on('mouseout',function(){
-                    $('.eff-border').stop().animate({margin : "-15px",width:"100%", height:"100%"},300,"easeOutExpo");
-                })
+                    border.on('mouseover',function(){
+                        border.stop().animate({width:parent.width()+border_width*2,height:parent.height()+border_width*2,margin:-border_width},300,'easeOutQuart');
+                    });
+                    border.on('mouseout',function(){
+                        border.stop().animate({width:parent.width(),height:parent.height(),margin:0},300,'easeOutQuart');
+                    });
+                    border.css({width:parent.width(),height:parent.height()});
+                });
+                // $("#img-wrap").on('mouseover', function(){
+                //     $(this).find('.border-anim').stop().animate({'border-width':10},500,'easeOutExpo');
+                // });
+
+                // $("#img-wrap").on('mouseout', function(){
+                //     $(this).find('.border-anim').stop().animate({'border-width':0},500,'easeOutExpo');
+                // });
             });
         </script>
     </head>
     <body>
-        <div class="img-wrap">
-            <span class="eff-border"></span>
-            <img src="../img/1.jpg" width="700" height="466">
+        <div id="img-wrap">
+            <img src="img/1.jpg" width="700" height="466">
+            <div class='border-anim' data-border-width="140"></div>
         </div>
     </body>
 </html>

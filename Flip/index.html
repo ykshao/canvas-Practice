@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1">
+        <meta name="description" content="">
+
+        <title>Flip [chrome]</title>
+
+        <link rel="stylesheet" href="css/normalize.css">
+            
+        <style>
+            #wrap { 
+                position: absolute;
+                width: 100%; height: 100%;
+                border: 0px solid #fff;
+            }
+
+            .plane-outer { 
+                position: relative;
+                width: 25%; height: 50%;
+                float: left;
+                border : 1px solid #fff;
+
+                -webkit-perspective  : 1000px;
+                -webkit-perspective-origin  : 50% 50%;
+            }
+
+            .plane-inner {
+                position: absolute;
+                width: 100%; height: 100%;
+                text-align: center;
+
+                -webkit-transform-style: preserve-3d;
+                -webkit-transform: translateZ(0px) rotateY(0deg);
+                -webkit-transition  : .5s cubic-bezier(.32,.03,.48,.96);
+            }
+            
+            .plane-inner-front,.plane-inner-behind {
+                position: absolute;
+                width: 100%; height: 100%;        
+                left:0; top:0;
+                -webkit-backface-visibility:hidden;
+                overflow: hidden;
+            }
+            .plane-inner-front {
+                background-color: #E40470;
+                color:#fff;
+                -webkit-transform: translateZ(0px) rotateY(0deg);
+            }
+            .plane-inner-behind {
+                background-color: #ff0;
+                color:#E40470;
+                -webkit-transform: translateZ(0px) rotateY(180deg);   
+            }
+
+            .flip { 
+                -webkit-transform: translateZ(-500px) rotateY(180deg);
+            }
+
+
+            .boxsizing {
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
+            }
+
+            .plane-inner p {
+                position: absolute;
+                width:100%; height: 100%; top: 45%
+
+            }
+        </style>
+        <script src="js/modernizr.custom.min.js"></script>
+        <script src="js/jquery-1.10.2.min.js"></script>
+        <script src="js/jquery.easing.1.3.js"></script>
+
+        <script>
+            $(document).ready(function(){
+                $(".plane-outer").on('mouseover',function(){
+                    var inner = $(this).find('.plane-inner');
+                    inner.addClass('flip');
+                    $('.plane-outer').addClass('zoom');
+                });
+
+                $(".plane-outer").on('mouseout',function(){
+                    var inner = $(this).find('.plane-inner');
+                    inner.removeClass('flip');
+                    $('.plane-outer').removeClass('zoom');
+                });
+
+
+            });
+        </script>
+    </head>
+    <body>
+        <div id="wrap" class="boxsizing"> 
+            <div class="plane-outer boxsizing">
+                <div class="plane-inner">
+                    <div class="plane-inner-front"><p>front</p></div>
+                    <div class="plane-inner-behind"><p>behind</p></div> 
+                </div>
+            </div>
+            <div class="plane-outer boxsizing">
+                <div class="plane-inner">
+                    <div class="plane-inner-front"><p>front</p></div>
+                    <div class="plane-inner-behind"><p>behind</p></div>
+                </div>    
+            </div>
+             <div class="plane-outer boxsizing">
+                <div class="plane-inner">
+                    <div class="plane-inner-front"><p>front</p></div>
+                    <div class="plane-inner-behind"><p>behind</p></div>
+                </div>
+            </div>
+            <div class="plane-outer boxsizing">
+                <div class="plane-inner">
+                    <div class="plane-inner-front"><p>front</p></div>
+                    <div class="plane-inner-behind"><p>behind</p></div>
+                </div>
+            </div>
+            <div class="plane-outer boxsizing">
+                <div class="plane-inner">
+                    <div class="plane-inner-front"><p>front</p></div>
+                    <div class="plane-inner-behind"><p>behind</p></div> 
+                </div>
+            </div>
+            <div class="plane-outer boxsizing">
+                <div class="plane-inner">
+                    <div class="plane-inner-front"><p>front</p></div>
+                    <div class="plane-inner-behind"><p>behind</p></div>
+                </div>    
+            </div>
+             <div class="plane-outer boxsizing">
+                <div class="plane-inner">
+                    <div class="plane-inner-front"><p>front</p></div>
+                    <div class="plane-inner-behind"><p>behind</p></div>
+                </div>
+            </div>
+            <div class="plane-outer boxsizing">
+                <div class="plane-inner">
+                    <div class="plane-inner-front"><p>front</p></div>
+                    <div class="plane-inner-behind"><p>behind</p></div>
+                </div>
+            </div>
+        </div>  
+    </body>
+</html>
