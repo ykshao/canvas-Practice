@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1">
+        <meta name="description" content="">
+        <title></title>
+        <link rel="stylesheet" href="css/normalize.css">
+        <style>
+            /*style*/
+            body{
+                background-color: #040e17;
+                overflow: hidden;
+            }
+            
+
+            a:focus,a:active,a:visited { text-decoration:none; color:#fff;}
+            a:hover { text-decoration: none; color:#d00;}
+
+            #name{
+                position: absolute;
+                width: 100%; height: 100%;                
+                text-align: center; left:0; top:50%;
+                color: #FFF;
+                overflow: hidden;
+                cursor: pointer;
+            }
+            #wrap {
+                position: absolute;
+                width   : 100%; height: 100%;
+                border  : 10px solid #040e17;
+                overflow: hidden;
+
+                -webkit-perspective  : 500px;
+                -webkit-perspective-origin  : 50% 50%;
+            }
+            #space {
+                position: absolute;
+                overflow: hidden;
+                width: 100%; height: 100%;
+                background-color: #E40470;
+                -webkit-transform: translateZ(0px) rotateX(0px) rotateY(0deg); 
+
+                background:url(img/space.png) 50% 50%;
+                /*background:url(img/bg1.jpg) 50% 50%;*/
+                background-size: 100% 100%;
+            }
+
+            .stars {
+                position: absolute;
+                width: 100%; height: 100%;
+                background-color: #E4ffff;
+                -webkit-transform: translateZ(0px) rotateX(0px) rotateY(0deg); 
+            }
+            
+            #star1 {
+                background:url(img/star1.png);
+            }
+
+            #star2 {
+                background:url(img/star2.png);
+            }
+
+            #star3 {
+                background:url(img/star3.png);
+            }
+
+            
+            #info {
+                position: absolute;
+                width: 100%; height: 100%;
+                top: 45%;
+                text-align: center;
+            }
+
+            .boxsizing {
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
+            }
+        </style>
+        <script src="js/modernizr.custom.min.js"></script>
+        <script src="js/jquery-1.10.2.min.js"></script>
+        <script src="js/jquery.easing.1.3.js"></script>
+        <script src="js/requestAnimationFrame.js"></script>
+        <script src="js/jquery.mousewheel.js"></script>
+        <script src="js/jquery.scroll.js"></script>
+
+        <script>
+            $(document).ready(function(){
+
+                var space   = $('#space'),
+                    star1   = $('#star1');
+                var mouse   = {x:0, y:0, cx:0, cy:0},
+                    stage   = {width:0, height:0},
+                    rotate  = {x:0,y:0},
+                    translate   = {x:0,y:0,disX:0,disY:0},
+                    offset      = { rotate : .01,translate : 0.05, zoom:0, zoomRatio:0, blur:0},
+                    perspective = 500;
+
+                var scroll = new Scroll({ speed : 1.5, friction : 0.9, touchSpeed : 5, step : onScroll });
+                renderStart();
+
+
+                $(window).on('mousemove',function(e){
+                    mouse.x = e.pageX;
+                    mouse.y = e.pageY;
+                    mouse.cx = (e.pageX / stage.width * 2)-1;
+                    mouse.cy = (e.pageY / stage.height * 2)-1;
+                    mouse.disX = mouse.cx * stage.width * 0.5;
+                    mouse.disY = mouse.cy * stage.height * 0.5;
+                });
+
+                // EVENT RESIZE
+                $(window).on('resize',function(){
+                    stage = WindowSize();
+                })
+
+                $(window).trigger('resize');
+
+                var renderID;
+
+                function renderStart(){ renderID = requestAnimationFrame(rendering);}
+                function renderStop(){ 
+                    cancelAnimationFrame(renderID); 
+                }
+                function rendering(){
+                    renderID = requestAnimationFrame(rendering);
+                    rotate.x += ((-mouse.cy * 180)-rotate.x)*0.1,
+                    rotate.y += ((mouse.cx * 180)-rotate.y)*0.1;
+
+                    var speed = ((offset.zoomRatio*0.1-offset.zoomRatio*0.1)+0.05);
+                    translate.x += (-(mouse.cx*stage.width)-translate.x)*speed;
+                    translate.y += (-(mouse.cy*stage.height)-translate.y)*speed;
+
+                    offset.blur = Math.min(3,Math.abs(scroll.offset));
+
+                    var rotX = rotate.x*offset.rotate,
+                        rotY = rotate.y*offset.rotate;
+
+
+
+
+                    space.css({
+                        '-webkit-transform' : 
+                            'translateZ('+(100+offset.zoom)+'px) '+
+                            'rotateX('+(rotX+rotate.x*offset.zoomRatio*0.05)+'deg) '+
+                            'rotateY('+(rotY+rotate.y*offset.zoomRatio*0.05)+'deg) '+
+                            'translateX('+(translate.x*offset.translate+translate.x*0.5*offset.zoomRatio)+'px) '+
+                            'translateY('+(translate.y*offset.translate+translate.y*0.5*offset.zoomRatio)+'px)'
+                    });
+
+
+                    if(offset.zoom > perspective-50){
+                        $('#wrap').css({display:'none'});
+                    }else{
+                        $('#wrap').css({display:'block'});
+                    }
+
+
+                    $('.stars').each(function(i){
+                        var star = $(this),
+                            id = i+1;
+                        star.css({
+                            '-webkit-transform' : 
+                                'translateZ('+(id*100+offset.zoom)+'px) '+
+                                'rotateX('+(rotX-rotate.x*offset.zoomRatio*0.05)+'deg) '+
+                                'rotateY('+(rotY-rotate.y*offset.zoomRatio*0.05)+'deg) '+
+                                'translateX('+(translate.x*offset.translate+translate.x*0.5*offset.zoomRatio)+'px) '+
+                                'translateY('+(translate.y*offset.translate+translate.y*0.5*offset.zoomRatio)+'px)'
+                        })
+                    });
+
+                    $('#wrap').css({
+                        'webkit-filter' : 'blur('+offset.blur+'px)'
+                    });
+
+                };
+
+                function onScroll(){
+                    offset.zoom += scroll.offset;
+
+                    offset.zoomRatio = offset.zoom/perspective;
+
+                    if(offset.zoom < 0){
+                        offset.zoom += (0-offset.zoom)*0.3;
+                    }
+
+                    if(offset.zoom > perspective-150){
+                        offset.zoom += (perspective-150-offset.zoom)*0.02;
+                    }
+                }
+
+                $('#name').on('click',function(){
+                    for(var i=0; i<100; i++){
+                        scroll.onWheel({},1);
+                    }
+                });
+            });
+
+            WindowSize = function(){
+                var size = { width:0,height:0};
+                if (document.documentElement.clientHeight) {
+                    size.width = document.documentElement.clientWidth;
+                    size.height = document.documentElement.clientHeight;
+                } else if (document.body.clientHeight) {
+                    size.width = document.body.clientWidth;
+                    size.height = document.body.clientHeight;
+                } else if (window.innerHeight) {
+                    size.width = window.innerWidth;
+                    size.height = window.innerHeight;
+                }
+
+                return size;
+            }
+        </script>
+    </head>
+    <body>
+        <div id="name">
+            HEOWONGEUN
+            <!-- <a href="https://www.facebook.com/heo.wongeun" target="_blank">HEOWONGEUN</a> -->
+        </div>
+        <div id="wrap" class="boxsizing">
+            <div id="space">
+            </div>
+            <div id="star3" class="stars"></div>
+            <div id="star2" class="stars"></div>
+            <div id="star1" class="stars"></div>
+        </div>
+    </body>
+</html>
