@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1">
+        <meta name="description" content="">
+        <title></title>
+        <link rel="stylesheet" href="css/normalize.css">
+        <style>
+            body {
+                background-color: #000;
+                width: 100%; height: 100%;
+                overflow: hidden;
+            }
+
+            #wrap{
+                position: absolute;
+                width: 648px;
+                height: 382px;
+                left:50%; margin-left: -324px;
+                top:50%; margin-top: -192px;
+                background-color: #000;
+
+            }
+
+            #myCanvas {
+
+            }   
+
+        </style>
+        <script src="js/modernizr-2.0.6.js"></script>
+        <script src="js/jquery-1.10.2.min.js"></script>
+        <script src="js/jquery.easing.1.3.js"></script>
+        <script src="js/requestAnimationFrame.js"></script>
+        <script src="js/effect.spark.js"></script>
+
+        <script>
+            $(document).ready(function(){
+                var spark = new Spark(0,'#wrap','img/line.png');
+                $(spark).bind('ready',function(){
+                    spark.start();
+                });
+                
+            });
+             
+        </script>
+    </head>
+    <body> 
+        <div id="wrap">
+        </div>
+    </body>
+</html>
+
+
+
+<!--  
+ HTMLCanvasElement
+
+    toDataURL()
+    getContext()
+
+ メソッド
+    addColorStop()
+    arc()
+    arcTo()
+    beginPath()
+    bezierCurveTo()
+    clearRect()
+    clip()
+    closePath()
+    createImageData()
+    createLinearGradient()
+    createPattern()
+    createRadialGradient()
+    drawFocusRing()
+    drawImage()
+    fill()
+    fillRect()
+    fillText()
+    getImageData()
+    isPointInPath()
+    lineTo()
+    measureText()
+    moveTo()
+    putImageData()
+    quadraticCurveTo()
+    rect()
+    restore()
+    rotate()
+    save()
+    scale()
+    setTransform()
+    stroke()
+    strokeRect()
+    strokeText()
+    translate()
+    transform()
+
+プロパティ
+    fillStyle
+    font
+    globalAlpha
+    globalCompositeOperation
+    lineCap
+    lineJoin
+    lineWidth
+    miterLimit
+    shadowBlur
+    shadowColor
+    shadowOffsetX
+    shadowOffsetY
+    strokeStyle
+    textAlign
+    textBaseline
+ */
+
+ -->

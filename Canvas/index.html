@@ -42,11 +42,16 @@
                     animationID;
 
                 var image = new Image();
-                image.src = './img/line.png';
-                $(image).load(function(){
+                // $(image).load(function(){
+                    
+                // });
+                image.onload = function(){
                     canvasStart();
                     addEvent();
-                });
+                }
+                image.crossOrigin="anonymous";
+                image.src = 'img/line.png';
+                
 
                     
                 var makePositions = [],
@@ -60,6 +65,8 @@
 
                         ctx.drawImage(image,0,0);
                         
+                        // var url = cvs.toDataURL();
+                        // image.crossOrigin="";
                         var imageData   = ctx.getImageData(0, 0, cvs.width, cvs.height);  
                         var pixels      = imageData.data;  
                         
@@ -91,12 +98,13 @@
                                 var x = parseInt((i-1)%imageData.width),
                                     y = Math.floor((i-1)/imageData.height/(imageData.width/imageData.height));
 
-                                makePositions.push({x:x,y:y});
+                                makePositions.push({x:x,y:y,r:r,g:g,b:b,a:a});
                             }
 
 
                             if(i==numPixels-1){
                                 requestAnimationFrame(draw);
+                                console.log(makePositions[0]);
                                 makePositionLength = makePositions.length-1;
                             }
                         };
@@ -140,7 +148,7 @@
                     
                     for(var i=0,l=5; i<l; i++){
                         var p = makePositions[Math.floor(Math.random()*makePositionLength)];
-                        // if(p.y < mouse.y && p.y > mouse.y - 50 && p.x < mouse.x && p.x > mouse.x - 50){
+                        // if(p.y < mouse.y && p.y > mouse.y - 50){//&& p.x < mouse.x && p.x > mouse.x - 50
                             sparkMake(p);  
                         // }
                     }
@@ -193,7 +201,7 @@
                     this.y  = pos.y;
 
                     this.startTime = new Date().getTime();
-                    this.viewTime  = 500+Math.random()*1000;
+                    this.viewTime  = 500+Math.random()*500;
                     this.progress  = 0; 
                     this.progressR = 1;
 
@@ -202,8 +210,8 @@
 
                     this.radian = (Math.random()*360)*Math.PI/180;
 
-                    this.vx = Math.random()*0;
-                    this.vy = Math.random()*-1;
+                    this.vx = Math.random()*2-1;
+                    this.vy = Math.random()*-10;
 
                     // console.log(makeP.oldX)
                     // this.vx = (pos.x - pos.oldX);
@@ -223,8 +231,8 @@
 
                     this.update = function(){
                         this.t += this.vt;
-                        this.x += this.vx+Math.cos(this.radian+this.t*this.progressR);//+Math.cos(this.radian+this.t)*this.progressR*2;
-                        this.y += this.vy;+Math.sin(this.radian+this.t*this.progressR);//+Math.sin(this.radian+this.t)*this.progressR*2;;
+                        this.x += this.vx+Math.cos(this.radian+this.progress*10);//+Math.cos(this.radian+this.t)*this.progressR*2;
+                        this.y += this.vy;//+Math.sin(this.radian+this.t*this.progressR);//+Math.sin(this.radian+this.t)*this.progressR*2;;
 
                         // this.vx *= this.friction;
                         // this.vy *= this.friction;
@@ -240,17 +248,20 @@
                         if(this.oldX && this.oldY){
 
                             // ctx.fillRect(this.x,this.y,1,1);
-                            
-                            ctx.beginPath();
-                            // ctx.fillStyle = 'rgba('+this.color.r+','+this.color.g+','+this.color.b+','+this.color.a+')';
-                            ctx.arc(this.x, this.y, Math.max(0,this.progressR*1), 0, 360*Math.PI/180, true);
-                            // ctx.fill();
 
                             ctx.strokeStyle = 'rgba('+this.color.r+','+this.color.g+','+this.color.b+','+this.color.a+')';
-                            // ctx.beginPath();
+                            ctx.beginPath();
                             ctx.moveTo(this.oldX,this.oldY);
                             ctx.lineTo(this.x, this.y);
                             ctx.stroke();
+                            
+                            // ctx.beginPath();
+                            // ctx.fillStyle = 'rgba('+this.color.r+','+this.color.g+','+this.color.b+','+this.color.a+')';
+                            // ctx.strokeStyle = 'rgba('+this.color.r+','+this.color.g+','+this.color.b+','+this.color.a+')';
+                            // ctx.arc(this.x, this.y, Math.max(0,this.progressR*1), 0, 10*Math.PI/180, true);
+                            // ctx.fill();
+
+                            
                         }
                         
                         
