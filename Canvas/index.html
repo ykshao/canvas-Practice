@@ -8,13 +8,11 @@
         <title></title>
         <link rel="stylesheet" href="css/normalize.css">
         <style>
-
             body {
                 background-color: #000;
                 width: 100%; height: 100%;
                 overflow: hidden;
             }
-            /*style*/
 
             #wrap{
                 position: absolute;
@@ -58,25 +56,24 @@
                    if(Modernizr.canvas){
                         cvs = document.getElementById('myCanvas');
                         ctx = cvs.getContext("2d");
-                        cvsOffset = $(cvs).offset();  
+                        cvsOffset = $(cvs).offset();
 
                         ctx.drawImage(image,0,0);
                         
-
-                        var imageData = ctx.getImageData(0, 0, cvs.width, cvs.height);  
-                        var pixels = imageData.data;  
-
-                        $(cvs).click(function(e) {  
+                        var imageData   = ctx.getImageData(0, 0, cvs.width, cvs.height);  
+                        var pixels      = imageData.data;  
+                        
+                        // $(cvs).click(function(e) {  
                             
-                            var canvasX = Math.floor(e.pageX-cvsOffset.left);  
-                            var canvasY = Math.floor(e.pageY-cvsOffset.top);  
+                        //     var canvasX = Math.floor(e.pageX-cvsOffset.left);  
+                        //     var canvasY = Math.floor(e.pageY-cvsOffset.top);  
                             
-                            var pixelRedIndex = ((canvasY - 1) * (imageData.width * 4)) + ((canvasX - 1) * 4);  
-                            var pixelcolor = "rgba("+pixels[pixelRedIndex]+", "+pixels[pixelRedIndex+1]+", "+pixels[pixelRedIndex+2]+", "+pixels[pixelRedIndex+3]+")";  
+                        //     var pixelRedIndex = ((canvasY - 1) * (imageData.width * 4)) + ((canvasX - 1) * 4);  
+                        //     var pixelcolor = "rgba("+pixels[pixelRedIndex]+", "+pixels[pixelRedIndex+1]+", "+pixels[pixelRedIndex+2]+", "+pixels[pixelRedIndex+3]+")";  
                             
-                            // console.log(canvasX,canvasY,pixelRedIndex);
-                            // $("body").css("backgroundColor", pixelcolor);
-                        }); 
+                        //     // console.log(canvasX,canvasY,pixelRedIndex);
+                        //     // $("body").css("backgroundColor", pixelcolor);
+                        // }); 
 
 
                         var numPixels = imageData.width * imageData.height;  
@@ -97,11 +94,14 @@
                                 makePositions.push({x:x,y:y});
                             }
 
+
                             if(i==numPixels-1){
                                 requestAnimationFrame(draw);
                                 makePositionLength = makePositions.length-1;
                             }
                         };
+
+                        
 
                         ctx.clearRect(0, 0, cvs.width, cvs.height);  
                         ctx.putImageData(imageData, 0, 0);  
@@ -116,7 +116,7 @@
 
 
                 var t = 0.01,
-                    mouse = {x:0,y:0};
+                    mouse = {x:0,y:0,oldX:0,oldY:0};
                 function draw(){
 
                     ctx.save();
@@ -131,38 +131,42 @@
                     }
                     
                     t+=0.1;
-                    animationID = requestAnimationFrame(draw);
+                    
 
                     // mouse.x = Math.random()*600;
                     // mouse.y = Math.random()*382;
                     
                     // console.log(p)
                     
-                    for(var i=0,l=10; i<l; i++){
+                    for(var i=0,l=5; i<l; i++){
                         var p = makePositions[Math.floor(Math.random()*makePositionLength)];
-                        // if(p.y < mouse.y && p.y > mouse.y - 50){
-                            // p.x < mouse.x && p.x > mouse.x - 50){
-                            sparkMake(p);    
+                        // if(p.y < mouse.y && p.y > mouse.y - 50 && p.x < mouse.x && p.x > mouse.x - 50){
+                            sparkMake(p);  
                         // }
                     }
-                    
-                    
+
+
+                    requestAnimationFrame(draw);
                 }
 
                 
 
-
+                var makeP = {x:0,y:0,oldX:0,oldY:0};
                 function addEvent(){
                     $(window).bind('mousemove',function(e){
                         mouse.x = e.pageX-cvsOffset.left;
                         mouse.y = e.pageY-cvsOffset.top;
 
-                        for(var i=0,l=100; i<l; i++){
-                            var p = makePositions[Math.floor(Math.random()*makePositionLength)];
-                            if(p.y-25 < mouse.y && p.y > mouse.y - 25 && p.x-25 < mouse.x && p.x > mouse.x - 25){
-                                sparkMake(p);    
-                            }
-                        }
+                        // for(var i=0,l=2; i<l; i++){
+                        //     var p = makePositions[Math.floor(Math.random()*makePositionLength)];
+                        //     if(p.y-25 < mouse.y && p.y > mouse.y - 25){// && p.x-25 < mouse.x && p.x > mouse.x - 25
+                        //         // sparkMake(p);
+                        //     }
+                        // }
+                        
+
+                        mouse.oldX = mouse.x;
+                        mouse.oldY = mouse.y;
                     })
                 }
 
@@ -187,10 +191,9 @@
 
                     this.x  = pos.x;
                     this.y  = pos.y;
-                    // console.log(this.x,this.y)
 
                     this.startTime = new Date().getTime();
-                    this.viewTime  = 500+Math.random()*500;
+                    this.viewTime  = 500+Math.random()*1000;
                     this.progress  = 0; 
                     this.progressR = 1;
 
@@ -199,8 +202,14 @@
 
                     this.radian = (Math.random()*360)*Math.PI/180;
 
-                    this.vx = Math.random()*2-1;
-                    this.vy = Math.random()*-2-1;
+                    this.vx = Math.random()*0;
+                    this.vy = Math.random()*-1;
+
+                    // console.log(makeP.oldX)
+                    // this.vx = (pos.x - pos.oldX);
+                    // this.vy = (pos.y - pos.oldY);
+                    // console.log(this.vx,this.vy);
+
                     this.vt = Math.random()*1-0.5;
                     this.friction  = 1;
                     this.t = 0;
@@ -214,33 +223,31 @@
 
                     this.update = function(){
                         this.t += this.vt;
-                        // this.x += this.vx+Math.cos(this.radian+this.t*this.progressR);//+Math.cos(this.radian+this.t)*this.progressR*2;
-                        // this.y += this.vy;//+Math.sin(this.radian+this.t*this.progressR);//+Math.sin(this.radian+this.t)*this.progressR*2;;
+                        this.x += this.vx+Math.cos(this.radian+this.t*this.progressR);//+Math.cos(this.radian+this.t)*this.progressR*2;
+                        this.y += this.vy;+Math.sin(this.radian+this.t*this.progressR);//+Math.sin(this.radian+this.t)*this.progressR*2;;
 
                         // this.vx *= this.friction;
                         // this.vy *= this.friction;
 
                         // this.friction = 1.1*this.progressR;
 
-                        this.color.r = parseInt(50*Math.random());
+                        // this.color.r = parseInt(50*Math.random());
                         this.color.a = this.progressR;
                         // this.color.g = parseInt(211);
                         // this.color.b = parseInt(255*this.progress);
                         // this.color.a = this.progress;
 
                         if(this.oldX && this.oldY){
-                            
+
                             // ctx.fillRect(this.x,this.y,1,1);
-                            // ctx.beginPath();
                             
-
-                            ctx.fillStyle = 'rgba('+this.color.r+','+this.color.g+','+this.color.b+','+this.color.a+')';//'rgba('+parseInt(Math.random()*255)+','+parseInt(Math.random()*255)+','+parseInt(Math.random()*255)+','+this.color.a+')';
-                            ctx.arc(this.x, this.y, Math.max(0,this.progressR*30), 0, 360*Math.PI/180, true);
-                            ctx.fill();
-
-
-                            ctx.strokeStyle = 'rgba('+this.color.r+','+this.color.g+','+this.color.b+','+0+')'
                             ctx.beginPath();
+                            // ctx.fillStyle = 'rgba('+this.color.r+','+this.color.g+','+this.color.b+','+this.color.a+')';
+                            ctx.arc(this.x, this.y, Math.max(0,this.progressR*1), 0, 360*Math.PI/180, true);
+                            // ctx.fill();
+
+                            ctx.strokeStyle = 'rgba('+this.color.r+','+this.color.g+','+this.color.b+','+this.color.a+')';
+                            // ctx.beginPath();
                             ctx.moveTo(this.oldX,this.oldY);
                             ctx.lineTo(this.x, this.y);
                             ctx.stroke();
