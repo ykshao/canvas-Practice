@@ -25,276 +25,39 @@
             }
 
             #myCanvas {
+
             }   
 
         </style>
-        <script src="js/modernizr-2.0.6.js"></script>
         <script src="js/jquery-1.10.2.min.js"></script>
         <script src="js/jquery.easing.1.3.js"></script>
-        <script src="js/requestAnimationFrame.js"></script>
+        <script src="js/canvas.js"></script>
 
         <script>
             $(document).ready(function(){
-
-                var cvs,
-                    ctx,
-                    cvsOffset,
-                    animationID;
-
-                var image = new Image();
-                // $(image).load(function(){
-                    
-                // });
-                image.onload = function(){
-                    canvasStart();
-                    addEvent();
-                }
-                image.crossOrigin="anonymous";
-                image.src = 'img/line.png';
-                
-
-                    
-                var makePositions = [],
-                    makePositionLength;
-                function canvasStart()
-                {
-                   if(Modernizr.canvas){
-                        cvs = document.getElementById('myCanvas');
-                        ctx = cvs.getContext("2d");
-                        cvsOffset = $(cvs).offset();
-
-                        ctx.drawImage(image,0,0);
-                        
-                        // var url = cvs.toDataURL();
-                        // image.crossOrigin="";
-                        var imageData   = ctx.getImageData(0, 0, cvs.width, cvs.height);  
-                        var pixels      = imageData.data;  
-                        
-                        // $(cvs).click(function(e) {  
-                            
-                        //     var canvasX = Math.floor(e.pageX-cvsOffset.left);  
-                        //     var canvasY = Math.floor(e.pageY-cvsOffset.top);  
-                            
-                        //     var pixelRedIndex = ((canvasY - 1) * (imageData.width * 4)) + ((canvasX - 1) * 4);  
-                        //     var pixelcolor = "rgba("+pixels[pixelRedIndex]+", "+pixels[pixelRedIndex+1]+", "+pixels[pixelRedIndex+2]+", "+pixels[pixelRedIndex+3]+")";  
-                            
-                        //     // console.log(canvasX,canvasY,pixelRedIndex);
-                        //     // $("body").css("backgroundColor", pixelcolor);
-                        // }); 
-
-
-                        var numPixels = imageData.width * imageData.height;  
-                        for (var i = 0 ;i < numPixels; i++) {  
-                            var r = pixels[i*4],
-                                g = pixels[i*4+1],
-                                b = pixels[i*4+2],
-                                a = pixels[i*4+3];
-
-                            if(r != 0 && g != 0 && b != 0){
-                                // pixels[i*4]   = 255;
-                                // pixels[i*4+1] = 0;
-                                // pixels[i*4+2] = 0;
-
-                                var x = parseInt((i-1)%imageData.width),
-                                    y = Math.floor((i-1)/imageData.height/(imageData.width/imageData.height));
-
-                                makePositions.push({x:x,y:y,r:r,g:g,b:b,a:a});
-                            }
-
-
-                            if(i==numPixels-1){
-                                requestAnimationFrame(draw);
-                                console.log(makePositions[0]);
-                                makePositionLength = makePositions.length-1;
-                            }
-                        };
-
-                        
-
-                        ctx.clearRect(0, 0, cvs.width, cvs.height);  
-                        ctx.putImageData(imageData, 0, 0);  
-                        
-                        // console.log(imageData.data.length,imageData.data.length/4)
-                        // for(var i=0,l=pixels.length/4; i<l; i++){
-                        //     if(pixels[i*4])console.log(pixels[i])
-                        // }
-                        
-                   }
-                }
-
-
-                var t = 0.01,
-                    mouse = {x:0,y:0,oldX:0,oldY:0};
-                function draw(){
-
-                    ctx.save();
-
-                    ctx.fillStyle = "rgba(0,0,0,.9)"
-                    ctx.fillRect(0, 0,648,382);
-                    // ctx.drawImage(image,0,0);
-
-
-                    for(s in sparks){
-                        sparks[s].update();
-                    }
-                    
-                    t+=0.1;
-                    
-
-                    // mouse.x = Math.random()*600;
-                    // mouse.y = Math.random()*382;
-                    
-                    // console.log(p)
-                    
-                    for(var i=0,l=5; i<l; i++){
-                        var p = makePositions[Math.floor(Math.random()*makePositionLength)];
-                        // if(p.y < mouse.y && p.y > mouse.y - 50){//&& p.x < mouse.x && p.x > mouse.x - 50
-                            sparkMake(p);  
-                        // }
-                    }
-
-
-                    requestAnimationFrame(draw);
-                }
+                var canvas = new Canvas('#canvasWrap',0,1024,500);
+                $(canvas).bind(canvas.EVENT_CHANGE,function(e,data){
+                    if(data.type == 'ready'){
+                        canvas.start();
+                    };
+                });
 
                 
 
-                var makeP = {x:0,y:0,oldX:0,oldY:0};
-                function addEvent(){
-                    $(window).bind('mousemove',function(e){
-                        mouse.x = e.pageX-cvsOffset.left;
-                        mouse.y = e.pageY-cvsOffset.top;
-
-                        // for(var i=0,l=2; i<l; i++){
-                        //     var p = makePositions[Math.floor(Math.random()*makePositionLength)];
-                        //     if(p.y-25 < mouse.y && p.y > mouse.y - 25){// && p.x-25 < mouse.x && p.x > mouse.x - 25
-                        //         // sparkMake(p);
-                        //     }
-                        // }
-                        
-
-                        mouse.oldX = mouse.x;
-                        mouse.oldY = mouse.y;
-                    })
+                canvas.draw = function(ctx){
+                    ctx.strokeStyle = 'rgba(0,211,255,1)';
+                    ctx.beginPath();
+                    ctx.moveTo(Math.random()*1024, Math.random()*500);
+                    ctx.lineTo(Math.random()*1024, Math.random()*500);
+                    ctx.stroke();
                 }
-
-                
-
-                var sparks = {},
-                    n = 0;
-                function sparkMake(position){
-                    var color = {r:0,g:211,b:255,a:1};
-                    var spark = new Spark(n,ctx,position,color);
-                    spark.update();
-                    sparks[n] = spark;
-                    n++;
-                }
-
-               
-
-                Spark = function(id,ctx,pos,color){
-                    this.id     = id;
-                    this.width  = 2;
-                    this.height = 2;
-
-                    this.x  = pos.x;
-                    this.y  = pos.y;
-
-                    this.startTime = new Date().getTime();
-                    this.viewTime  = 500+Math.random()*500;
-                    this.progress  = 0; 
-                    this.progressR = 1;
-
-                    // this.oldX = pos.x;
-                    // this.oldY = pos.x;
-
-                    this.radian = (Math.random()*360)*Math.PI/180;
-
-                    this.vx = Math.random()*2-1;
-                    this.vy = Math.random()*-10;
-
-                    // console.log(makeP.oldX)
-                    // this.vx = (pos.x - pos.oldX);
-                    // this.vy = (pos.y - pos.oldY);
-                    // console.log(this.vx,this.vy);
-
-                    this.vt = Math.random()*1-0.5;
-                    this.friction  = 1;
-                    this.t = 0;
-
-                    this.color = color;//{r:0,g:211,b:255,a:1};
-
-                    this.init = function(){
-                        
-                    }
-
-
-                    this.update = function(){
-                        this.t += this.vt;
-                        this.x += this.vx+Math.cos(this.radian+this.progress*10);//+Math.cos(this.radian+this.t)*this.progressR*2;
-                        this.y += this.vy;//+Math.sin(this.radian+this.t*this.progressR);//+Math.sin(this.radian+this.t)*this.progressR*2;;
-
-                        // this.vx *= this.friction;
-                        // this.vy *= this.friction;
-
-                        // this.friction = 1.1*this.progressR;
-
-                        // this.color.r = parseInt(50*Math.random());
-                        this.color.a = this.progressR;
-                        // this.color.g = parseInt(211);
-                        // this.color.b = parseInt(255*this.progress);
-                        // this.color.a = this.progress;
-
-                        if(this.oldX && this.oldY){
-
-                            // ctx.fillRect(this.x,this.y,1,1);
-
-                            ctx.strokeStyle = 'rgba('+this.color.r+','+this.color.g+','+this.color.b+','+this.color.a+')';
-                            ctx.beginPath();
-                            ctx.moveTo(this.oldX,this.oldY);
-                            ctx.lineTo(this.x, this.y);
-                            ctx.stroke();
-                            
-                            // ctx.beginPath();
-                            // ctx.fillStyle = 'rgba('+this.color.r+','+this.color.g+','+this.color.b+','+this.color.a+')';
-                            // ctx.strokeStyle = 'rgba('+this.color.r+','+this.color.g+','+this.color.b+','+this.color.a+')';
-                            // ctx.arc(this.x, this.y, Math.max(0,this.progressR*1), 0, 10*Math.PI/180, true);
-                            // ctx.fill();
-
-                            
-                        }
-                        
-                        
-
-                        this.oldX = this.x;
-                        this.oldY = this.y;
-
-                        if(this.x<0 || this.y<0 || this.progress >= 1){
-                            this.remove(this.id);
-                        }
-
-
-                        this.progress = (new Date().getTime() - this.startTime)/this.viewTime
-                        this.progressR = 1-this.progress;
-                    }
-
-                    this.remove = function(id){
-                        delete sparks[id];
-                    }
-
-                    return this;
-                }
-                Spark.prototype.constructor = Spark;
-
-            
             });
              
         </script>
     </head>
     <body> 
-        <div id="wrap">
-            <canvas id="myCanvas" width="648" height="382"></canvas>
         </div>
+        <div id="canvasWrap"></div>
     </body>
 </html>
 

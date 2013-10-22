@@ -13,7 +13,8 @@
         this.renderingID;
 
         this.sparks     = {}; // embers 
-        this.sparkLengh = 0
+        this.sparkLengh = 0;
+        this.makeAmount = 10;
 
         /* ************************************************************
             init
@@ -31,15 +32,17 @@
         }
 
         this.draw = function(){
-            // if(this.status != 'ready')return; 
-            root.make();
-            root.make();
-            root.make();
-            root.make();
-
             //canvas clear
-            root.ctx.fillStyle = "rgba(0,0,0,.9)"
-            root.ctx.fillRect(0, 0,root.cvs.width,root.cvs.height);
+            // root.ctx.fillStyle = "rgba(0,0,0,1)"
+            // root.ctx.fillRect(0, 0,root.cvs.width,root.cvs.height);
+            
+            root.ctx.clearRect(0,0,root.cvs.width,root.cvs.height);
+            // if(this.status != 'ready')return; 
+            for(var i=0; i<root.makeAmount; i++){
+                root.make();
+            }
+
+            // root.ctx.drawImage(root.img,0,0);
 
             //update
             for(s in root.sparks)root.sparks[s].update();
@@ -131,7 +134,7 @@
 
         this.config = {
             vx         : Math.random()*2-1,
-            vy         : Math.random()*-3,
+            vy         : Math.random()*-1,
             friction   : 1,
             color      : {r:0,g:211,b:255,a:1},
             duration   : 500+Math.random()*500,
@@ -165,7 +168,7 @@
         ************************************************************ */
 
         this.calculate = function(){
-            this.x += this.config.vx;//+Math.cos(this.config.radian)*this.config.vx*this.progressR;
+            this.x += this.config.vx+Math.cos(this.config.radian)*this.config.vx*this.progressR;
             this.y += this.config.vy;//+Math.sin(this.config.radian)*this.config.vy*this.progressR;
         }
 
