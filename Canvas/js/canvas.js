@@ -14,10 +14,6 @@
         var root = this,
             id,wrap,$cvs,cvs,ctx,size,status,info,stopTimer,event_info = {};
 
-            
-            
-            
-
         /* ************************************************************
             private function
         ************************************************************ */
