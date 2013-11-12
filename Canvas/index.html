@@ -43,12 +43,15 @@
                 });
 
                 
-
+                var oldP = {x:Math.random()*1024, y:Math.random()*500};
                 canvas.draw = function(ctx){
                     ctx.strokeStyle = 'rgba(0,211,255,1)';
+                    ctx.fillStyle = 'rgba(0,0,0,0.05)';
+                    ctx.fillRect(0,0,1024,500);
                     ctx.beginPath();
-                    ctx.moveTo(Math.random()*1024, Math.random()*500);
-                    ctx.lineTo(Math.random()*1024, Math.random()*500);
+                    ctx.moveTo(oldP.x, oldP.y);
+                    oldP = { x:Math.random()*1024, y:Math.random()*500};
+                    ctx.lineTo(oldP.x, oldP.y);
                     ctx.stroke();
                 }
             });

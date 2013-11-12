@@ -64,8 +64,8 @@
 
         function rendering(){
             info.renderID = requestAnimationFrame(rendering);
-            ctx.fillStyle = 'rgba(0,0,0,0)';
-            ctx.fillRect(0,0,1024,500);
+            // ctx.fillStyle = 'rgba(0,0,0,0)';
+            // ctx.fillRect(0,0,1024,500);
             root.draw(ctx);
         }
 
