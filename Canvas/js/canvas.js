@@ -64,14 +64,16 @@
 
         function rendering(){
             info.renderID = requestAnimationFrame(rendering);
-            // ctx.fillStyle = 'rgba(0,0,0,0)';
-            // ctx.fillRect(0,0,1024,500);
             root.draw(ctx);
+
+            for(var o in drawList){
+                drawList[o].draw();
+            }
         }
 
 
         /* ************************************************************
-            publci function
+            public function
         ************************************************************ */
         this.start = function(){
             if(stopTimer){
@@ -93,7 +95,78 @@
         };
 
         this.draw = function(){
+
+            ctx.save();
+            ctx.fillStyle = 'rgba(0,0,0,1)';
+            ctx.fillRect(0,0,1280,800);
+            ctx.restore();
+
+            // ctx.save();
+            // ctx.fillStyle = 'rgba(255,0,0,1)';
+            // ctx.beginPath();
+            // ctx.arc(Math.random()*1200, Math.random()*800, Math.random()*100, 0, 360*Math.PI/180, true);
+            // ctx.closePath();
+            // ctx.fill();
+            // ctx.restore();
+
+
+            
+            // ctx.restore();
         }
+
+        /* ************************************************************
+            add DrawList
+        ************************************************************ */
+        var drawList = {};
+        this.addDrawList = function(name,effctClass){
+            drawList[name] = effctClass;
+        }
+
+        /* ************************************************************
+            
+        ************************************************************ */
+
+        this.getImageData = function(rect){
+            var rectangle = {x:0,y:0,width:cvs.width,height:cvs.height};
+            $.extend(rectangle,rect);
+            var imgData = ctx.getImageData(0, 0, rectangle.width, rectangle.height);
+            return imgData;
+
+        }
+
+        this.clear = function(){
+            ctx.clearRect(0, 0, cvs.width, cvs.height);
+        }
+
+        this.drawImage = function(img,x,y){
+            ctx.drawImage(img,x,y);
+        }
+
+        this.getColorPixel = function(imgData){
+            var data    = imgData,
+                length  = imgData.width * imgData.height,
+                imgDatas = [];
+
+            for (var i = 0 ;i < length; i++) {  
+                var r = data.data[i*4],
+                    g = data.data[i*4+1],
+                    b = data.data[i*4+2],
+                    a = data.data[i*4+3];
+
+                if(r != 0 && g != 0 && b != 0){
+                    var x = parseInt((i-1)%imgData.width),
+                        y = Math.floor((i-1)/imgData.height/(imgData.width/imgData.height));
+                    imgDatas.push({x:x,y:y,r:r,g:g,b:b,a:Number((a/255).toFixed(2))});
+                }
+
+                // console.log(info.colorPosition[0].alpha)
+
+
+                if(i==length-1){
+                    return imgDatas;
+                }
+            };
+        };
 
 
 
