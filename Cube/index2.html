@@ -1,0 +1,119 @@
+<!DOCTYPE html> 
+<html lang="ja"> 
+    <head> 
+        <meta charset="utf-8"> 
+        <title>CSS3 - 3D Cube</title>
+        
+        <style>
+            
+            .main {
+                width: 100px;
+                padding: 20px;
+                margin: 0 auto;
+                /*display: -webkit-box;*/
+                /* 3D設定 */
+                -webkit-transform-style: preserve-3d;
+                -webkit-perspective: 1200;
+                /* 少し上から見下ろす感じ  */
+                -webkit-transform: rotateX(0deg);
+            }
+            
+            .cube {
+                margin: 40px;
+                width: 400px;
+                height: 400px;
+                margin-left: -50px;
+                
+                -webkit-transform-style: preserve-3d;
+                -webkit-transform: translateZ( -200px );
+            }
+            
+            .rolling {
+                -webkit-animation: rolling 2s infinite;
+            }
+            
+            .pitching {
+                -webkit-animation: pitching 2s infinite;
+            }
+            
+            .yawing {
+                -webkit-animation: yawing 2s infinite;
+            }
+            
+            @-webkit-keyframes rolling {
+                  0% { -webkit-transform: translateZ(-200px) rotateX(0deg); }
+                100% { -webkit-transform: translateZ(-200px) rotateX(360deg); }
+            }
+            
+            @-webkit-keyframes pitching {
+                  0% { -webkit-transform: translateZ(-100px) rotateY(0deg); }
+                100% { -webkit-transform: translateZ(-100px) rotateY(360deg); }
+            }
+            
+            @-webkit-keyframes yawing {
+                  0% { -webkit-transform: translateZ(-100px) rotateZ(0deg); }
+                100% { -webkit-transform: translateZ(-100px) rotateZ(360deg); }
+            }
+            
+            .cube [class|=plane] {
+                position: absolute;
+                width: 400px;
+                height: 400px;
+                border: solid 1px black;
+                
+                font-size: 64px;
+                text-align: center;
+                line-height: 200px;
+            }
+            
+            .cube .plane-front  { background-color: hsla(  0, 100%, 50%, 0.7); }
+            .cube .plane-back   { background-color: hsla( 60, 100%, 50%, 0.7); }
+            .cube .plane-right  { background-color: hsla(120, 100%, 50%, 0.7); }
+            .cube .plane-left   { background-color: hsla(180, 100%, 50%, 0.7); }
+            .cube .plane-top    { background-color: hsla(240, 100%, 50%, 0.7); }
+            .cube .plane-bottom { background-color: hsla(300, 100%, 50%, 0.7); }
+            
+            .cube .plane-front    { -webkit-transform: translateZ(200px); }
+            .cube .plane-back     { -webkit-transform: rotateX(-180deg) translateZ(200px); }
+            .cube .plane-right    { -webkit-transform: rotateY(  90deg) translateZ(200px); }
+            .cube .plane-left     { -webkit-transform: rotateY( -90deg) translateZ(200px); }
+            .cube .plane-top      { -webkit-transform: rotateX(  90deg) translateZ(200px); }
+            .cube .plane-bottom   { -webkit-transform: rotateX( -90deg) translateZ(200px); }
+            
+        </style>
+        
+    </head>
+    
+    <body>
+        
+        <h1>CSS3 - 3D Cube</h1>
+        
+        <div class="main">
+            <div class="cube rolling">
+                <div class="plane-front">front</div>
+                <div class="plane-back">back</div>
+                <div class="plane-right">right</div>
+                <div class="plane-left">left</div>
+                <div class="plane-top">top</div>
+                <div class="plane-bottom">bottom</div>
+            </div>
+            <!--div class="cube pitching">
+                <div class="plane-front">front</div>
+                <div class="plane-back">back</div>
+                <div class="plane-right">right</div>
+                <div class="plane-left">left</div>
+                <div class="plane-top">top</div>
+                <div class="plane-bottom">bottom</div>
+            </div>
+            <div class="cube yawing">
+                <div class="plane-front">front</div>
+                <div class="plane-back">back</div>
+                <div class="plane-right">right</div>
+                <div class="plane-left">left</div>
+                <div class="plane-top">top</div>
+                <div class="plane-bottom">bottom</div>
+            </div-->
+        </div>
+        
+    </body>
+</html>
