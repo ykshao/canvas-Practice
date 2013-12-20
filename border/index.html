@@ -37,20 +37,25 @@
 
         <script>
             $(document).ready(function(){
+                var border,parent;
                 $('.border-anim').each(function(){
-                    var border          = $(this),
-                        parent          = border.parent(),
-                        border_width    = border.data('border-width');
-                        border.css({'border-width':border_width});
+                    border          = $(this);
+                    parent          = border.parent();
+                    border_width    = border.data('border-width');
+                    border.css({'border-width':border_width});
 
-                    border.on('mouseover',function(){
-                        border.stop().animate({width:parent.width()+border_width*2,height:parent.height()+border_width*2,margin:-border_width},300,'easeOutQuart');
-                    });
-                    border.on('mouseout',function(){
-                        border.stop().animate({width:parent.width(),height:parent.height(),margin:0},300,'easeOutQuart');
-                    });
+                    border.on('mouseover',onOver);
+                    border.on('mouseout',onOut);
                     border.css({width:parent.width(),height:parent.height()});
                 });
+
+                function onOver(){
+                    border.stop().animate({width:parent.width()+border_width*2,height:parent.height()+border_width*2,margin:-border_width},300,'easeOutQuart');
+                }
+
+                function onOut(){
+                    border.stop().animate({width:parent.width(),height:parent.height(),margin:0},300,'easeOutQuart');
+                }
                 // $("#img-wrap").on('mouseover', function(){
                 //     $(this).find('.border-anim').stop().animate({'border-width':10},500,'easeOutExpo');
                 // });

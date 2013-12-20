@@ -8,44 +8,24 @@
         <title></title>
         <link rel="stylesheet" href="css/normalize.css">
         <style>
-            .red    { background-color: red;}
-            .blue   { background-color: blue;}
-            .green  { background-color: green;}
-
-
+            body { background-color: #000; cursor: move;}
             #wrap{
                 position: absolute;
                 width: 100%; height: 100%;
-
-                -webkit-perspective  : 1000px;
-                -webkit-transform-style: preserve-3d;
-                -webkit-transform-origin : 50% 50%;
-                -webkit-transform : translateZ(-100px);
+                /*-webkit-transform-style: preserve-3d;*/
+                /*-webkit-transform : translateZ(-100px);*/
             }
 
             #cube {
                 position: absolute;
                 left : 50%; top:50%;
-                -webkit-transform-origin : 50% 50%;
-                -webkit-transform-style : preserve-3d;
+                /*-webkit-transform-origin : 50% 50%;*/
+                
             }
             
-            #cube [class|=plane] {
-                position: absolute;
-                -webkit-transform-origin : 50% 50%;
-                text-align: center;
-                font-size: 60px;
-                /*-webkit-backface-visibility : hidden;*/
-            }
-
             .rolling {
-                -webkit-animation: rolling 50s infinite;
+                /*-webkit-animation: rolling 50s infinite;*/
             }
-
-            /*@-webkit-keyframes rolling {*/
-                  /*0% { -webkit-transform: translateZ(0px) rotateY(0deg) rotateX(360deg); }*/
-                /*100% { -webkit-transform: translateZ(0px) rotateY(0deg) rotateX(0deg); }*/
-            /*}*/
 
             #cube .plane-front  { background-color: hsla(  0, 100%, 50%, 0.7); }
             #cube .plane-back   { background-color: hsla( 60, 100%, 50%, 0.7); }
@@ -54,24 +34,7 @@
             #cube .plane-top    { background-color: hsla(240, 100%, 50%, 0.7); }
             #cube .plane-bottom { background-color: hsla(300, 100%, 50%, 0.7); }
 
-            /*#cube .plane-front    { width:400px; height:100px; -webkit-transform:                  translateZ(100px); }
-            #cube .plane-back     { width:400px; height:100px; -webkit-transform: rotateX(-180deg) translateZ(100px); }
-            #cube .plane-left     { width:200px; height:100px; -webkit-transform: rotateY(  -90deg) translateZ(100px); }
-            #cube .plane-right    { width:200px; height:100px; -webkit-transform: rotateY(  90deg) translateZ(300px); }
-
-            #cube .plane-top      { width:400px; height:200px; -webkit-transform: rotateX(  90deg) translateZ(100px); }
-            #cube .plane-bottom   { width:400px; height:200px; -webkit-transform: rotateX( -90deg) translateZ(0px); }*/
-
-            .rolling {
-                /*-webkit-animation: rolling 2s infinite;*/
-            }
-            
-            
-            @-webkit-keyframes rolling {
-                /*0% { -webkit-transform: translateZ(-50px) rotateX(0deg); }
-                100% { -webkit-transform: translateZ(-50px) rotateX(360deg); }   */
-            }
-    
+           
             
         </style>
         <script src="js/modernizr.custom.min.js"></script>
@@ -98,28 +61,68 @@
                      top    : $('.plane-top'),
                      bottom : $('.plane-bottom')
                 };
-
-                cube = new CUBE(cubeWrap,planes,{width:stage.width,height:stage.height});
-                // cube = new CUBE(cubeWrap,planes,{width:1000,height:800});
+                cube = new CUBE(cubeWrap,planes,{ width:stage.width,height:stage.height, depth:stage.width });
+                // cube = new CUBE(cubeWrap,planes,{width:100,height:100});
                 var scroll = new Scroll({speed:1,step:onScroll});
 
             }
 
 
-            var stage = {};
+            var stage = {},
+                renderID;
             function addEvent(){
                 $(window).on('resize',function(){
                     stage = windowSize();
                     stage.halfW = stage.width*0.5;
                     stage.halfH = stage.height*0.5;
+                    if(typeof cube != 'undefined')cube.sizeChange({ width:stage.width,height:stage.height, depth:stage.width });
                 })
                 $(window).trigger('resize');
+                $('body').on('mousedown',mousedown);
+                $('body').on('mouseup',mouseup);
+                $('body').on('mouseout',mouseup);
+
+                renderID = requestAnimationFrame(onRender);
             };
+
+            var downP = {x:0, y:0},disP = {x:0,y:0}, cubeRot = {rx:0,ry:0};
+            function mousedown(e){
+                downP.x = e.clientX;
+                downP.y = e.clientY;
+                disP.x = 0;
+                disP.y = 0;
+                $('body').bind('mousemove',mousemove);
+            }
+            function mousemove(e){
+                var mouse = {x : e.clientX, y : e.clientY};
+                disP = {x : (mouse.x-downP.x)*0.01, y: (mouse.y-downP.y)*0.01};
+            }
+            function mouseup(){
+                $('body').unbind('mousemove',mousemove);
+            }
+
+            function onRender(){
+                disP.x *= 0.9;
+                disP.y *= 0.9;
+                cubeRot.rx += disP.x;
+                cubeRot.ry -= disP.y;
+
+                // cube.rolling(-cubeRot.ry);
+                // cube.pitching(-cubeRot.rx);
+                renderID = requestAnimationFrame(onRender);
+            }
 
             var rx = 0;
             function onScroll(offset){
                 rx+=offset;
-                cube.rolling(rx);
+                
+                if(cube.direction == 'vertical'){
+                    cube.rolling(rx);
+                }else if(cube.direction == 'horizon'){
+                    cube.pitching(rx);
+                }
+
+                // 
                 // $('#cube').css({'-webkit-transform':'rotateX('+rx+'deg)'});
             }
 
