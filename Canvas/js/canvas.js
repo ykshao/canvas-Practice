@@ -39,7 +39,6 @@
             cvs = $cvs[0];
             ctx = cvs.getContext("2d");
 
-
             //infomation
             info = {};
             info.$cvs = $cvs;
@@ -52,6 +51,7 @@
                 event_info.type = status;
                 eventDispatch();
             },0);
+            
         };
 
         function eventDispatch(){
@@ -95,23 +95,10 @@
         };
 
         this.draw = function(){
-
             ctx.save();
             ctx.fillStyle = 'rgba(0,0,0,1)';
-            ctx.fillRect(0,0,1280,800);
+            ctx.fillRect(0,0,size.width,size.height);
             ctx.restore();
-
-            // ctx.save();
-            // ctx.fillStyle = 'rgba(255,0,0,1)';
-            // ctx.beginPath();
-            // ctx.arc(Math.random()*1200, Math.random()*800, Math.random()*100, 0, 360*Math.PI/180, true);
-            // ctx.closePath();
-            // ctx.fill();
-            // ctx.restore();
-
-
-            
-            // ctx.restore();
         }
 
         /* ************************************************************
@@ -126,16 +113,43 @@
             
         ************************************************************ */
 
-        this.getImageData = function(rect){
+        this.getImageData = function(rect,original){
             var rectangle = {x:0,y:0,width:cvs.width,height:cvs.height};
             $.extend(rectangle,rect);
-            var imgData = ctx.getImageData(0, 0, rectangle.width, rectangle.height);
-            return imgData;
+            var imgData = ctx.getImageData(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
 
+            if(original){
+                return imgData;
+            }else{
+                var length  = imgData.width * imgData.height,
+                newData = {data:[],legnth:length};
+
+                for(var i = 0 ;i < length; i++) {  
+                    var r = imgData.data[i*4],
+                        g = imgData.data[i*4+1],
+                        b = imgData.data[i*4+2],
+                        a = imgData.data[i*4+3];
+
+                        var x = (i)%imgData.width+rectangle.x,
+                            y = Math.floor(i/imgData.width)+rectangle.y;
+                        if(typeof newData.data[x] == 'undefined')newData.data[x] = [];
+                        newData.data[x][y] = {x:x,y:y,r:r,g:g,b:b,a:Number((a/255).toFixed(2))};
+                        // newData.data.push({x:x,y:y,r:r,g:g,b:b,a:Number((a/255).toFixed(2))});
+
+                    if(i==length-1){
+                        return newData;
+                    }
+                };
+            }
+            
+
+            // return imgData;
         }
 
         this.clear = function(){
+            ctx.save();
             ctx.clearRect(0, 0, cvs.width, cvs.height);
+            ctx.restore();
         }
 
         this.drawImage = function(img,x,y){
@@ -153,14 +167,14 @@
                     b = data.data[i*4+2],
                     a = data.data[i*4+3];
 
-                if(r != 0 && g != 0 && b != 0){
+                // if(r != 0 && g != 0 && b != 0){
                     var x = parseInt((i-1)%imgData.width),
                         y = Math.floor((i-1)/imgData.height/(imgData.width/imgData.height));
+
+                    if(typeof imgDatas[x] == 'undefined')imgDatas[x] = [];
+                    // imgDatas[x][y] = {x:x,y:y,r:r,g:g,b:b,a:Number((a/255).toFixed(2))};
                     imgDatas.push({x:x,y:y,r:r,g:g,b:b,a:Number((a/255).toFixed(2))});
-                }
-
-                // console.log(info.colorPosition[0].alpha)
-
+                // }
 
                 if(i==length-1){
                     return imgDatas;
@@ -264,8 +278,8 @@
         globalCompositeOperation
         lineCap
         lineJoin
-        lineWidth
         miterLimit
+        lineWidth
         shadowBlur
         shadowColor
         shadowOffsetX
