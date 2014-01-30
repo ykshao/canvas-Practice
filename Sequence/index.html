@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <style>
+            body{
+                margin: 0; padding: 0;
+                background-color: #000;
+            }
+            .sequence {
+                position: relative;
+                margin: 0 auto;
+                width: 1280px;
+            }
+            .sequence img { 
+                position: absolute;
+                left: 0; top: 0;
+                display: none;
+            }
+        </style>
+        <script src="js/jquery-1.10.2.min.js"></script>
+        <script src="js/jquery.easing.1.3.js"></script>
+        <script>
+            $(document).ready(function(){
+                var seq_imgs    = $('.sequence img'),
+                    seq_total   = seq_imgs.length-1,
+                    seq_info    = { id : 0 , old : -1}
+
+                seq_imgs.eq(0).css({display:'block'});
+
+                function seqView(duration,targetScene){
+                    $(seq_info).stop(true).animate({ id : targetScene },{
+                        duration    : duration,
+                        step        : function(now,fx){
+                                        var seq_id      = Number(fx.elem.id.toFixed(0));
+                                        if(seq_id != seq_info.old){
+                                            seq_imgs.eq(seq_id).css({display:'block'});
+                                            if(seq_info.old != -1)seq_imgs.eq(seq_info.old).css({display:'none'});
+                                        }
+
+                                        seq_info.old = seq_id;
+                                      },
+                        complete : function(){ seq_info.id = targetScene; },
+                        easing      : "swing"
+                    })
+                }
+
+                var loadedCount = 0;
+                seq_imgs.each(function(i){
+                    var url = $(this).attr("src"),
+                        img = new Image();
+
+                    img.onload = function(){
+                        if(loadedCount == seq_total){
+                            seqView(3000,seq_total);
+                        }
+                        loadedCount++;
+                    }
+                    img.src = url;
+                });
+               // seqView(3000,seq_total);
+            });
+        </script>
+    </head>
+    
+    <body>
+         <article id="sqc1" class="sequence">
+            <img src="images/01_000.jpg" >
+            <img src="images/01_001.jpg" >
+            <img src="images/01_002.jpg" >
+            <img src="images/01_003.jpg" >
+            <img src="images/01_004.jpg" >
+            <img src="images/01_005.jpg" >
+            <img src="images/01_006.jpg" >
+            <img src="images/01_007.jpg" >
+            <img src="images/01_008.jpg" >
+            <img src="images/01_009.jpg" >
+            <img src="images/01_010.jpg" >
+            <img src="images/01_011.jpg" >
+            <img src="images/01_012.jpg" >
+            <img src="images/01_013.jpg" >
+            <img src="images/01_014.jpg" >
+            <img src="images/01_015.jpg" >
+            <img src="images/01_016.jpg" >
+            <img src="images/01_017.jpg" >
+            <img src="images/01_018.jpg" >
+            <img src="images/01_019.jpg" >
+            <img src="images/01_020.jpg" >
+            <img src="images/01_021.jpg" >
+            <img src="images/01_022.jpg" >
+            <img src="images/01_023.jpg" >
+            <img src="images/01_024.jpg" >
+            <img src="images/01_025.jpg" >
+            <img src="images/01_026.jpg" >
+            <img src="images/01_027.jpg" >
+            <img src="images/01_028.jpg" >
+            <img src="images/01_029.jpg" >
+            <img src="images/01_030.jpg" >
+            <img src="images/01_031.jpg" >
+            <img src="images/01_032.jpg" >
+            <img src="images/01_033.jpg" >
+            <img src="images/01_034.jpg" >
+            <img src="images/01_035.jpg" >
+            <img src="images/01_036.jpg" >
+            <img src="images/01_037.jpg" >
+            <img src="images/01_038.jpg" >
+            <img src="images/01_039.jpg" >
+            <img src="images/01_040.jpg" >
+            <img src="images/01_041.jpg" >
+            <img src="images/01_042.jpg" >
+            <img src="images/01_043.jpg" >
+            <img src="images/01_044.jpg" >
+            <img src="images/01_045.jpg" >
+            <img src="images/01_046.jpg" >
+            <img src="images/01_047.jpg" >
+            <img src="images/01_048.jpg" >
+            <img src="images/01_049.jpg" >
+            <img src="images/01_050.jpg" >
+            <img src="images/01_051.jpg" >
+            <img src="images/01_052.jpg" >
+            <img src="images/01_053.jpg" >
+            <img src="images/01_054.jpg" >
+            <img src="images/01_055.jpg" >
+            <img src="images/01_056.jpg" >
+            <img src="images/01_057.jpg" >
+            <img src="images/01_058.jpg" >
+            <img src="images/01_059.jpg" >
+            <img src="images/01_060.jpg" >
+            <img src="images/01_061.jpg" >
+            <img src="images/01_062.jpg" >
+            <img src="images/01_063.jpg" >
+            <img src="images/01_064.jpg" >
+            <img src="images/01_065.jpg" >
+            <img src="images/01_066.jpg" >
+            <img src="images/01_067.jpg" >
+            <img src="images/01_068.jpg" >
+            <img src="images/01_069.jpg" >
+            <img src="images/01_070.jpg" >
+            <img src="images/01_071.jpg" >
+            <img src="images/01_072.jpg" >
+            <img src="images/01_073.jpg" >
+            <img src="images/01_074.jpg" >
+            <img src="images/01_075.jpg" >
+            <img src="images/01_076.jpg" >
+            <img src="images/01_077.jpg" >
+            <img src="images/01_078.jpg" >
+            <img src="images/01_079.jpg" >
+            <img src="images/01_080.jpg" >
+            <img src="images/01_081.jpg" >
+            <img src="images/01_082.jpg" >
+            <img src="images/01_083.jpg" >
+            <img src="images/01_084.jpg" >
+        </article>
+    </body>
+</html>

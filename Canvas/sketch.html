@@ -26,8 +26,8 @@
 
             #img-color {
                 position: absolute;
-                left:300px;
-                top:200px;
+                /*left:300px;*/
+                /*top:200px;*/
             }   
 
             #canvasWrap,#canvasWrap2 {
@@ -49,80 +49,111 @@
                     ctx2     = canvas2.getContext();
 
                 var drawImg = new Image();
-                drawImg.src = 'img/portfolio-img-01.png';
+                drawImg.src = 'img/img1-sketch.png';
+
+                var brush = new Image();
+                brush.src = 'img/brush2.png';
+                var brushSize = 80;
+
+                var drawPoints = [],standP = {x:100,y:100};
+                $("#img-color").css({left:standP.x,top:standP.y});
                 drawImg.onload = function(){
                     var width   = drawImg.width,
                         height  = drawImg.height;
+
                     var startP = {x:0,y:0},
                         lastP  = {x:width,y:height},
                         dist   = {x:startP.x-lastP.x, y: startP.y-lastP.y};
-                    
+
+                    // drawRect(startP.x+300,startP.y+200,width,height);
+
                     var diagonal = parseInt(Math.sqrt(dist.x*dist.x+dist.y*dist.y));
+                    var brushDis = (width+height)/brushSize;
 
-                    var brushDis = diagonal/brushSize;
+                    var points1 = [],bendPoint1 = {start:0,cnt:0,x:0,y:0},
+                        points2 = [],bendPoint2 = {start:0,cnt:0,x:0,y:0},
+                        cnt=0;
 
-                    var points = [],cnt=0;
                     for(var i=0,n=brushDis; i<n; i++){
-                        var dis = i*brushSize;
-                        var color = 'rgba(0,0,0,1)'
+                        var x = 0,
+                            y = i * brushSize;
 
-                        if(dis>diagonal*0.5){
-                            color = 'rgba(255,0,0,1)'
+                        if(y > height){
+                            bendPoint1.start = i-bendPoint1.cnt;
+                            x = bendPoint1.cnt * brushSize;
+                            y = bendPoint1.start * brushSize;
+                            bendPoint1.cnt++;
                         }
 
-                        console.log(color)
-
-                        var x = 300 + dis,
-                            y = 200 + dis;
-
-                        points.push({x:0+300,y:y});
-                        points.push({x:x,y:0+200});
-                        // console.log(i*brushDis);
+                        points1.push({x:x + standP.x - brushSize*0.5 ,y: y + standP.y + brushSize*0.5});
+                        // drawPoint(points1[i].x,points1[i].y);
                     }
 
-                    for(var i=0,n=points.length; i<n; i++){
-                        var p = points[i];
+                    for(var i=0,n=brushDis; i<n; i++){
+                        var x = i * brushSize,
+                            y = 0;
 
-                        ctx2.save();
-                        ctx2.fillStyle = color;
-                        ctx2.beginPath();
-                        ctx2.arc(p.x, p.y, 2, 0, 360*Math.PI/180, true);
-                        ctx2.closePath();
-                        ctx2.fill();
-                        ctx2.restore();
-                        
-                        var id = i+1;
-                        if(id%2==0){
-                            var prevP = points[i-1];
-                            ctx2.save();
-                            ctx2.strokeStyle = color;
-                            ctx2.beginPath();
-                            ctx2.moveTo(prevP.x,prevP.y);
-                            ctx2.lineTo(p.x, p.y);
-                            ctx2.stroke();
-                            ctx2.restore();
+                        if(x > width){
+                            bendPoint2.start = i-bendPoint2.cnt;
+                            x = bendPoint2.start * brushSize;
+                            y = bendPoint2.cnt * brushSize;
+                            bendPoint2.cnt++;
                         }
 
-                        if(i == n-1){
-                            var prevP = points[i-1];
-                            ctx2.save();
-                            ctx2.strokeStyle = color;
-                            ctx2.beginPath();
-                            ctx2.moveTo(300,200);
-                            ctx2.lineTo(300+width, 200+height);
-                            ctx2.stroke();
-                            ctx2.restore();
-                        }
+                        points2.push({x:x + standP.x + brushSize*0.5 ,y: y + standP.y - brushSize*0.5});
+                        // drawPoint(points2[i].x,points2[i].y,"rgba(255,0,0,1)");
                     }
+
+                    for(var i =0, n=points1.length; i<n; i++){
+                        // drawLine(points1[i],points2[i],"rgba(0,0,255,1)");
+                        drawPoints.push(points1[i]);
+                        drawPoints.push(points2[i]);
+                    }
+
+                    brushDrawStart();
+                }
+
+                function drawPoint(x,y,color){
+                    ctx2.save();
+                    ctx2.fillStyle = color;
+                    ctx2.beginPath();
+                    ctx2.arc(x, y, 2, 0, 360*Math.PI/180, true);
+                    ctx2.closePath();
+                    ctx2.fill();
+                    ctx2.restore();
+                }
+
+                function drawLine(start,last,color){
+                    ctx2.save();
+                    ctx2.strokeStyle = color;
+                    ctx2.beginPath();
+                    ctx2.moveTo(start.x,start.y);
+                    ctx2.lineTo(last.x, last.y);
+                    ctx2.stroke();
+                    ctx2.restore();
+                }
+
+                function drawRect(x,y,width,height){
+                    ctx2.save();
+                    ctx2.fillStyle = "rgba(0,0,255,.5)";
+                    ctx2.beginPath();
+                    ctx2.fillRect(x,y,width,height);
+                    ctx2.beginPath();
+                    ctx2.fill();
+                    ctx2.restore();
                 }
                 
                 $(canvas).bind(canvas.EVENT_CHANGE,function(e,data){
                     if(data.type == 'ready'){
-                        canvas.start();
+                        // canvas.start();
+
                         ctx.save();
                         ctx.fillStyle = 'fff4ed';
-                        ctx.fillRect(300,200,drawImg.width,drawImg.height);
+                        ctx.fillRect(standP.x,standP.y,drawImg.width,drawImg.height);
                         ctx.restore();
+                        canvas.drawImage(drawImg,standP.x,standP.y);
+
+                        ctx.globalCompositeOperation = 'destination-out';
                     };
                 });
 
@@ -130,14 +161,15 @@
                 var sketchPowder,colorData;
                 $(canvas2).bind(canvas.EVENT_CHANGE,function(e,data){
                     if(data.type == 'ready'){
-                        canvas2.start();
-                        canvas2.drawImage(drawImg,300,200);
-                        sketchPowder    = new SketchPowder(canvas2);
-                        colorData = canvas2.getImageData({x:300,y:200,width:drawImg.width,height:drawImg.height});
-                        var cvs = canvas2.getCanvas();
-                        $(cvs).bind("mousemove",onMousemove);
-                        $(cvs).bind("mousedown",onMousedown);
-                        $(cvs).bind("mouseup",onMouseup);
+                        // canvas2.start();
+                        // canvas2.drawImage(drawImg,300,200);
+                        // sketchPowder    = new SketchPowder(canvas2);
+                        // colorData = canvas2.getImageData({x:300,y:200,width:drawImg.width,height:drawImg.height});
+                        // canvas2.clear();
+                        // var cvs = canvas2.getCanvas();
+                        // $(cvs).bind("mousemove",onMousemove);
+                        // $(cvs).bind("mousedown",onMousedown);
+                        // $(cvs).bind("mouseup",onMouseup);
 
                         // ctx.save();
                         // ctx.fillStyle = 'rgba(255,0,0,1)';
@@ -146,66 +178,121 @@
                     }
                 });
 
+
                 canvas.draw = function(ctx){
                     
                 }
 
                 canvas2.draw = function(ctx){
-                    // canvas2.clear()
-                    sketchPowder.draw();
+                    // canvas2.clear();
+                    // sketchPowder.draw();
                     // canvas2.drawImage(drawImg,300,200);
                     // if (!isDrawing) return;
                     
-                    var info = {};
+                    // var info = {};
 
-                    for(var i = 0 ; i < 10; i++){
-                        var cx = x+10-(i%10)+20,
-                            cy = y+10-(i%10)+20;
+                    // for(var i = 0 ; i < 10; i++){
+                    //     var cx = drawPos.x+10-(i%10)+20,
+                    //         cy = drawPos.y+10-(i%10)+20;
 
-                        if(colorData.data[cx] && colorData.data[cx][cy]){
-                            info = { color:colorData.data[cx][cy] };
-                            sketchPowder.make(cx,cy,info);
-                        }    
-                    }
+                    //     if(colorData.data[cx] && colorData.data[cx][cy]){
+                    //         info = { color:colorData.data[cx][cy] };
+                    //         // sketchPowder.make(cx,cy,info);
+                    //     }    
+                    // }
                 }
 
+                var brushPos = {sp:{x:0,y:0},lp:{x:0,y:0}},
+                    drawPos  = {x:0,y:0},
+                    brushCnt = 0,
+                    startTime,crtTime,lastPoint = {x:0,y:0};
+                function brushDrawStart(){
+                    for(var i=0; i<drawPoints.length-1; i++){
+                        animateStep(i,800,150,false);
+                        animateStep(i,1000,200,true);
+                    }
+
+                    
+                }
+
+
+                function animateStep(i,duration,delay,detail){
+                    var now     = drawPoints[i],
+                        target  = drawPoints[i+1];
+
+                    $({x:now.x,y:now.y}).stop().delay(i*delay).animate({x:target.x,y:target.y}, {    
+                        duration    : duration,
+                        step        : function(now,fx){
+                            var p = fx.elem;
+                            drawPos.x = p.x;
+                            drawPos.y = p.y;
+                            // ctx.drawImage(brush, p.x, p.y);
+                            brushDraw(drawPos,detail);
+                        },
+                        complete    : function(){
+                            // brushCnt++;
+                            // if(brushCnt < drawPoints.length-1){
+                                // brushDrawStart();
+                            // }
+                        },
+                        easing      : "easeOutQuint"
+                    });
+                }
+
+
                 var isDrawing = false,
-                    lastPoint,
                     x,y;
 
-                var brush = new Image();
-                brush.src = 'img/brush2.png';
-                var brushSize = 40;
+
+                function brushDraw(pos,detail){
+                    dist    = distanceBetween(lastPoint, drawPos);
+                    angle   = angleBetween(lastPoint, drawPos);
+
+                    ctx.drawImage(brush, pos.x-brushSize*0.5, pos.y-brushSize*0.5);
+
+                    if(detail){
+                        for (var i = 0; i < dist; i++) {
+                            x = parseInt(lastPoint.x + (Math.sin(angle) * i)-brushSize);
+                            y = parseInt(lastPoint.y + (Math.cos(angle) * i)-brushSize);
+                            ctx.drawImage(brush, x, y);
+                        }
+
+                    }
+
+                    lastPoint.x = x;
+                    lastPoint.y = y;
+                }
+                
 
                 function onMousemove(e){
                     if (!isDrawing) return;
                     // canvas.drawImage(img,300,200);
-                    var mouse = { x:e.clientX, y:e.clientY};
-                    if(sketchPowder){
-                        sketchPowder.mouse.crt = mouse;
-                    }
+                    // var mouse = { x:e.clientX, y:e.clientY};
+                    // if(sketchPowder){
+                    //     sketchPowder.mouse.crt = mouse;
+                    // }
 
-                    currentPoint = { x: e.clientX, y: e.clientY };
-                    dist = distanceBetween(lastPoint, currentPoint);
-                    angle = angleBetween(lastPoint, currentPoint);
-                    ctx.globalCompositeOperation = 'destination-out';
+                    // currentPoint = { x: e.clientX, y: e.clientY };
+                    // dist = distanceBetween(lastPoint, currentPoint);
+                    // angle = angleBetween(lastPoint, currentPoint);
+                    // // ctx.globalCompositeOperation = 'destination-out';
 
-                    for (var i = 0; i < dist; i++) {
-                        x = parseInt(lastPoint.x + (Math.sin(angle) * i) - 20);
-                        y = parseInt(lastPoint.y + (Math.cos(angle) * i) - 20);
-                        ctx.drawImage(brush, x, y);
-                    }
+                    // for (var i = 0; i < dist; i++) {
+                    //     x = parseInt(lastPoint.x + (Math.sin(angle) * i) - 20);
+                    //     y = parseInt(lastPoint.y + (Math.cos(angle) * i) - 20);
+                    //     ctx.drawImage(brush, x, y);
+                    // }
 
 
                     
-                    lastPoint = currentPoint;
+                    // lastPoint = currentPoint;
                 }
 
                 function onMousedown(e){
-                    isDrawing = true;
-                    x = e.clientX;
-                    y = e.clientY;
-                    lastPoint = { x: e.clientX, y: e.clientY };
+                    // isDrawing = true;
+                    // x = e.clientX;
+                    // y = e.clientY;
+                    // lastPoint = { x: e.clientX, y: e.clientY };
                 }
 
                 function onMouseup(){
@@ -223,7 +310,9 @@
         </script>
     </head>
     <body> 
-        <img id="img-color" src="img/portfolio-img-01.png" alt="">
+        <img id="img-color2" src="img/img1-sketch.png" style="position:absolute; displey:hidden; opacity:0">
+        <img id="img-color" src="img/img1.png" alt="">
+        <!-- <img id="img-color" src="img/01-grey.png" alt=""> -->
         <div id="canvasWrap"></div>
         <div id="canvasWrap2"></div>
     </body>
