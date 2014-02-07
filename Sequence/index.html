@@ -5,7 +5,7 @@
         <style>
             body{
                 margin: 0; padding: 0;
-                background-color: #000;
+                background-color: #ff0;
             }
             .sequence {
                 position: relative;
@@ -15,7 +15,7 @@
             .sequence img { 
                 position: absolute;
                 left: 0; top: 0;
-                display: none;
+                visibility: hidden;
             }
         </style>
         <script src="js/jquery-1.10.2.min.js"></script>
@@ -34,8 +34,8 @@
                         step        : function(now,fx){
                                         var seq_id      = Number(fx.elem.id.toFixed(0));
                                         if(seq_id != seq_info.old){
-                                            seq_imgs.eq(seq_id).css({display:'block'});
-                                            if(seq_info.old != -1)seq_imgs.eq(seq_info.old).css({display:'none'});
+                                            seq_imgs.eq(seq_id).css({visibility:'visible'});
+                                            if(seq_info.old != -1)seq_imgs.eq(seq_info.old).css({visibility:'hidden'});
                                         }
 
                                         seq_info.old = seq_id;
@@ -52,7 +52,7 @@
 
                     img.onload = function(){
                         if(loadedCount == seq_total){
-                            seqView(3000,seq_total);
+                            seqView(2000,seq_total);
                         }
                         loadedCount++;
                     }
@@ -65,91 +65,68 @@
     
     <body>
          <article id="sqc1" class="sequence">
-            <img src="images/01_000.jpg" >
-            <img src="images/01_001.jpg" >
-            <img src="images/01_002.jpg" >
-            <img src="images/01_003.jpg" >
-            <img src="images/01_004.jpg" >
-            <img src="images/01_005.jpg" >
-            <img src="images/01_006.jpg" >
-            <img src="images/01_007.jpg" >
-            <img src="images/01_008.jpg" >
-            <img src="images/01_009.jpg" >
-            <img src="images/01_010.jpg" >
-            <img src="images/01_011.jpg" >
-            <img src="images/01_012.jpg" >
-            <img src="images/01_013.jpg" >
-            <img src="images/01_014.jpg" >
-            <img src="images/01_015.jpg" >
-            <img src="images/01_016.jpg" >
-            <img src="images/01_017.jpg" >
-            <img src="images/01_018.jpg" >
-            <img src="images/01_019.jpg" >
-            <img src="images/01_020.jpg" >
-            <img src="images/01_021.jpg" >
-            <img src="images/01_022.jpg" >
-            <img src="images/01_023.jpg" >
-            <img src="images/01_024.jpg" >
-            <img src="images/01_025.jpg" >
-            <img src="images/01_026.jpg" >
-            <img src="images/01_027.jpg" >
-            <img src="images/01_028.jpg" >
-            <img src="images/01_029.jpg" >
-            <img src="images/01_030.jpg" >
-            <img src="images/01_031.jpg" >
-            <img src="images/01_032.jpg" >
-            <img src="images/01_033.jpg" >
-            <img src="images/01_034.jpg" >
-            <img src="images/01_035.jpg" >
-            <img src="images/01_036.jpg" >
-            <img src="images/01_037.jpg" >
-            <img src="images/01_038.jpg" >
-            <img src="images/01_039.jpg" >
-            <img src="images/01_040.jpg" >
-            <img src="images/01_041.jpg" >
-            <img src="images/01_042.jpg" >
-            <img src="images/01_043.jpg" >
-            <img src="images/01_044.jpg" >
-            <img src="images/01_045.jpg" >
-            <img src="images/01_046.jpg" >
-            <img src="images/01_047.jpg" >
-            <img src="images/01_048.jpg" >
-            <img src="images/01_049.jpg" >
-            <img src="images/01_050.jpg" >
-            <img src="images/01_051.jpg" >
-            <img src="images/01_052.jpg" >
-            <img src="images/01_053.jpg" >
-            <img src="images/01_054.jpg" >
-            <img src="images/01_055.jpg" >
-            <img src="images/01_056.jpg" >
-            <img src="images/01_057.jpg" >
-            <img src="images/01_058.jpg" >
-            <img src="images/01_059.jpg" >
-            <img src="images/01_060.jpg" >
-            <img src="images/01_061.jpg" >
-            <img src="images/01_062.jpg" >
-            <img src="images/01_063.jpg" >
-            <img src="images/01_064.jpg" >
-            <img src="images/01_065.jpg" >
-            <img src="images/01_066.jpg" >
-            <img src="images/01_067.jpg" >
-            <img src="images/01_068.jpg" >
-            <img src="images/01_069.jpg" >
-            <img src="images/01_070.jpg" >
-            <img src="images/01_071.jpg" >
-            <img src="images/01_072.jpg" >
-            <img src="images/01_073.jpg" >
-            <img src="images/01_074.jpg" >
-            <img src="images/01_075.jpg" >
-            <img src="images/01_076.jpg" >
-            <img src="images/01_077.jpg" >
-            <img src="images/01_078.jpg" >
-            <img src="images/01_079.jpg" >
-            <img src="images/01_080.jpg" >
-            <img src="images/01_081.jpg" >
-            <img src="images/01_082.jpg" >
-            <img src="images/01_083.jpg" >
-            <img src="images/01_084.jpg" >
+            <img src="images/hamon_00000.png" >
+            <img src="images/hamon_00001.png" >
+            <img src="images/hamon_00002.png" >
+            <img src="images/hamon_00003.png" >
+            <img src="images/hamon_00004.png" >
+            <img src="images/hamon_00005.png" >
+            <img src="images/hamon_00006.png" >
+            <img src="images/hamon_00007.png" >
+            <img src="images/hamon_00008.png" >
+            <img src="images/hamon_00009.png" >
+            <img src="images/hamon_00010.png" >
+            <img src="images/hamon_00011.png" >
+            <img src="images/hamon_00012.png" >
+            <img src="images/hamon_00013.png" >
+            <img src="images/hamon_00014.png" >
+            <img src="images/hamon_00015.png" >
+            <img src="images/hamon_00016.png" >
+            <img src="images/hamon_00017.png" >
+            <img src="images/hamon_00018.png" >
+            <img src="images/hamon_00019.png" >
+            <img src="images/hamon_00020.png" >
+            <img src="images/hamon_00021.png" >
+            <img src="images/hamon_00022.png" >
+            <img src="images/hamon_00023.png" >
+            <img src="images/hamon_00024.png" >
+            <img src="images/hamon_00025.png" >
+            <img src="images/hamon_00026.png" >
+            <img src="images/hamon_00027.png" >
+            <img src="images/hamon_00028.png" >
+            <img src="images/hamon_00029.png" >
+            <img src="images/hamon_00030.png" >
+            <img src="images/hamon_00031.png" >
+            <img src="images/hamon_00032.png" >
+            <img src="images/hamon_00033.png" >
+            <img src="images/hamon_00034.png" >
+            <img src="images/hamon_00035.png" >
+            <img src="images/hamon_00036.png" >
+            <img src="images/hamon_00037.png" >
+            <img src="images/hamon_00038.png" >
+            <img src="images/hamon_00039.png" >
+            <img src="images/hamon_00040.png" >
+            <img src="images/hamon_00041.png" >
+            <img src="images/hamon_00042.png" >
+            <img src="images/hamon_00043.png" >
+            <img src="images/hamon_00044.png" >
+            <img src="images/hamon_00045.png" >
+            <img src="images/hamon_00046.png" >
+            <img src="images/hamon_00047.png" >
+            <img src="images/hamon_00048.png" >
+            <img src="images/hamon_00049.png" >
+            <img src="images/hamon_00050.png" >
+            <img src="images/hamon_00051.png" >
+            <img src="images/hamon_00052.png" >
+            <img src="images/hamon_00053.png" >
+            <img src="images/hamon_00054.png" >
+            <img src="images/hamon_00055.png" >
+            <img src="images/hamon_00056.png" >
+            <img src="images/hamon_00057.png" >
+            <img src="images/hamon_00058.png" >
+            <img src="images/hamon_00059.png" >
+            <img src="images/hamon_00060.png" >
+     
         </article>
     </body>
 </html>
