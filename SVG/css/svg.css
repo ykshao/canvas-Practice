@@ -1,0 +1,15 @@
+body { background-color: #e0e0e0; }
+#image-wrapper { position: absolute; left: 100px;
+top: 100px;
+height: 100%;
+background-color: #f00;}
+.svg-background, .svg-image { clip-path: url(#clip-triangle); }
+.svg-image {
+    -webkit-transition: all 0.5s ease 0.2s;
+    -moz-transition: all 0.5s ease 0.2s;
+    opacity: 1;
+    transition: all 0.5s ease 0.2s;
+}
+
+svg.clip-svg { height: 250px; position: absolute; width: 250px; }
+#svg-1 { left: 0px; top: 0px; }
