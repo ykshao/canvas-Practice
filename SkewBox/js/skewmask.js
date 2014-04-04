@@ -10,6 +10,7 @@
         var _this = this;
         
         this.target = $(target);
+        this.parent = this.target.parent();
         this.point  = [{x:0,y:0},{x:0,y:0},{x:0,y:0},{x:0,y:0}];
         this.center = {x:0,y:0};
         this.config = {
@@ -19,18 +20,9 @@
             minHeight   : '100%',
             skewX       : 30,
             skewY       : 0,
-            translateX  : 0,
-            translateY  : 0
+            x           : 0,
+            y           : 0
         };
-
-        this.position = {
-            lt : 0,
-            rt : 0,
-            lb : 0,
-            rb : 0
-        }
-        
-        
 
         this.width  = 0;
         this.height = 0;
@@ -38,12 +30,6 @@
         $.extend(this.config,option);
 
         function init(){
-            // _this.centerDot = $('<div></div>').appendTo(_this.target);
-            // _this.centerDot.css({
-            //     position : 'absolute',
-            //     width : 10, height : 10,
-            //     'background-color' : '#ff00ff'
-            // })
             _this.sizeCalculate();
             _this.applyMask();
 
@@ -57,31 +43,51 @@
         return this;
     };
 
+    SkewMask.prototype.skew = function(x,y){
+        if(x){
+            this.config.skewX += x;
+        }
+
+        if(y){
+            this.config.skewY += y;
+        }
+
+        this.sizeCalculate();
+        this.applyMask();
+    }
+
+    SkewMask.prototype.translate = function(x,y){
+        if(x){
+            var newX = changeSize(this.config.x,this.target.width())+x;
+            this.config.x = newX;//((newX/this.target.width())*100).toFixed(3)+'%';
+        }
+
+        if(y){
+            var newY = changeSize(this.config.y,this.target.height())+y;
+            this.config.y = newY;//((newY/this.target.height())*100).toFixed(3)+'%';
+        }
+
+        this.sizeCalculate();
+        this.applyMask();
+    }
+
     SkewMask.prototype.sizeCalculate = function(){
         this.width  = changeSize(this.config.width,this.target.width());
         this.height = changeSize(this.config.height,this.target.height());
 
         var rx  = this.config.skewX*Math.PI / 180,
             ry  = this.config.skewY*Math.PI / 180,
-            tx  = changeSize(this.config.translateX,this.target.width),
-            ty  = changeSize(this.config.translateY,this.target.height),
-            skx = Math.atan(rx)*this.target.height(),
-            sky = Math.atan(ry)*this.target.width();
-            
-        this.point[0] = {x:tx+0,y:ty+0};
-        this.point[1] = {x:tx+this.width,y:ty};
-        this.point[2] = {x:tx+this.width+skx,y:ty+this.height+sky};
-        this.point[3] = {x:tx+0+skx,y:ty+this.height};
-
-        // this.center.x = tx+(skx+this.width)*0.5;
-        // this.center.y = ty+(sky+this.height)*0.5;
+            x   = changeSize(this.config.x,this.target.width()),
+            y   = changeSize(this.config.y,this.target.height()),
+            skx = Math.atan(rx)*this.height,
+            sky = Math.atan(ry)*this.width;
         
-        // this.centerDot.css({
-        //     left : this.center.x-this.centerDot.width(),
-        //     top  : this.center.y-this.centerDot.height()
-        // });
+        this.point[0] = {x:x,y:y};
+        this.point[1] = {x:x+this.width,y:y+sky};
+        this.point[2] = {x:x+this.width+skx,y:y+this.height+sky};
+        this.point[3] = {x:x+skx,y:y+this.height};
 
-
+        console.log(this.config.x)
         // $.extend(this.point,positionConvert(this.point,this.target));
     }
 

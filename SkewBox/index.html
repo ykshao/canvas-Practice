@@ -10,56 +10,84 @@
         <style>
             body {
                 background-color: #000;
+                height: 100%;
+                overflow: hidden;
             }
             #skew-box {
                 position: absolute;
                 width: 100%; height: 100%;
-                background-color: #cb3230;
+                background-color: #fff;
+                /*-webkit-transform : skewX(10deg);*/
             }
 
             #skew-box2 {
                 position: absolute;
                 width: 100%; height: 100%;
                 background-color: #fff230;
+                opacity: 0.5;
+                /*-webkit-transform : skewX(10deg);*/
             }
         </style>
         <script src="js/modernizr.custom.min.js"></script>
         <script src="js/jquery-1.10.2.min.js"></script>
         <script src="js/jquery.easing.1.3.js"></script>
+        <script src="js/jquery.mousewheel.js"></script>
+        <script src="js/jquery.scroll.js"></script>
         <script src="js/skewmask.js"></script>
 
         <script>
             $(document).ready(function(){
                 var skm = new SkewMask(
                     $('#skew-box'),{
-                        width       : 100,
-                        height      : '100%',
-                        minWidth    : 300,
-                        minHeight   : '100%',
-                        skewX       : 40,
+                        width       : "50%",
+                        height      : 466,
+                        skewX       : 0,
                         skewY       : 0,
-                        translateX  : 0,
-                        translateY  : 0
+                        x           : 100,
+                        y           : 0
                     }
                 );
 
                 var skm2 = new SkewMask(
                     $('#skew-box2'),{
-                        width       : 500,
+                        width       : '0%',
                         height      : '100%',
-                        minWidth    : 300,
-                        minHeight   : '100%',
-                        skewX       : 40,
+                        skewX       : 200,
                         skewY       : 0,
-                        translateX  : 100,
-                        translateY  : 0
+                        x           : '0%',
+                        y           : 0
                     }
                 );
+
+
+                var scroll = new Scroll({
+                    speed       : 1.5,
+                    friction    : 0.90,
+                    touchSpeed  : 5,
+                    type        : "wheel",
+                    // screenFix   : false,
+                    step        : onScroll
+                    // start       : function(){},
+                    // stop        : function(){},
+                    // touchStart  : function(){},
+                    // touchMove   : function(){},
+                    // touchEnd    : function(){}
+                });
+
+                function onScroll(offset){
+                    skm.translate(offset,offset);
+                    // skm.skew(offset,offset);
+                    // skm2.translate(-offset,offset);
+                    // skm2.skew(offset,offset);
+                }
+
+
+
             });
         </script>
     </head>
     <body>
-        <div id="skew-box"></div>
+        <div id="skew-box"><img src="img/1.jpg"></div>
         <div id="skew-box2"></div>
     </body>
 </html>
