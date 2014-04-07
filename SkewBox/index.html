@@ -10,13 +10,16 @@
         <style>
             body {
                 background-color: #000;
+                width:100%;
                 height: 100%;
                 overflow: hidden;
             }
             #skew-box {
                 position: absolute;
                 width: 100%; height: 100%;
-                background-color: #fff;
+                background-color: #000;
+                -webkit-clip-path : url(#hex-mask);
+                clip-path : url(#hex-mask);
                 /*-webkit-transform : skewX(10deg);*/
             }
 
@@ -38,30 +41,19 @@
         <script>
             $(document).ready(function(){
                 var skm = new SkewMask(
-                    $('#skew-box'),{
-                        width       : "50%",
-                        height      : 466,
-                        skewX       : 0,
+                    $('body').find('img'),'img1',{
+                        align       : "L",
+                        width       : "10%",
+                        height      : "100%",
+                        skewX       : 34,
                         skewY       : 0,
-                        x           : 100,
+                        x           : 0,
                         y           : 0
                     }
                 );
-
-                var skm2 = new SkewMask(
-                    $('#skew-box2'),{
-                        width       : '0%',
-                        height      : '100%',
-                        skewX       : 200,
-                        skewY       : 0,
-                        x           : '0%',
-                        y           : 0
-                    }
-                );
-
 
                 var scroll = new Scroll({
-                    speed       : 1.5,
+                    speed       : 1,
                     friction    : 0.90,
                     touchSpeed  : 5,
                     type        : "wheel",
@@ -74,20 +66,30 @@
                     // touchEnd    : function(){}
                 });
 
+                var x = 0;
                 function onScroll(offset){
-                    skm.translate(offset,offset);
-                    // skm.skew(offset,offset);
-                    // skm2.translate(-offset,offset);
-                    // skm2.skew(offset,offset);
+                    skm.translate(offset,0);
+                    skm.skew(offset,0);
                 }
-
 
 
             });
         </script>
     </head>
     <body>
-        <div id="skew-box"><img src="img/1.jpg"></div>
-        <div id="skew-box2"></div>
+        <div id="skew-box">
+            <img src="img/1.jpg">
+            <!-- <img src="img/2.jpg" style="position:absolute"> -->
+        </div>
+        <!-- <img src="img/3.jpg"> -->
+
+        <svg>
+          <defs>
+            <!-- <clipPath id="hex-mask"> -->
+              <!-- <polygon fill="#cb3230" points="270,0 0,160 0,485 270,645 560,485 560,160" /> -->
+           <!-- </clipPath> -->
+          </defs>
+        </svg>
+
     </body>
 </html>

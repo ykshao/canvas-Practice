@@ -1,6 +1,6 @@
 /**
  * 2014.01
- * Scroll ver 0.08
+ * Scroll ver 0.09
  */
 
 (function () {
@@ -153,6 +153,7 @@
         this.offset = 0;
     }
 
+    var oldOffset = -1;
     Scroll.prototype.onRender = function(){
         if(Math.abs(this.offset) < 0.001){
             this.stopRender();
@@ -162,8 +163,13 @@
         }
 
         this.offset *= this.config.friction;
-        this.config.step(this.offset);
+        this.offset = Number(this.offset.toFixed(4));
 
+        if(oldOffset != this.offset){
+            this.config.step(this.offset);
+        }
+
+        oldOffset = this.offset
         this.renderingID = requestAnimationFrame(this.onRender);
     }
 

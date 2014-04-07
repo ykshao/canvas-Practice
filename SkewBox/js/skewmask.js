@@ -6,14 +6,20 @@
  */
 
 (function(){
-    var SkewMask = function(target,option){
+    var SkewMask = function(target,maskId,option){
         var _this = this;
         
+        this.svg        = '',
+        this.svgCon     = '',
+        this.clippath   = '',
+        this.polygon    = '';
+
         this.target = $(target);
         this.parent = this.target.parent();
         this.point  = [{x:0,y:0},{x:0,y:0},{x:0,y:0},{x:0,y:0}];
         this.center = {x:0,y:0};
         this.config = {
+            align       : 'L',
             width       : '100%',
             height      : '100%',
             minWidth    : '100%',
@@ -30,13 +36,30 @@
         $.extend(this.config,option);
 
         function init(){
+            if(typeof $('body').find('svg')[0] === 'undefined'){
+                _this.svg        = $('<svg><defs></<defs></svg>').appendTo($('body'));
+                _this.svgCon     = _this.svg.find('defs');
+            }else{
+                _this.svgCon = $('body').find('defs');
+            }
+
+            _this.clippath   = $('<clipPath id="mask-'+maskId+'"></clipPath>').appendTo(_this.svgCon);
+            _this.polygon    = $('<polygon points="0"></polygon>').appendTo(_this.clippath);
+
+
+            _this.target.css({
+                "-webkit-clip-path" : "url(#mask-"+maskId+")",
+                "clip-path" : "url(#mask-"+maskId+")"
+            });
+
+
             _this.sizeCalculate();
             _this.applyMask();
 
             $(window).on('resize',function(){
                 _this.sizeCalculate();
                 _this.applyMask();             
-            })
+            });
         }
 
         init();
@@ -52,6 +75,12 @@
             this.config.skewY += y;
         }
 
+        this.sizeCalculate();
+        this.applyMask();
+    }
+
+    SkewMask.prototype.changeProperty = function(option){
+        $.extend(this.config,option);
         this.sizeCalculate();
         this.applyMask();
     }
@@ -81,13 +110,15 @@
             y   = changeSize(this.config.y,this.target.height()),
             skx = Math.atan(rx)*this.height,
             sky = Math.atan(ry)*this.width;
+
+        if(this.config.align == "R"){
+            x = this.target.width()-(x+this.width);
+        }
         
         this.point[0] = {x:x,y:y};
         this.point[1] = {x:x+this.width,y:y+sky};
         this.point[2] = {x:x+this.width+skx,y:y+this.height+sky};
         this.point[3] = {x:x+skx,y:y+this.height};
-
-        console.log(this.config.x)
         // $.extend(this.point,positionConvert(this.point,this.target));
     }
 
@@ -97,17 +128,23 @@
         for(var o in p){
             var x = p[o].x,
                 y = p[o].y;
-            pointPath += x+'px '+y+'px'+( o == p.length-1?"":"," );
+            pointPath   += x+' '+y+''+( o == p.length-1?"":"," );
+
         };
 
-        return{
-            'clip-path'         : 'polygon('+pointPath+')',
-            '-webkit-clip-path' : 'polygon('+pointPath+')'
-        }
+        return pointPath;
+
+        // this.maskId.attr('points',pointPath2);
+
+        // return{
+        //     'clip-path'         : 'polygon('+pointPath+')',
+        //     '-webkit-clip-path' : 'polygon('+pointPath+')'
+        // }
     }
 
     SkewMask.prototype.applyMask = function(){
-        this.target.css(this.getPointCss(this.point));
+        this.polygon.attr('points',this.getPointCss(this.point));
+        // this.target.css(this.getPointCss(this.point));
     }
 
 
