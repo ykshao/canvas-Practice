@@ -1,17 +1,17 @@
 /**
  * 2014.04.
- * SkewMask ver 0.01
+ * SkewMask ver 0.02
  * Author : Heonwongeun
  * FaceBook : https://www.facebook.com/heo.wongeun
  */
 
 (function(){
-    var SkewMask = function(target,maskId,option){
+    var SkewMask = function(target,svgID,option){
         var _this = this;
         
-        this.svg        = '',
-        this.svgCon     = '',
-        this.clippath   = '',
+        // this.svg        = '';
+        // this.svgCon     = '';
+        // this.clippath   = '';
         this.polygon    = '';
 
         this.target = $(target);
@@ -36,22 +36,21 @@
         $.extend(this.config,option);
 
         function init(){
-            if(typeof $('body').find('svg')[0] === 'undefined'){
-                _this.svg        = $('<svg><defs></<defs></svg>').appendTo($('body'));
-                _this.svgCon     = _this.svg.find('defs');
-            }else{
-                _this.svgCon = $('body').find('defs');
-            }
+            // if(typeof $('body').find('svg')[0] === 'undefined'){
+            //     _this.svg        = $('<svg><defs></<defs></svg>').appendTo($('body'));
+            //     _this.svgCon     = _this.svg.find('defs');
+            // }else{
+            //     _this.svgCon = $('body').find('defs');
+            // }
+            // _this.clippath   = $('<clippath id="'+svgID+'"></clipPath>').appendTo(_this.svgCon);
+            // _this.polygon    = $('<polygon points="0 0,0 0,0 0,0 0" />').appendTo(_this.clippath);
 
-            _this.clippath   = $('<clipPath id="mask-'+maskId+'"></clipPath>').appendTo(_this.svgCon);
-            _this.polygon    = $('<polygon points="0"></polygon>').appendTo(_this.clippath);
-
+            _this.polygon    = $("#"+svgID).find('polygon');//$('<polygon points="0 0,0 0,0 0,0 0" />').appendTo(_this.clippath);
 
             _this.target.css({
-                "-webkit-clip-path" : "url(#mask-"+maskId+")",
-                "clip-path" : "url(#mask-"+maskId+")"
+                "-webkit-clip-path" : "url(#"+svgID+")",
+                "clip-path" : "url(#"+svgID+")"
             });
-
 
             _this.sizeCalculate();
             _this.applyMask();

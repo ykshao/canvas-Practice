@@ -18,8 +18,8 @@
                 position: absolute;
                 width: 100%; height: 100%;
                 background-color: #000;
-                -webkit-clip-path : url(#hex-mask);
-                clip-path : url(#hex-mask);
+                /*-webkit-clip-path : url(#hex-mask);*/
+                /*clip-path : url(#hex-mask);*/
                 /*-webkit-transform : skewX(10deg);*/
             }
 
@@ -41,7 +41,7 @@
         <script>
             $(document).ready(function(){
                 var skm = new SkewMask(
-                    $('body').find('img'),'img1',{
+                    $('#skew-box'),'mask1',{
                         align       : "L",
                         width       : "10%",
                         height      : "100%",
@@ -85,9 +85,9 @@
 
         <svg>
           <defs>
-            <!-- <clipPath id="hex-mask"> -->
-              <!-- <polygon fill="#cb3230" points="270,0 0,160 0,485 270,645 560,485 560,160" /> -->
-           <!-- </clipPath> -->
+            <clipPath id="mask1">
+              <polygon points="" />
+           </clipPath>
           </defs>
         </svg>
 
