@@ -9,12 +9,20 @@
         <link rel="stylesheet" href="css/normalize.css">
         <style>
             #sentence-box {
-                width: 600px;
+                width: 100%;
+                max-width   : 1200px;
+                min-width   : 800px;
+                box-sizing  : border-box;
+                border-left : 30px solid transparent;
+                border-right : 30px solid transparent;
+                overflow: hidden;
             }
 
             #sentence {
+                width: 100%;
                 text-align: justify;
                 font-size: 12px;
+                line-height: 25px;
             }
         </style>
         <script src="js/modernizr.custom.min.js"></script>
@@ -23,39 +31,66 @@
 
         <script>
             $(document).ready(function(){
-                var diaoanl = new DiagonalText($('#sentence-box'),$('#sentence'),14);                   
+                var diaoanl = new DiagonalText($('#sentence-box'),$('#sentence'),14,{fontSize:12,lineHeight:25});                   
             });
 
             function DiagonalText(textWrap,text,deg,option){
                 var scope   = this;
                 var config  = {
                     textWidth   : "100%",
-                    fontSize    : 12,
-                    lineHeight  : 12
+                    fontSize    : 15,
+                    lineHeight  : 24
                 }
-                var alignBox,
-                    wrapH   = textWrap.width(),
-                    textH   = text.height(),
-                    line    = Math.floor(textH/config.fontSize),
-                    r       = deg * Math.PI/180;
+
+                $.extend(config,option)
+                var alignBox    = $('<span class="diaoanl-align-box"></span>').prependTo(textWrap),
+                    wrapH       = textWrap.width(),
+                    textW       = text.width()
+                    textH       = text.height(),
+                    r           = Math.abs(deg) * Math.PI/180,
+                    lines       = 0;
 
                 function init(){
-                    alignBox = $('<span></span>').prependTo(textWrap);
                     text.wrap('<span></span>');
-
                     scope.makeAlignBox();
+
+                    $(window).on('resize',function(){
+                        scope.makeAlignBox();
+                    })
+                }
+
+                function calculHeight(){
+                    var w = 0,
+                        n = Math.floor(text.height()/config.lineHeight)
+
+                    for(var i=0; i<n; i++){
+                        w += Math.atan(r)*(i*config.lineHeight)
+                    }
+
+                    // if(w > text.width()*2){
+                    //     w -= text.width();
+                    // }
+
+                    return w+text.width();
                 }
 
                 this.makeAlignBox = function(){
-                   var out = '';
-                    for(i=0; i < line; i++) {
-                        var w1 = Math.floor(Math.atan(r)*i*config.lineHeight);
-                        console.log(w1)
-                        out += '<div style="background-color:#fff;float:left;clear:left;height:'+config.lineHeight+'px;width:'+ w1+'px"></div>';
-                        // out += '<div style="background-color:#fff;float:right;clear:right;height:'+config.lineHeight+'px;width:'+ parts[2]+'px"></div>';
+                    var out = '',
+                        total = 0;
+
+                    alignBox.empty()
+
+                    lines = Math.floor((calculHeight())/config.lineHeight+1)
+                    for(i=0; i < lines; i++) {
+                        var w1 = Math.atan(r)*(i*config.lineHeight),
+                            w2 = Math.atan(r)*((lines-1)*config.lineHeight)-w1;
+                        out += '<div style="float:left;clear:left;height:'+config.lineHeight+'px;width:'+ (deg>0?w1:w2)+ 'px"></div>';
+                        out += '<div style="float:right;clear:right;height:'+config.lineHeight+'px;width:'+ (deg>0?w2:w1)+'px"></div>';
                     }
-                    
-                    alignBox.appendTo(out);
+
+                    alignBox.append(out);
+
+                    textWrap.css({height:text.height()+config.lineHeight});
                 }
 
 
