@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en"> 
+    <head>
+        <title></title>
+        <style>
+            body { background-color: #e0e0e0; }
+            #image-wrapper { 
+                position: relative; left: 100px;
+                top: 100px;
+                height: 100%;
+                background-color: #f00;
+            }
+            .svg-background, .svg-image { clip-path: url(#clip-triangle); }
+            .svg-image {
+                -webkit-transition: all 0.5s ease 0.2s;
+                -moz-transition: all 0.5s ease 0.2s;
+                opacity: 1;
+                transition: all 0.5s ease 0.2s;
+            }
+
+            svg.clip-svg { height: 250px; position: absolute; width: 250px; }
+            #svg-1 { left: 0px; top: 0px; }
+        </style>
+    </head>
+
+    <body>
+        <div>
+            <div id="image-wrapper">
+                <svg id="svg-1" class="clip-svg">
+                    <rect class='svg-background' width="300" height="300" fill="#ffffff" />
+                    <image id="img-1" class='svg-image' width="300" height="300" xlink:href="http://25.media.tumblr.com/tumblr_m5nre6cxkQ1qbs7p5o1_r1_500.jpg" />
+                </svg>
+            </div>
+        </div>
+        <svg id="svg-defs">
+            <defs>
+                <clipPath id="clip-triangle">
+                    <polygon points="0 0, 40 0, 112 13, 240 13, 140 150, 150 250"/>
+                </clipPath>
+            </defs>
+        </svg>
+    </body>
+</html>

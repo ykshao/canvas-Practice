@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1">
+        <meta name="description" content="">
+        <title></title>
+        <link rel="stylesheet" href="css/normalize.css">
+        <style>
+            #sentence-box {
+                width: 100%;
+                max-width   : 1200px;
+                min-width   : 800px;
+                box-sizing  : border-box;
+                border-left : 30px solid transparent;
+                border-right : 30px solid transparent;
+                overflow: hidden;
+            }
+
+            #sentence {
+                width: 100%;
+                text-align: justify;
+                font-size: 12px;
+                line-height: 25px;
+            }
+        </style>
+        <script src="js/modernizr.custom.min.js"></script>
+        <script src="js/jquery-1.10.2.min.js"></script>
+        <script src="js/jquery.easing.1.3.js"></script>
+
+        <script>
+            $(document).ready(function(){
+                var diaoanl = new DiagonalText($('#sentence-box'),$('#sentence'),14,{fontSize:12,lineHeight:25});                   
+            });
+
+            function DiagonalText(textWrap,text,deg,option){
+                var scope   = this;
+                var config  = {
+                    textWidth   : "100%",
+                    fontSize    : 15,
+                    lineHeight  : 24
+                }
+
+                $.extend(config,option)
+                var alignBox    = $('<span class="diaoanl-align-box"></span>').prependTo(textWrap),
+                    wrapH       = textWrap.width(),
+                    textW       = text.width()
+                    textH       = text.height(),
+                    r           = Math.abs(deg) * Math.PI/180,
+                    lines       = 0;
+
+                function init(){
+                    text.wrap('<span></span>');
+                    scope.makeAlignBox();
+
+                    $(window).on('resize',function(){
+                        scope.makeAlignBox();
+                    })
+                }
+
+                function calculHeight(){
+                    var w = 0,
+                        n = Math.floor(text.height()/config.lineHeight)
+
+                    for(var i=0; i<n; i++){
+                        w += Math.atan(r)*(i*config.lineHeight)
+                    }
+
+                    // if(w > text.width()*2){
+                    //     w -= text.width();
+                    // }
+
+                    return w+text.width();
+                }
+
+                this.makeAlignBox = function(){
+                    var out = '',
+                        total = 0;
+
+                    alignBox.empty()
+
+                    lines = Math.floor((calculHeight())/config.lineHeight+1)
+                    for(i=0; i < lines; i++) {
+                        var w1 = Math.atan(r)*(i*config.lineHeight),
+                            w2 = Math.atan(r)*((lines-1)*config.lineHeight)-w1;
+                        out += '<div style="float:left;clear:left;height:'+config.lineHeight+'px;width:'+ (deg>0?w1:w2)+ 'px"></div>';
+                        out += '<div style="float:right;clear:right;height:'+config.lineHeight+'px;width:'+ (deg>0?w2:w1)+'px"></div>';
+                    }
+
+                    alignBox.append(out);
+
+                    textWrap.css({height:text.height()+config.lineHeight});
+                }
+
+
+                init();
+
+                // function shapeWrapper(lineHeight,Xs) {
+                //     var out = '';
+                //     Xvalues = Xs.split('|');
+                //     for(i=0; i < Xvalues.length; i++) {
+                //         parts = Xvalues[i].split(',');
+                //         out += '<div style="float:left;clear:left;height:'+lineHeight+'px;width:'+ parts[1]+'px"></div>';
+                //         out += '<div style="float:right;clear:right;height:'+lineHeight+'px;width:'+ parts[2]+'px"></div>';
+                //     }
+                //     return out;//document.write(out);
+                // }
+            }
+
+            DiagonalText.prototype.constructor = DiagonalText;
+
+        </script>
+    </head>
+    <body>
+        <div id="sentence-box">
+            <p id="sentence">
+                The latest fleet of Lexus concept and production models can be described as innovative and revolutionary, bold and cutting-edge. But sexy? That’s an adjective few had associated with Japan’s premier automotive brand – until the unveiling of the Lexus RC, that is.<br>
+                A sharply styled coupe that evokes both glamour and elegance, the RC debuted at the 2013 Tokyo Motor Show last fall and takes its design cues from a number of its predecessors. The spindle grille, now a widely recognized Lexus motif of excellence, is the marque’s widest and lowest application of a grille to date. (It is 30 millimeters wider, 35 millimeters lower and 70 millimeters shorter in wheelbase than that of the new IS line.) On either side of the grille sit triangular headlight casings inspired by the LFA, the most formidable Lexus vehicle to date.<br>
+                At the rear, the combination taillight has been given an aggressive three-dimensional appearance, shaped into an L to emphasize its brand identity. And the taillight’s interior has been uniquely engineered to feature hairline carvings so that when the driver applies the brakes, the taillight illuminates as if from behind – a subtle design treatment that represents Lexus’s meticulous attention to detail.<br>
+                Inside, Lexus’s first purpose-built lighting system illuminates upward to envelop<br>
+                the cabin in light. Genuine shimamoku (tightly layered wood) highlights accentuate the surrounding trim and provide opulent character.<br>
+                “By ‘sexy,’” explains Yasuo Kajino, chief designer at the Lexus Design Division, “we mean beautiful packaging, a visually dynamic structure and a low and wide body shape, all of which comes with Lexus’s state-of-the-art technology.”<br>
+                The RC will fill a long-standing gap in the Lexus lineup. “When we looked at the freshly carved model of this car, we were immensely excited because we were doing what hadn’t been done before: making a coupe,” recalls Junichi Furuyama, previously chief engineer of the RC. “To strengthen the emotional value of the brand and to appeal to younger generations, introducing a coupe to the range was a must for Lexus.”<br>
+                Purposefully pared back to put focus on performance, the RC will provide one of the purest and most exhilarating Lexus driving experiences. It will be as luxurious as it is high performing, says Furuyama, and will “deliver superior drivability at a higher speed or in a higher g-force environment.”
+            </p>
+        </div>
+    </body>
+</html>

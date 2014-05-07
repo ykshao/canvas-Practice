@@ -5,129 +5,378 @@
         <style>
             body{
                 margin: 0; padding: 0;
-                background-color: #000;
+                background-color: #f6f6f6;
             }
+
+            #sqcs-wrap {
+                position: absolute;
+                left : 540px; margin-left: -270px;
+                width: 540px; height: 540px;
+            }
+
+
             .sequence {
-                position: relative;
-                margin: 0 auto;
-                width: 1920px;
+                position: absolute;
+                width: 540px; height: 540px;
             }
+
+            #hidden-btn{
+                position: absolute;
+                width: 540px; height: 540px;
+                background-color: rgba(255,255,255,0);
+            }
+
             .sequence img { 
                 position: absolute;
                 left: 0; top: 0;
                 visibility: hidden;
+            }
+
+            #sqc1 {
+                /*background-color: #f00;*/
             }
         </style>
         <script src="js/jquery-1.10.2.min.js"></script>
         <script src="js/jquery.easing.1.3.js"></script>
         <script>
             $(document).ready(function(){
-                var seq_imgs    = $('.sequence img'),
-                    seq_total   = seq_imgs.length-1,
-                    seq_info    = { id : 0 , old : -1}
+                var seq_imgs1       = $('#sqc1 img'),
+                    seq_imgs2       = $('#sqc2 img'),
+                    seq_total       = seq_imgs1.length-1,
+                    seq_info1        = { id : 0 , old : -1},
+                    seq_info2        = { id : 0 , old : -1}
 
-                seq_imgs.eq(0).css({display:'block'});
+                var seq1 = $("#seq1"),
+                    seq2 = $("#sqc2").css({visibility:'hidden'});
 
-                function seqView(duration,targetScene){
-                    $(seq_info).stop(true).animate({ id : targetScene },{
+                function seqView(objs,duration,sequenceWrap,targetScene,complete){
+                    $(objs).stop(true).animate({ id : targetScene },{
                         duration    : duration,
                         step        : function(now,fx){
-                                        var seq_id      = Number(fx.elem.id.toFixed(0));
-                                        if(seq_id != seq_info.old){
-                                            seq_imgs.eq(seq_id).css({visibility:'visible'});
-                                            if(seq_info.old != -1)seq_imgs.eq(seq_info.old).css({visibility:'hidden'});
+                                        var seq_id = Number(fx.elem.id.toFixed(0));
+                                        if(seq_id != objs.old){
+                                            sequenceWrap.eq(seq_id).css({visibility:'visible'});
+                                            if(seq_info1.old != -1)sequenceWrap.eq(objs.old).css({visibility:'hidden'});
                                         }
 
-                                        seq_info.old = seq_id;
+
+                                        seq_info1.old = seq_id;
                                       },
-                        complete : function(){ seq_info.id = targetScene; },
+                        complete : function(){ if(complete)complete(); },
                         easing      : "swing"
                     })
                 }
 
                 var loadedCount = 0;
-                seq_imgs.each(function(i){
+                seq_imgs1.each(function(i){
                     var url = $(this).attr("src"),
                         img = new Image();
 
                     img.onload = function(){
                         if(loadedCount == seq_total){
-                            seqView(3000,seq_total);
+                            seq_imgs1.eq(0).css({visibility:'visible'});
+                            // seq_imgs2.eq(0).css({visibility:'visible'});
+                            seqView(
+                                seq_info1,
+                                4000,
+                                $("#sqc1").children(),
+                                seq_total,
+                                function(){
+                                    seq_info1.id = 0;
+                                    seqView(
+                                        seq_info1,
+                                        2000,
+                                        $("#sqc1").children(),
+                                        seq_total,
+                                        function(){
+                                            seq_info1.id = 0;
+                                            
+                                        }
+                                    );
+                                }
+                            );
                         }
                         loadedCount++;
                     }
                     img.src = url;
                 });
-               // seqView(3000,seq_total);
+
+                $("#sqcs-wrap").css({cursor:'pointer'})
+                $("#sqcs-wrap").on('mouseover',function(){
+                    // seqView(2000,$("#sqc1").children(),seq_total);
+                    seqView(
+                            seq_info2,
+                            4000,
+                            $("#sqc2").children(),
+                            seq_total
+                        );
+                });
+
+                $("#sqcs-wrap").on('mouseout',function(){
+                    // seqView(2000,$("#sqc1").children(),seq_total);
+                    seqView(
+                            seq_info2,
+                            4000,
+                            $("#sqc2").children(),
+                            0
+                        );
+                })
             });
         </script>
     </head>
     
     <body>
-        <img src="images/dummy-bg.jpg" style="position:absolute" width="100%" height="auto" alt="">
-         <article id="sqc1" class="sequence">
-            <img src="images/ttl1_00000.png" >
-            <img src="images/ttl1_00001.png" >
-            <img src="images/ttl1_00002.png" >
-            <img src="images/ttl1_00003.png" >
-            <img src="images/ttl1_00004.png" >
-            <img src="images/ttl1_00005.png" >
-            <img src="images/ttl1_00006.png" >
-            <img src="images/ttl1_00007.png" >
-            <img src="images/ttl1_00008.png" >
-            <img src="images/ttl1_00009.png" >
-            <img src="images/ttl1_00010.png" >
-            <img src="images/ttl1_00011.png" >
-            <img src="images/ttl1_00012.png" >
-            <img src="images/ttl1_00013.png" >
-            <img src="images/ttl1_00014.png" >
-            <img src="images/ttl1_00015.png" >
-            <img src="images/ttl1_00016.png" >
-            <img src="images/ttl1_00017.png" >
-            <img src="images/ttl1_00018.png" >
-            <img src="images/ttl1_00019.png" >
-            <img src="images/ttl1_00020.png" >
-            <img src="images/ttl1_00021.png" >
-            <img src="images/ttl1_00022.png" >
-            <img src="images/ttl1_00023.png" >
-            <img src="images/ttl1_00024.png" >
-            <img src="images/ttl1_00025.png" >
-            <img src="images/ttl1_00026.png" >
-            <img src="images/ttl1_00027.png" >
-            <img src="images/ttl1_00028.png" >
-            <img src="images/ttl1_00029.png" >
-            <img src="images/ttl1_00030.png" >
-            <img src="images/ttl1_00031.png" >
-            <img src="images/ttl1_00032.png" >
-            <img src="images/ttl1_00033.png" >
-            <img src="images/ttl1_00034.png" >
-            <img src="images/ttl1_00035.png" >
-            <img src="images/ttl1_00036.png" >
-            <img src="images/ttl1_00037.png" >
-            <img src="images/ttl1_00038.png" >
-            <img src="images/ttl1_00039.png" >
-            <img src="images/ttl1_00040.png" >
-            <img src="images/ttl1_00041.png" >
-            <img src="images/ttl1_00042.png" >
-            <img src="images/ttl1_00043.png" >
-            <img src="images/ttl1_00044.png" >
-            <img src="images/ttl1_00045.png" >
-            <img src="images/ttl1_00046.png" >
-            <img src="images/ttl1_00047.png" >
-            <img src="images/ttl1_00048.png" >
-            <!-- <img src="images/ttl1_00049.png" >
-            <img src="images/ttl1_00050.png" >
-            <img src="images/ttl1_00051.png" >
-            <img src="images/ttl1_00052.png" >
-            <img src="images/ttl1_00053.png" >
-            <img src="images/ttl1_00054.png" >
-            <img src="images/ttl1_00055.png" >
-            <img src="images/ttl1_00056.png" >
-            <img src="images/ttl1_00057.png" >
-            <img src="images/ttl1_00058.png" >
-            <img src="images/ttl1_00059.png" >
-            <img src="images/ttl1_00060.png" > -->
-     
-        </article>
+        <div id="sqcs-wrap">
+            <article id="sqc1" class="sequence">
+                <img src="images/woman_off_00000.png" >
+                <img src="images/woman_off_00001.png" >
+                <img src="images/woman_off_00002.png" >
+                <img src="images/woman_off_00003.png" >
+                <img src="images/woman_off_00004.png" >
+                <img src="images/woman_off_00005.png" >
+                <img src="images/woman_off_00006.png" >
+                <img src="images/woman_off_00007.png" >
+                <img src="images/woman_off_00008.png" >
+                <img src="images/woman_off_00009.png" >
+                <img src="images/woman_off_00010.png" >
+                <img src="images/woman_off_00011.png" >
+                <img src="images/woman_off_00012.png" >
+                <img src="images/woman_off_00013.png" >
+                <img src="images/woman_off_00014.png" >
+                <img src="images/woman_off_00015.png" >
+                <img src="images/woman_off_00016.png" >
+                <img src="images/woman_off_00017.png" >
+                <img src="images/woman_off_00018.png" >
+                <img src="images/woman_off_00019.png" >
+                <img src="images/woman_off_00020.png" >
+                <img src="images/woman_off_00021.png" >
+                <img src="images/woman_off_00022.png" >
+                <img src="images/woman_off_00023.png" >
+                <img src="images/woman_off_00024.png" >
+                <img src="images/woman_off_00025.png" >
+                <img src="images/woman_off_00026.png" >
+                <img src="images/woman_off_00027.png" >
+                <img src="images/woman_off_00028.png" >
+                <img src="images/woman_off_00029.png" >
+                <img src="images/woman_off_00030.png" >
+                <img src="images/woman_off_00031.png" >
+                <img src="images/woman_off_00032.png" >
+                <img src="images/woman_off_00033.png" >
+                <img src="images/woman_off_00034.png" >
+                <img src="images/woman_off_00035.png" >
+                <img src="images/woman_off_00036.png" >
+                <img src="images/woman_off_00037.png" >
+                <img src="images/woman_off_00038.png" >
+                <img src="images/woman_off_00039.png" >
+                <img src="images/woman_off_00040.png" >
+                <img src="images/woman_off_00041.png" >
+                <img src="images/woman_off_00042.png" >
+                <img src="images/woman_off_00043.png" >
+                <img src="images/woman_off_00044.png" >
+                <img src="images/woman_off_00045.png" >
+                <img src="images/woman_off_00046.png" >
+                <img src="images/woman_off_00047.png" >
+                <img src="images/woman_off_00048.png" >
+                <img src="images/woman_off_00049.png" >
+                <img src="images/woman_off_00050.png" >
+                <img src="images/woman_off_00051.png" >
+                <img src="images/woman_off_00052.png" >
+                <img src="images/woman_off_00053.png" >
+                <img src="images/woman_off_00054.png" >
+                <img src="images/woman_off_00055.png" >
+                <img src="images/woman_off_00056.png" >
+                <img src="images/woman_off_00057.png" >
+                <img src="images/woman_off_00058.png" >
+                <img src="images/woman_off_00059.png" >
+                <img src="images/woman_off_00060.png" >
+                <img src="images/woman_off_00060.png" >
+                <img src="images/woman_off_00061.png" >
+                <img src="images/woman_off_00062.png" >
+                <img src="images/woman_off_00063.png" >
+                <img src="images/woman_off_00064.png" >
+                <img src="images/woman_off_00065.png" >
+                <img src="images/woman_off_00066.png" >
+                <img src="images/woman_off_00067.png" >
+                <img src="images/woman_off_00068.png" >
+                <img src="images/woman_off_00069.png" >
+                <img src="images/woman_off_00070.png" >
+                <img src="images/woman_off_00071.png" >
+                <img src="images/woman_off_00072.png" >
+                <img src="images/woman_off_00073.png" >
+                <img src="images/woman_off_00074.png" >
+                <img src="images/woman_off_00075.png" >
+                <img src="images/woman_off_00076.png" >
+                <img src="images/woman_off_00077.png" >
+                <img src="images/woman_off_00078.png" >
+                <img src="images/woman_off_00079.png" >
+                <img src="images/woman_off_00080.png" >
+                <img src="images/woman_off_00081.png" >
+                <img src="images/woman_off_00082.png" >
+                <img src="images/woman_off_00083.png" >
+                <img src="images/woman_off_00084.png" >
+                <img src="images/woman_off_00085.png" >
+                <img src="images/woman_off_00086.png" >
+                <img src="images/woman_off_00087.png" >
+                <img src="images/woman_off_00088.png" >
+                <img src="images/woman_off_00089.png" >
+                <img src="images/woman_off_00090.png" >
+                <img src="images/woman_off_00091.png" >
+                <img src="images/woman_off_00092.png" >
+                <img src="images/woman_off_00093.png" >
+                <img src="images/woman_off_00094.png" >
+                <img src="images/woman_off_00095.png" >
+                <img src="images/woman_off_00096.png" >
+                <img src="images/woman_off_00097.png" >
+                <img src="images/woman_off_00098.png" >
+                <img src="images/woman_off_00099.png" >
+                <img src="images/woman_off_00100.png" >
+                <img src="images/woman_off_00101.png" >
+                <img src="images/woman_off_00102.png" >
+                <img src="images/woman_off_00103.png" >
+                <img src="images/woman_off_00104.png" >
+                <img src="images/woman_off_00105.png" >
+                <img src="images/woman_off_00106.png" >
+                <img src="images/woman_off_00107.png" >
+                <img src="images/woman_off_00108.png" >
+                <img src="images/woman_off_00109.png" >
+                <img src="images/woman_off_00110.png" >
+                <img src="images/woman_off_00111.png" >
+                <img src="images/woman_off_00112.png" >
+                <img src="images/woman_off_00113.png" >
+                <img src="images/woman_off_00114.png" >
+                <img src="images/woman_off_00115.png" >
+                <img src="images/woman_off_00116.png" >
+                <img src="images/woman_off_00117.png" >
+                <img src="images/woman_off_00118.png" >
+                <img src="images/woman_off_00119.png" >
+                <img src="images/woman_off_00120.png" >
+            </article>   
+
+            <article id="sqc2" class="sequence">
+                <img src="images/woman_on_00000.png" >
+                <img src="images/woman_on_00001.png" >
+                <img src="images/woman_on_00002.png" >
+                <img src="images/woman_on_00003.png" >
+                <img src="images/woman_on_00004.png" >
+                <img src="images/woman_on_00005.png" >
+                <img src="images/woman_on_00006.png" >
+                <img src="images/woman_on_00007.png" >
+                <img src="images/woman_on_00008.png" >
+                <img src="images/woman_on_00009.png" >
+                <img src="images/woman_on_00010.png" >
+                <img src="images/woman_on_00011.png" >
+                <img src="images/woman_on_00012.png" >
+                <img src="images/woman_on_00013.png" >
+                <img src="images/woman_on_00014.png" >
+                <img src="images/woman_on_00015.png" >
+                <img src="images/woman_on_00016.png" >
+                <img src="images/woman_on_00017.png" >
+                <img src="images/woman_on_00018.png" >
+                <img src="images/woman_on_00019.png" >
+                <img src="images/woman_on_00020.png" >
+                <img src="images/woman_on_00021.png" >
+                <img src="images/woman_on_00022.png" >
+                <img src="images/woman_on_00023.png" >
+                <img src="images/woman_on_00024.png" >
+                <img src="images/woman_on_00025.png" >
+                <img src="images/woman_on_00026.png" >
+                <img src="images/woman_on_00027.png" >
+                <img src="images/woman_on_00028.png" >
+                <img src="images/woman_on_00029.png" >
+                <img src="images/woman_on_00030.png" >
+                <img src="images/woman_on_00031.png" >
+                <img src="images/woman_on_00032.png" >
+                <img src="images/woman_on_00033.png" >
+                <img src="images/woman_on_00034.png" >
+                <img src="images/woman_on_00035.png" >
+                <img src="images/woman_on_00036.png" >
+                <img src="images/woman_on_00037.png" >
+                <img src="images/woman_on_00038.png" >
+                <img src="images/woman_on_00039.png" >
+                <img src="images/woman_on_00040.png" >
+                <img src="images/woman_on_00041.png" >
+                <img src="images/woman_on_00042.png" >
+                <img src="images/woman_on_00043.png" >
+                <img src="images/woman_on_00044.png" >
+                <img src="images/woman_on_00045.png" >
+                <img src="images/woman_on_00046.png" >
+                <img src="images/woman_on_00047.png" >
+                <img src="images/woman_on_00048.png" >
+                <img src="images/woman_on_00049.png" >
+                <img src="images/woman_on_00050.png" >
+                <img src="images/woman_on_00051.png" >
+                <img src="images/woman_on_00052.png" >
+                <img src="images/woman_on_00053.png" >
+                <img src="images/woman_on_00054.png" >
+                <img src="images/woman_on_00055.png" >
+                <img src="images/woman_on_00056.png" >
+                <img src="images/woman_on_00057.png" >
+                <img src="images/woman_on_00058.png" >
+                <img src="images/woman_on_00059.png" >
+                <img src="images/woman_on_00060.png" >
+                <img src="images/woman_on_00060.png" >
+                <img src="images/woman_on_00061.png" >
+                <img src="images/woman_on_00062.png" >
+                <img src="images/woman_on_00063.png" >
+                <img src="images/woman_on_00064.png" >
+                <img src="images/woman_on_00065.png" >
+                <img src="images/woman_on_00066.png" >
+                <img src="images/woman_on_00067.png" >
+                <img src="images/woman_on_00068.png" >
+                <img src="images/woman_on_00069.png" >
+                <img src="images/woman_on_00070.png" >
+                <img src="images/woman_on_00071.png" >
+                <img src="images/woman_on_00072.png" >
+                <img src="images/woman_on_00073.png" >
+                <img src="images/woman_on_00074.png" >
+                <img src="images/woman_on_00075.png" >
+                <img src="images/woman_on_00076.png" >
+                <img src="images/woman_on_00077.png" >
+                <img src="images/woman_on_00078.png" >
+                <img src="images/woman_on_00079.png" >
+                <img src="images/woman_on_00080.png" >
+                <img src="images/woman_on_00081.png" >
+                <img src="images/woman_on_00082.png" >
+                <img src="images/woman_on_00083.png" >
+                <img src="images/woman_on_00084.png" >
+                <img src="images/woman_on_00085.png" >
+                <img src="images/woman_on_00086.png" >
+                <img src="images/woman_on_00087.png" >
+                <img src="images/woman_on_00088.png" >
+                <img src="images/woman_on_00089.png" >
+                <img src="images/woman_on_00090.png" >
+                <img src="images/woman_on_00091.png" >
+                <img src="images/woman_on_00092.png" >
+                <img src="images/woman_on_00093.png" >
+                <img src="images/woman_on_00094.png" >
+                <img src="images/woman_on_00095.png" >
+                <img src="images/woman_on_00096.png" >
+                <img src="images/woman_on_00097.png" >
+                <img src="images/woman_on_00098.png" >
+                <img src="images/woman_on_00099.png" >
+                <img src="images/woman_on_00100.png" >
+                <img src="images/woman_on_00101.png" >
+                <img src="images/woman_on_00102.png" >
+                <img src="images/woman_on_00103.png" >
+                <img src="images/woman_on_00104.png" >
+                <img src="images/woman_on_00105.png" >
+                <img src="images/woman_on_00106.png" >
+                <img src="images/woman_on_00107.png" >
+                <img src="images/woman_on_00108.png" >
+                <img src="images/woman_on_00109.png" >
+                <img src="images/woman_on_00110.png" >
+                <img src="images/woman_on_00111.png" >
+                <img src="images/woman_on_00112.png" >
+                <img src="images/woman_on_00113.png" >
+                <img src="images/woman_on_00114.png" >
+                <img src="images/woman_on_00115.png" >
+                <img src="images/woman_on_00116.png" >
+                <img src="images/woman_on_00117.png" >
+                <img src="images/woman_on_00118.png" >
+                <img src="images/woman_on_00119.png" >
+                <img src="images/woman_on_00120.png" >
+            </article>
+            <div id="hidden-btn"></div>
+        </div>
     </body>
 </html>

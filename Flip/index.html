@@ -19,7 +19,7 @@
 
             .plane-outer { 
                 position: relative;
-                width: 25%; height: 50%;
+                width: 15%; height: 50%;
                 float: left;
                 border : 1px solid #fff;
 
@@ -56,7 +56,7 @@
             }
 
             .flip { 
-                -webkit-transform: translateZ(-1000px) rotateY(180deg);
+                -webkit-transform: translateZ(-500px) rotateY(180deg);
             }
 
 
@@ -80,13 +80,13 @@
                 $(".plane-outer").on('mouseover',function(){
                     var inner = $(this).find('.plane-inner');
                     inner.addClass('flip');
-                    $('.plane-outer').addClass('zoom');
+                    // $('.plane-outer').addClass('zoom');
                 });
 
                 $(".plane-outer").on('mouseout',function(){
                     var inner = $(this).find('.plane-inner');
                     inner.removeClass('flip');
-                    $('.plane-outer').removeClass('zoom');
+                    // $('.plane-outer').removeClass('zoom');
                 });
 
 
