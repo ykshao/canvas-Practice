@@ -132,7 +132,8 @@
                     var x = (i)%imgData.width+rectangle.x,
                         y = Math.floor(i/imgData.width)+rectangle.y;
                     if(typeof newData.data[x] == 'undefined')newData.data[x] = [];
-                    newData.data[x][y] = {x:x,y:y,r:r,g:g,b:b,a:Number((a/255).toFixed(2))};
+                    // newData.data[x][y] = {x:x,y:y,r:r,g:g,b:b,a:Number((a/255).toFixed(2))};
+                    newData.data[x][y] = {x:String(x),y:String(y),r:String(r),g:String(g),b:String(b),a:String(Number((a/255).toFixed(2)))};
                     // newData.data.push({x:x,y:y,r:r,g:g,b:b,a:Number((a/255).toFixed(2))});
 
                 if(i==length-1){
