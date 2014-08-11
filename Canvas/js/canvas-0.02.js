@@ -1,6 +1,6 @@
 /**
  * 2013.10.
- * Scenes ver 0.01
+ * Scenes ver 0.02
  * Author : Heonwongeun
  * FaceBook : https://www.facebook.com/heo.wongeun
  */
@@ -67,7 +67,7 @@
             root.draw(ctx);
 
             for(var o in drawList){
-                drawList[o].draw();
+                drawList[o].draw(ctx);
             }
         }
 
@@ -96,7 +96,7 @@
 
         this.draw = function(){
             ctx.save();
-            ctx.fillStyle = 'rgba(0,0,0,0.01)';
+            ctx.fillStyle = 'rgba(0,0,0,1)';
             ctx.fillRect(0,0,size.width,size.height);
             ctx.restore();
         }
@@ -113,44 +113,39 @@
             
         ************************************************************ */
 
-        this.getImageData = function(rect,original){
+        this.getImageData = function(rect,callBack){
             var rectangle = {x:0,y:0,width:cvs.width,height:cvs.height};
             $.extend(rectangle,rect);
+
             var imgData = ctx.getImageData(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
 
-            if(original){
-                return imgData;
-            }else{
-                var length  = imgData.width * imgData.height,
-                newData = {data:[],legnth:length, width:imgData.width, height : imgData.height};
+           
+            var length  = imgData.width * imgData.height,
+            newData = {data:[],legnth:length, width:imgData.width, height : imgData.height};
 
-                for(var i = 0 ;i < length; i++) {  
-                    var r = imgData.data[i*4],
-                        g = imgData.data[i*4+1],
-                        b = imgData.data[i*4+2],
-                        a = imgData.data[i*4+3];
+            for(var i = 0 ;i < length; i++) {  
+                var r = imgData.data[i*4],
+                    g = imgData.data[i*4+1],
+                    b = imgData.data[i*4+2],
+                    a = imgData.data[i*4+3];
 
-                        var x = (i)%imgData.width+rectangle.x,
-                            y = Math.floor(i/imgData.width)+rectangle.y;
-                        if(typeof newData.data[x] == 'undefined')newData.data[x] = [];
-                        // newData.data[x][y] = {x:x,y:y,r:r,g:g,b:b,a:Number((a/255).toFixed(2))};
-                        // newData.data.push({x:x,y:y,r:r,g:g,b:b,a:Number((a/255).toFixed(2))});
+                    var x = (i)%imgData.width+rectangle.x,
+                        y = Math.floor(i/imgData.width)+rectangle.y;
+                    if(typeof newData.data[x] == 'undefined')newData.data[x] = [];
+                    // newData.data[x][y] = {x:x,y:y,r:r,g:g,b:b,a:Number((a/255).toFixed(2))};
+                    newData.data[x][y] = {x:String(x),y:String(y),r:String(r),g:String(g),b:String(b),a:String(Number((a/255).toFixed(2)))};
+                    // newData.data.push({x:x,y:y,r:r,g:g,b:b,a:Number((a/255).toFixed(2))});
 
-                    if(i==length-1){
-                        return newData;
-                    }
-                };
+                if(i==length-1){
+                    callBack(newData);
+                }
             }
-            
-
-            // return imgData;
         }
 
         this.clear = function(){
             ctx.save();
             ctx.clearRect(0, 0, size.width, size.height);
             ctx.restore();
-            console.log(size,cvs)
         }
 
         this.drawImage = function(img,x,y){
