@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1">
+        <meta name="description" content="">
+        <title></title>
+        <link rel="stylesheet" href="css/normalize.css">
+        <style>
+            .box {
+                position: absolute;
+                width: 30px; height:1px;
+                left : 0; top : 0;
+                border : 1px solid #fff;
+                /*background: #ff0000;*/
+            }
+
+            .btn {
+                position: absolute;
+                width: 100px; height: 50px;
+                left: 50%; margin-left: -50px;
+                bottom: 100px;
+                cursor: pointer;
+                background: #ff0000;
+                text-align: center;
+                font-size: 12px;
+                color : #fff;
+                line-height: 50px;
+                text-transform: uppercase;
+            }
+        </style>
+        <script src="js/modernizr.custom.min.js"></script>
+        <script src="js/jquery-1.10.2.min.js"></script>
+        <script src="js/jquery.easing.1.3.js"></script>
+        <script src="js/stats.js"></script>
+        
+        <script type="text/javascript" src="js/gsap-plugins.js"></script>
+    
+        <script>
+            $(document).ready(function(){
+
+                var stats = Stats();
+                stats.setMode(2);
+                stats.domElement.style.position = 'absolute';
+                stats.domElement.style.left = '0px';
+                stats.domElement.style.top = '0px';
+                stats.domElement.style['z-index'] = '2';
+                document.body.appendChild( stats.domElement );
+
+                setInterval(function(){
+                    stats.update()
+                },1000/60)
+
+
+                var boxs = [];
+                for(var i=0; i<100; i++){
+                    var box = $('<div class="box"></div>').appendTo($('body'));
+                    box.css({
+                        width   : 10 + Math.random()*10,
+                        height  : 10 + Math.random()*10,
+                        left    : Math.random() * 1000,
+                        top     : Math.random() * 500,
+                        background : 'rgba('+Math.floor(Math.random()*255)+','+Math.floor(Math.random()*255)+','+Math.floor(Math.random()*255)+',1)'
+                    })
+                    box[0].width    = box.width();
+                    box[0].height   = box.height();
+                    boxs.push(box);
+                }
+
+                var box = $('<div class="btn"> animation </div>').appendTo($('body'));
+                var css = {x:0,scale:1,z:1};
+                box.on('click',function(){
+                    if(css.x == 0){
+                        css.left = 100;
+                        // css.scale = 10;
+                        // css.z = 1000;
+                    }else{
+                        css.left = 1000;
+                        // css.scale = .1;
+                        // css.z = 300;
+                    }
+
+                    for(var o in boxs){
+                        var box = boxs[o];
+                        box.stop(true).delay(o*2).animate(css, {duration:700, easing:"easeInOutQuint"});
+                        // box.stop(true).delay(o*1).animate({left:css.x}, 700,"easeInOutQuint");
+                    }
+                });
+            });
+
+            //tween all elements with class "myClass" to top:100px and left:200px over the course of 3 seconds
+            // $(".myClass").animate({top:100, left:200}, 3000);
+             
+            //do the same thing, but with a Strong.easeOut ease
+            // $(".myClass").animate({top:100, left:200}, {duration:3000, easing:"easeOutStrong"});
+             
+            //tween width to 50% and then height to 200px (sequenced) and then call myFunction
+            // $(".myClass").animate({width:"50%"}, 2000).animate({height:"200px"}, {duration:3000, complete:myFunction});
+
+
+        </script>
+    </head>
+    <body>
+
+    </body>
+</html>

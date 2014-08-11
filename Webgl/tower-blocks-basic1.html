@@ -1,0 +1,141 @@
+<html>
+    <head>
+        <title>first three.js app</title>
+        <style>
+            body {
+                margin: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <script src="build/three.min.js"></script>
+        <script src="js/libs/jquery-1.9.1.min.js"></script>
+        <script>
+            $(document).ready(function(){
+                init();
+            });
+
+            /* ************************************************************
+                init
+            ************************************************************ */
+            var scene,camera,renderer;
+            var worldSize = {
+                width   : 10000,
+                height  : 10000,
+                depth   : 10000
+            }
+            var land,landArticle,landArticles;
+
+            function init(){
+                scene       = new THREE.Scene();
+                camera      = new THREE.PerspectiveCamera(45,window.innerWidth/window.innerHeight,0,1000);
+                renderer    = new THREE.WebGLRenderer();
+
+                renderer.setSize(window.innerWidth,window.innerHeight);
+                document.body.appendChild(renderer.domElement);
+
+                setLayout();
+                addEvent();
+                render();
+
+                camera.position.x = 0;
+                // camera.position.y = 1000;
+                // camera.position.z = 1000;
+
+                // camera.lookAt(scene.position);
+            }
+            function render(){
+                // camera.position.y += ( targetRotation - camera.rotation.y ) * 0.05;
+                // camera.rotation.x += ( targetRotation - camera.rotation.x ) * 0.05;
+                // camera.position.z += ( targetRotation - camera.position.z ) * 0.05;
+                // camera.position.z += 1;
+
+                // camera.lookAt(scene.position)
+                renderer.render(scene, camera);
+                requestAnimationFrame(render);
+            }
+
+            /* ************************************************************
+                layout
+            ************************************************************ */
+            
+            function setLayout(){
+                land = new THREE.Mesh(
+                    new THREE.BoxGeometry( 1000, 1000, 1000 ),
+                    new THREE.MeshBasicMaterial( {color: 0xff0000})
+                );
+                // land.position.x = 0;
+                // land.position.y = 0;
+                // land.position.z = 0;
+                scene.add(land);
+            }
+
+
+            /* ************************************************************
+                event
+            ************************************************************ */
+            var stageSize   = {},
+                mouse       = {},
+                targetRotation = 0,
+                targetRotationOnMouseDown = 0;
+
+
+            function addEvent(){
+                onWindowResize();
+                window.addEventListener( 'resize', onWindowResize, false );
+                document.addEventListener( 'mousedown', onDocumentMouseDown, false );
+            }
+
+            function onDocumentMouseDown( e ) {
+
+                e.preventDefault();
+
+                document.addEventListener( 'mousemove', onMouseMove, false );
+                document.addEventListener( 'mouseup', onMouseUp, false );
+                document.addEventListener( 'mouseout', onMouseOut, false );
+
+                mouse.mouseDown = e.clientX - stageSize.halfW;
+                targetRotationOnMouseDown = targetRotation;
+
+            }
+
+            function onMouseMove( e ) {
+                mouse.x = e.clientX - stageSize.halfW;
+                mouse.y = e.clientY - stageSize.halfH;
+
+                targetRotation = targetRotationOnMouseDown + ( mouse.x - mouse.mouseDown ) * 0.02;
+            }
+
+            function onMouseUp( e ) {
+
+                document.removeEventListener( 'mousemove', onMouseMove, false );
+                document.removeEventListener( 'mouseup', onMouseUp, false );
+                document.removeEventListener( 'mouseout', onMouseOut, false );
+
+            }
+
+            function onMouseOut( e ) {
+                document.removeEventListener( 'mousemove', onMouseMove, false );
+                document.removeEventListener( 'mouseup', onMouseUp, false );
+                document.removeEventListener( 'mouseout', onMouseOut, false );
+            }
+
+
+            function onWindowResize() {
+                stageSize.width     = window.innerWidth;
+                stageSize.height    = window.innerHeight;
+                stageSize.halfW     = stageSize.width * 0.5;
+                stageSize.halfH     = stageSize.height * 0.5;
+
+                camera.aspect = stageSize.width / stageSize.height;
+                camera.updateProjectionMatrix();
+                renderer.setSize( stageSize.width, stageSize.height );
+            }
+
+            
+            
+            
+
+        </script>
+    </body>
+</html>

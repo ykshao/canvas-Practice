@@ -2,6 +2,7 @@
     var Spark = function(id,container,imgURL){
         var root        = this;
 
+        this.speed      = 1;
         this.name       = 'spark'+id;
         this.imgURL     = imgURL;
         this.imgData    = {};
@@ -15,6 +16,7 @@
         this.sparks     = {}; // embers 
         this.sparkLengh = 0;
         this.makeAmount = 10;
+        
 
         /* ************************************************************
             init
@@ -24,7 +26,7 @@
             if(this.status != 'ready')return; 
             var p = this.imgData.makePositions[Math.floor(Math.random()*(this.imgData.makePositions.length-1))];
             // conainter,ctx,id,startP,option
-            var embers = new Embers( this.sparks,this.ctx,this.sparkLengh,p,{ 
+            var embers = new Embers(root,this.sparks,this.ctx,this.sparkLengh,p,{ 
                 color : {r:p.r,g:p.g,b:p.b,a:p.a},
                 stageRect : {x:0,y:0,width:this.imgData.width,height:this.imgData.height}} );
             this.sparks[this.sparkLengh] = embers;
@@ -33,16 +35,27 @@
 
         this.draw = function(){
             //canvas clear
-            // root.ctx.fillStyle = "rgba(0,0,0,1)"
-            // root.ctx.fillRect(0, 0,root.cvs.width,root.cvs.height);
             
-            root.ctx.clearRect(0,0,root.cvs.width,root.cvs.height);
+            root.ctx.drawImage(root.img,0,0);
+            root.ctx.fillStyle = "rgba(0,0,0,0.1)"
+            root.ctx.fillRect(0, 0,root.cvs.width,root.cvs.height);
+            
+            if(root.speed){
+                root.speed += 0.01;  
+                console.log(root.speed)
+                if(root.speed > 10 && root.speed < 100.001)root.speed = 100;
+                if(root.speed > 105)root.speed = 0.01; 
+            } 
+            
+            // if(this.speed > 10)this.speed = 100;
+            
+            // root.ctx.clearRect(0,0,root.cvs.width,root.cvs.height);
             // if(this.status != 'ready')return; 
             for(var i=0; i<root.makeAmount; i++){
                 root.make();
             }
 
-            // root.ctx.drawImage(root.img,0,0);
+            
 
             //update
             for(s in root.sparks)root.sparks[s].update();
@@ -118,7 +131,7 @@
     /* ************************************************************
         Embers
     ************************************************************ */
-    var Embers = function(conainter,ctx,id,startP,option){
+    var Embers = function(roo,conainter,ctx,id,startP,option){
         this.conainter  = conainter;
         this.root       = this;
         this.ctx        = ctx;
@@ -133,8 +146,8 @@
         this.oldY       = startP.y;
 
         this.config = {
-            vx         : Math.random()*2-1,
-            vy         : Math.random()*-1,
+            vx         : roo.speed,
+            vy         : Math.random()*0.1,
             friction   : 1,
             color      : {r:0,g:211,b:255,a:1},
             duration   : 500+Math.random()*500,

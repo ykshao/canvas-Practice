@@ -66,13 +66,13 @@
             this.circulation = 0;
 
             this.config = {
-                vx         : Math.random()*.2-0.1,
-                vy         : Math.random()*-.5,
-                size       : Math.max(Math.random()*1,0.5),
+                vx         : 20,
+                vy         : Math.random()*13,
+                size       : Math.random()*3+1,
                 elastic    : Math.random(),
                 friction   : 1,
                 color      : {r:255,g:255,b:255,a:1},
-                duration   : 5000+Math.random()*500,
+                duration   : 5000,
                 radian     : 360*Math.PI/180,
                 stageRect  : {x:0,y:0,width:0,height:0}
             };
