@@ -62,7 +62,7 @@
 
                                 $(canvas.getCanvas()).on('mousemove',function(e){
                                     // fd.globalAlpha = e.clientX/img.width;
-                                    // $(canvas.getCanvas()).css({opacity:fd.globalAlpha});
+                                    $(canvas.getCanvas()).css({opacity:e.clientX/img.width});
                                 });
 
                                 
@@ -113,8 +113,8 @@
                 }
 
                 this.makeFigure = function(){
-                    var w = 15*Math.random(),
-                        h = 15*Math.random(),
+                    var w = 20*Math.random(),
+                        h = 20*Math.random(),
                         x = Math.floor(Math.random()*(imgData.width-w)),
                         y = Math.floor(Math.random()*(imgData.height-h)),
                         a = .5,
@@ -145,7 +145,7 @@
     </head>
     <body> 
         </div>
-        <!-- <img class="photo" src="img/photo2.jpg"> -->
+        <img class="photo" src="img/photo1.jpg">
         <div id="canvasWrap"></div>
     </body>
 </html>
