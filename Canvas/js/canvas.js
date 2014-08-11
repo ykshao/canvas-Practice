@@ -96,7 +96,7 @@
 
         this.draw = function(){
             ctx.save();
-            ctx.fillStyle = 'rgba(0,0,0,1)';
+            ctx.fillStyle = 'rgba(0,0,0,0.01)';
             ctx.fillRect(0,0,size.width,size.height);
             ctx.restore();
         }

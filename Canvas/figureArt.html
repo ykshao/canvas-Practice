@@ -52,20 +52,27 @@
                     var canvas = new Canvas('#canvasWrap',0,img.width,img.height);
                     $(canvas).bind(canvas.EVENT_CHANGE,function(e,data){
                         if(data.type == 'ready'){
-                            var colorData;
                             canvas.drawImage(img,0,0);
                             canvas.getImageData({},function(imgData){
-                                colorData = imgData;
-                                var fd = new FigureDraw(colorData);
+                                // setBlobUrl(JSON.stringify(imgData.data));
+                                // setBlobUrl(JSON.stringify(imgData.data));
+
+                                var fd = new FigureDraw(imgData,'circle',canvas.getContext());
                                 canvas.addDrawList('figureDraw',fd)
                                 canvas.start();
-
-                                $(canvas.getCanvas()).on('mousemove',function(e){
-                                    // fd.globalAlpha = e.clientX/img.width;
-                                    $(canvas.getCanvas()).css({opacity:e.clientX/img.width});
-                                });
-
-                                
+                                ctx = canvas.getContext();
+                                // $(canvas.getCanvas()).on('mousemove',function(e){
+                                    // ctx.globalCompositeOperation = 'lighter';
+                                    // canvas.drawImage(img,0,0);
+                                    
+                                    // ctx.save();
+                                    // ctx.beginPath();
+                                    // ctx.fillStyle = 'rgba('+255+','+255+','+255+','+1+')';
+                                    // ctx.clearRect(e.clientX-50, e.clientY-50, 100,100)
+                                    // ctx.arc(e.clientX, e.clientY, 100, 0, Math.PI*2, true);
+                                    // ctx.fill();
+                                    // ctx.restore();
+                                // });
                             });
                             canvas.draw = function(){
                                 // canvas.drawImage(img,0,0);
@@ -75,62 +82,126 @@
                 }
             });
 
+            // Aタグのhref属性に、Blobを設定する。
+            // Blobに含めるデータは、引数で指定する。
+            function setBlobUrl(content) {
+                // 指定されたデータを保持するBlobを作成する。
+                var blob = new Blob([ content ], { "type" : "application/json" });
 
-            var FigureDraw = function(imgData){
+                // Aタグのhref属性にBlobオブジェクトを設定する。
+                window.URL = window.URL || window.webkitURL;
+                $("#download").attr("href", window.URL.createObjectURL(blob));
+
+                // console.log(content);
+            }
+
+            // $("#canvasWrap").keyup(function(){
+            //     setBlobUrl("download", content);
+            // });
+
+            // $("#canvasWrap").keyup();
+
+
+            var FigureDraw = function(imgData,drawType,ctx){
                 var lists       = [],
-                    max         = 5000;
-
-                this.globalAlpha = .1;
+                    max         = 500;
+                this.globalAlpha = .3;
 
                 this.draw = function(ctx){
                     for(var o in lists){
                         var data = lists[o];
                         data.a += (1-data.a)*data.sp;
-
-                        if(data.a > .999){
-                            data.a = 1;
+                        if(data.composite == 'lighter'){
+                            if(data.a > .3999)data.a = 1;
+                        }else{
+                            if(data.a > .9999)data.a = 1;
                         }
+                        
 
-                        ctx.save();
-                        ctx.fillStyle = 'rgba('+data.r+','+data.g+','+data.b+','+data.a*this.globalAlpha+')';
-                        ctx.fillRect(data.x+data.w*(1-data.a)*0.5,data.y+data.h*(1-data.a)*0.5,data.w*data.a,data.h*data.a);
-                        ctx.restore();
+                        switch(data.type){
+                            case 'square' : this.draw_square(data,ctx); break;
+                            case 'circle' : this.drwa_circle(data,ctx); break;
+                        }
 
                         if(data.a >= 1){
                             lists[o] = this.makeFigure();
                         }
                     }
-                    
-                    
-                    
-                    
                 }
 
-                this.init = function(ctx){
+                this.init = function(){
                     for(var i=0; i<max; i++){
-                        lists.push(this.makeFigure());
+                        var f = this.makeFigure();
+                        f.a = 1;
+                        lists.push(f);
                     }
+
+                    for(var i=0; i<5000; i++){
+                        var f = this.makeFigure();
+                        f.a = 1;
+                        f.w = 15*Math.random();
+                        f.h = 15*Math.random();
+                        f.x = Math.floor(Math.random()*(imgData.width-f.w));
+                        f.y = Math.floor(Math.random()*(imgData.height-f.h));
+                        var data = imgData.data[f.x][f.y];
+                        f.r = data.r;
+                        f.g = data.g;
+                        f.b = data.b;
+                        switch(drawType){
+                            case 'square' : this.draw_square(f,ctx); break;
+                            case 'circle' : this.drwa_circle(f,ctx); break;
+                        }
+                    }
+
+                    this.globalAlpha = .1;
                 }
 
                 this.makeFigure = function(){
-                    var w = 20*Math.random(),
-                        h = 20*Math.random(),
-                        x = Math.floor(Math.random()*(imgData.width-w)),
-                        y = Math.floor(Math.random()*(imgData.height-h)),
-                        a = .5,
-                        data = imgData.data[x][y];
-                        
+                    var type    = drawType,
+                        w       = 15*Math.random()+1,
+                        h       = 15*Math.random()+1,
+                        a       = 0,
+                        c       = 10*Math.random(),
+                        x       = Math.floor(Math.max(0,(Math.random()*imgData.width)-w*0.5)),
+                        y       = Math.floor(Math.max(0,(Math.random()*imgData.height)-h*0.5));
+                        var data    = imgData.data[x][y],
+                        composite = Math.random()<0.01?'lighter':'source-over';
+
                     return {
                         x : x,
                         y : y,
                         w : w,
                         h : h,
                         a : a,
+                        c : c,
                         r : data.r,
                         g : data.g,
                         b : data.b,
-                        sp : Math.random()
-                    }
+                        type : type,
+                        composite : composite,
+                        sp : Math.random()*Math.random()
+                    };
+                }
+
+
+
+                this.draw_square = function(data,ctx){
+                    ctx.save();
+                    ctx.fillStyle = 'rgba('+data.r+','+data.g+','+data.b+','+data.a*this.globalAlpha+')';
+                    ctx.fillRect(data.x+data.w*(1-data.a)*0.5,data.y+data.h*(1-data.a)*0.5,data.w*data.a,data.h*data.a);
+                    ctx.restore();
+                    ctx.globalCompositeOperation = data.composite;
+                }
+
+                this.drwa_circle = function(data,ctx){
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.fillStyle = 'rgba('+data.r+','+data.g+','+data.b+','+data.a*this.globalAlpha+')';
+                    ctx.arc(data.x, data.y, data.c, 0, Math.PI*2, true);
+                    ctx.fill();
+                    ctx.restore();
+                    ctx.globalCompositeOperation = data.composite;
+                    
                 }
 
 
@@ -145,8 +216,11 @@
     </head>
     <body> 
         </div>
-        <img class="photo" src="img/photo1.jpg">
-        <div id="canvasWrap"></div>
+        <!-- <img class="photo" src="img/photo1.jpg"> -->
+        <div id="canvasWrap">
+            <a id="download" target="_blank">ダウンロード</a>
+        </div>
+
     </body>
 </html>
 

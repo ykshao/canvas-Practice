@@ -1,0 +1,104 @@
+<html>
+    <head>
+        <title>first three.js app</title>
+        <style>
+            body {
+                margin: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <script src="build/three.min.js"></script>
+        <script src="fonts/helvetiker_bold.typeface.js"></script>
+        <script src="fonts/helvetiker_regular.typeface.js"></script>
+        <script>
+            var scene   = new THREE.Scene();
+            var camera  = new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,1000);
+
+            var renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth,window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            
+            var mouseX = 0, mouseY = 0;
+            var text = "heowongeun",
+
+                height = 20,
+                size = 70,
+                hover = 30,
+                curveSegments = 4,
+
+                bevelThickness = 2,
+                bevelSize = 1.5,
+                bevelSegments = 3,
+                bevelEnabled = true,
+
+                font = "helvetiker", // helvetiker, optimer, gentilis, droid sans, droid serif
+                weight = "bold", // normal bold
+                style = "normal"; // normal italic
+
+            // var textShapes = THREE.FontUtils.generateShapes(text, {} );
+            // var text3d = new ExtrudeGeometry( textShapes, {} );
+
+            var textGeo = new THREE.TextGeometry(text,{
+                    size: size,
+                    height: height,
+                    curveSegments: curveSegments,
+
+                    font: font,
+                    weight: weight,
+                    style: style,
+
+                    // bevelThickness: bevelThickness,
+                    // bevelSize: bevelSize,
+                    // bevelEnabled: bevelEnabled,
+
+                    material: 0,
+                    extrudeMaterial: 1
+
+                });
+            var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+            var mesh = new THREE.Mesh(textGeo,material);
+            scene.add(mesh);
+
+            textGeo.computeBoundingBox();
+            var centerOffsetX = -0.5 * ( textGeo.boundingBox.max.x - textGeo.boundingBox.min.x );
+            var centerOffsetY = -0.5 * ( textGeo.boundingBox.max.y - textGeo.boundingBox.min.y );
+
+            mesh.position.x = centerOffsetX;
+
+            camera.position.z = 400;
+            console.log(textGeo);
+            console.log(mesh);
+            var rotY = 0
+            var render = function(){
+                requestAnimationFrame(render);
+                // mesh.position.x = mouseX+centerOffsetX;
+                // mesh.rotation.x += ((rotY-mesh.rotation.x)*0.05);
+                // mesh.rotation.x += 0.1;
+                // mesh.rotation.y += 0.01;
+                // t+= 0.01;
+                // cube.position.z = Math.cos(t)*10;
+
+                renderer.render(scene, camera);
+            }
+
+            render();
+
+            document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+            function onDocumentMouseMove( event ) {
+                mouseX = event.clientX - window.innerWidth*0.5;
+                mouseY = event.clientY - window.innerHeight*0.5;
+
+                for(var o in mesh.geometry.vertices){
+                    mesh.geometry.vertices[o].set(0,0,0);
+                    // mesh.geometry.vertices[o].x += 1;
+                    // mesh.geometry.vertices[o].y += 1;
+                    // console.log(mesh.geometry.vertices[o])
+                }
+                // rotY = (mouseY/window.innerHeight*2)*10;
+                // targetRotation = targetRotationOnMouseDown + ( mouseX - mouseXOnMouseDown ) * 0.02;
+            }
+        </script>
+    </body>
+</html>

@@ -1,0 +1,70 @@
+<html>
+    <head>
+        <title>first three.js app</title>
+        <style>
+            body {
+                margin  : 0;
+                padding : 0;
+            }
+            html, body {
+                width: 100%;
+                height: 100%;
+            }
+
+            body {
+                background-color: #000000;
+                margin: 0;
+                overflow: hidden;
+                font-family: arial;
+            }
+/*
+            #blocker {
+
+                position: absolute;
+
+                width: 100%;
+                height: 100%;
+
+                background-color: rgba(0,0,0,0.5);
+
+            }*/
+
+            #instructions {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                top: 50%;
+
+                color: #ffffff;
+                text-align: center;
+                line-height: 100%;
+                cursor: pointer;
+            }
+
+        </style>
+
+        <script src="js/libs/three.js"></script>
+        <script src="js/libs/jquery-1.9.1.min.js"></script>
+        <script src="js/libs/dat.gui.min.js"></script>
+        <script src="js/libs/cannon.js"></script>
+        <script src="js/libs/PointerLockControls.js"></script>
+        <!-- // <script src="js/libs/physi.js"></script> -->
+        
+
+        <script src="js/class/towerBlock.js"></script>
+        <script src="js/class/towerBlockObject.js"></script>
+        <script src="js/class/land.js"></script>
+        <script src="js/class/floor.js"></script>
+        <script src="js/class/block.js"></script>
+        <script src="js/class/hammer.js"></script>
+        <script src="js/class/character.js"></script>
+        <script src="js/class/lights.js"></script>
+    </head>
+    <body>
+        <div id="instructions">
+            <p>TowerBlock</p>
+            <p>start</p>
+        </div>
+       <script src="js/tower-block-world1.js"></script>
+    </body>
+</html>
