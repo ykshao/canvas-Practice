@@ -7,7 +7,7 @@
 
         this.init = function(){
             var ambient = new THREE.AmbientLight( 0x111111 );
-                scene.add( ambient );
+                root.scene.add( ambient );
 
             this.light = new THREE.SpotLight( 0xffffff );
             this.light.position.set( 0, 30, 20 );
