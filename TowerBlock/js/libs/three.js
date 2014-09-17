@@ -673,7 +673,6 @@ THREE.Quaternion.prototype = {
 	},
 
 	setFromEuler: function ( euler, update ) {
-
 		if ( euler instanceof THREE.Euler === false ) {
 
 			throw new Error( 'THREE.Quaternion: .setFromEuler() now expects a Euler rotation rather than a Vector3 and order.' );

@@ -10,20 +10,20 @@
                 root.scene.add( ambient );
 
             this.light = new THREE.SpotLight( 0xffffff );
-            this.light.position.set( 0, 30, 20 );
-            this.light.target.position.set( 0, 0, 0 );
+            this.light.position.set( 0, 400, 0 );
+            // this.light.target.position.set( 0, 0, 0 );
             if(true){
                 this.light.castShadow = true;
 
                 this.light.shadowCameraNear = 20;
-                this.light.shadowCameraFar = 50;//camera.far;
-                this.light.shadowCameraFov = 40;
+                this.light.shadowCameraFar  = 400;//camera.far;
+                this.light.shadowCameraFov  = 40;
 
-                this.light.shadowMapBias = 0.1;
-                this.light.shadowMapDarkness = 0.7;
-                this.light.shadowMapWidth = 2*512;
-                this.light.shadowMapHeight = 2*512;
-                this.light.shadowCameraVisible = true;
+                this.light.shadowMapBias        = 0.1;
+                this.light.shadowMapDarkness    = 0.7;
+                this.light.shadowMapWidth       = 2*512;
+                this.light.shadowMapHeight      = 2*512;
+                this.light.shadowCameraVisible  = true;
             }
 
             root.scene.add(this.light);

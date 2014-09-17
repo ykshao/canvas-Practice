@@ -1,0 +1,79 @@
+<html> 
+    <title>Sound Spectrum</title> 
+    <script src="AIRAliases.js" /> 
+    <script> 
+        const PLOT_WIDTH = 600; 
+        const CHANNEL_LENGTH = 256; 
+         
+        // var snd = new air.Sound(); 
+        // var req = new air.URLRequest("sound/tentlondon-intro.mp3"); 
+        // var bytes = new air.ByteArray(); 
+        // var divStyles = new Array;     
+         
+        // /** 
+        //     * Initializes the application. It draws 256 DIV elements to the document body, 
+        //      * and sets up a divStyles array that contains references to the style objects of  
+        //      * each DIV element. It then calls the playSound() function. 
+        //      */ 
+        // function init() 
+        // { 
+        //     var div; 
+        //     for (i = 0; i < CHANNEL_LENGTH; i++) 
+        //     { 
+        //         div = document.createElement("div"); 
+        //         div.style.height = "1px";  
+        //         div.style.width = "0px";  
+        //         div.style.backgroundColor = "blue"; 
+        //         document.body.appendChild(div); 
+        //         divStyles[i] = div.style; 
+        //     } 
+        //     playSound(); 
+        // } 
+        // /** 
+        //      * Plays a sound, and calls setInterval() to call the setMeter() function 
+        //      * periodically, to display the sound spectrum data. 
+        //      */ 
+        // function playSound()  
+        // { 
+        //     if (snd.url != null) 
+        //     { 
+        //         snd.close(); 
+        //     } 
+        //     snd.load(req);         
+        //     var channel = snd.play(); 
+        //     timer = setInterval(setMeter, 100); 
+        //     snd.addEventListener(air.Event.SOUND_COMPLETE, onPlaybackComplete); 
+        // } 
+         
+        // /** 
+        //      * Computes the width of each of the 256 colored DIV tags in the document, 
+        //      * based on data returned by the call to SoundMixer.computeSpectrum(). The  
+        //     * first 256 floating point numbers in the byte array represent the data from 
+        //      * the left channel, and then next 256 floating point numbers represent the  
+        //      * data from the right channel. 
+        //      */ 
+        // function setMeter() 
+        // { 
+        //     air.SoundMixer.computeSpectrum(bytes, false, 0);         
+        //     var n;             
+        //     for (var i = 0; i < CHANNEL_LENGTH; i++)  
+        //     { 
+        //         bytes.position = i * 4; 
+        //         n = Math.abs(bytes.readFloat()); 
+        //         bytes.position = 256*4 + i * 4; 
+        //         n += Math.abs(bytes.readFloat()); 
+        //         divStyles[i].width = n * PLOT_WIDTH; 
+        //     } 
+        // } 
+        // /** 
+        //  * When the sound is done playing, remove the intermediate process  
+        //  * started by setInterval(). 
+        //  */ 
+        // function onPlaybackComplete(event) 
+        // { 
+        //     clearInterval(interval); 
+        // } 
+    </script> 
+    <body onload="init()"> 
+    </body> 
+</html>

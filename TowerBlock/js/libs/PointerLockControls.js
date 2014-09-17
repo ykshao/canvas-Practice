@@ -2,11 +2,16 @@
  * @author mrdoob / http://mrdoob.com/
  */
 
-THREE.PointerLockControls = function ( camera ) {
+THREE.PointerLockControls = function ( camera, cannonBody ) {
 
 	var scope = this;
 
 	camera.rotation.set( 0, 0, 0 );
+
+    var eyeYPos = 2; // eyes are 2 meters above the ground
+    var velocityFactor = 0.2;
+    var jumpVelocity = 120;
+    var scope = this;
 
 	var pitchObject = new THREE.Object3D();
 	pitchObject.add( camera );
@@ -15,19 +20,36 @@ THREE.PointerLockControls = function ( camera ) {
 	yawObject.position.y = 10;
 	yawObject.add( pitchObject );
 
-	var moveForward = false;
-	var moveBackward = false;
-	var moveLeft = false;
-	var moveRight = false;
-
-	var isOnObject = false;
-	var canJump = false;
+	var isOnObject 		= false;
+	var moveForward 	= false;
+	var moveBackward 	= false;
+	var moveLeft 		= false;
+	var moveRight 		= false;
+	var canJump 		= false;
 
 	var prevTime = performance.now();
-
-	var velocity = new THREE.Vector3();
-
+	// var velocity = new THREE.Vector3();
+	var velocity = cannonBody.velocity;
 	var PI_2 = Math.PI / 2;
+
+	// Normal in the contact, pointing *out* of whatever the player touched
+	var contactNormal = new CANNON.Vec3(); 
+    var upAxis = new CANNON.Vec3(0,1,0);
+    cannonBody.addEventListener("collide",function(e){
+        var contact = e.contact;
+
+        // contact.bi and contact.bj are the colliding bodies, and contact.ni is the collision normal.
+        // We do not yet know which one is which! Let's check.
+        if(contact.bi.id == cannonBody.id)  // bi is the player body, flip the contact normal
+            contact.ni.negate(contactNormal);
+        else
+            contact.ni.copy(contactNormal); // bi is something else. Keep the normal as it is
+
+        // If contactNormal.dot(upAxis) is between 0 and 1, we know that the contact normal is somewhat in the up direction.
+        if(contactNormal.dot(upAxis) > 0.5) // Use a "good" threshold value between 0 and 1 here!
+            canJump = true;
+    });
+
 
 	var onMouseMove = function ( event ) {
 
@@ -67,7 +89,7 @@ THREE.PointerLockControls = function ( camera ) {
 				break;
 
 			case 32: // space
-				if ( canJump === true ) velocity.y += 350;
+				if ( canJump === true ) velocity.y = jumpVelocity;
 				canJump = false;
 				break;
 
@@ -116,10 +138,8 @@ THREE.PointerLockControls = function ( camera ) {
 	};
 
 	this.isOnObject = function ( boolean ) {
-
 		isOnObject = boolean;
 		canJump = boolean;
-
 	};
 
 	this.getDirection = function() {
@@ -141,6 +161,8 @@ THREE.PointerLockControls = function ( camera ) {
 
 	}();
 
+	var quat = new THREE.Quaternion();
+	var inputVelocity = new THREE.Vector3();
 	this.update = function () {
 
 		if ( scope.enabled === false ) return;
@@ -148,35 +170,61 @@ THREE.PointerLockControls = function ( camera ) {
 		var time = performance.now();
 		var delta = ( time - prevTime ) / 1000;
 
-		velocity.x -= velocity.x * 10.0 * delta;
-		velocity.z -= velocity.z * 10.0 * delta;
+		inputVelocity.x -= inputVelocity.x * 10.0 * delta;
+		inputVelocity.z -= inputVelocity.z * 10.0 * delta;
 
-		velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
+		// inputVelocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
 
-		if ( moveForward ) velocity.z -= 400.0 * delta;
-		if ( moveBackward ) velocity.z += 400.0 * delta;
+		if ( moveForward ) inputVelocity.z -= 400.0 * delta;
+		if ( moveBackward ) inputVelocity.z += 400.0 * delta;
 
-		if ( moveLeft ) velocity.x -= 400.0 * delta;
-		if ( moveRight ) velocity.x += 400.0 * delta;
+		if ( moveLeft ) inputVelocity.x -= 400.0 * delta;
+		if ( moveRight ) inputVelocity.x += 400.0 * delta;
 
-		if ( isOnObject === true ) {
+		// if ( isOnObject === true ) {
+		// 	inputVelocity.y = Math.max( 0, inputVelocity.y );
+		// }
 
-			velocity.y = Math.max( 0, velocity.y );
+		// inputVelocity.position.y = 
+		// yawObject.position.y = velocity.y;
 
-		}
+		// yawObject.translateX( inputVelocity.x * delta );
+		// yawObject.translateY( inputVelocity.y * delta ); 
+		// yawObject.translateZ( inputVelocity.z * delta );
 
-		yawObject.translateX( velocity.x * delta );
-		yawObject.translateY( velocity.y * delta ); 
-		yawObject.translateZ( velocity.z * delta );
+		// pitchObject.position.x = inputVelocity.x;
+		// pitchObject.position.y = inputVelocity.y;
 
-		if ( yawObject.position.y < 10 ) {
+		var euls = new THREE.Euler(pitchObject.rotation.x, yawObject.rotation.y, 0);
+		// quat.setFromAxisAngle(vector3,"XYZ");
+		// quat.multiplyVector3(inputVelocity);
+		// quat.setFromEuler(euls,"XYZ");
+		//vector.applyQuaternion( quaternion )
+		// inputVelocity.applyQuaternion(quat);
+		// inputVelocity.applyQuaternion( quat )
+		// inputVelocity.applyQuaternion(quat);
+		// console.log(quat.setFromEuler);
+		// 
+        yawObject.translateX( inputVelocity.x * delta );
+		// yawObject.translateY( inputVelocity.y * delta ); 
+		yawObject.translateZ( inputVelocity.z * delta );
 
-			velocity.y = 0;
-			yawObject.position.y = 10;
+		// yawObject.position.copy(cannonBody.position);
+        // velocity.x += inputVelocity.x;
+        // velocity.z += inputVelocity.z;
 
-			canJump = true;
+		// cannonBody.position.copy(yawObject.position);
 
-		}
+
+		// if ( yawObject.position.y < 10 ) {
+
+		// 	velocity.y = 0;
+		// 	yawObject.position.y = 10;
+
+		// 	canJump = true;
+
+		// }
+
 
 		prevTime = time;
 

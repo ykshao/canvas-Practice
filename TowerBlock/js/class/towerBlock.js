@@ -13,7 +13,7 @@
 
         this.mouse = {x:0,y:0,z:0};
         this.gx = 0;
-        this.gy = -19.8;
+        this.gy = -100.8;
         this.gz = 0;//
 
         this.light
@@ -36,12 +36,13 @@
 
         this.towerBlockInfo = {
             blockNum    : 10,
-            blockHeight : 5,
-            blockRadius : 5
+            blockRadius : 20,
+            blockHeight : 10
         }
-
         this.stageSize = WindowSize();
         this.rendererObjects = {};
+
+        this.birds = [];
 
         var worldSize = {
             width   : 10000,
@@ -52,7 +53,7 @@
         var physicsMaterial,controls,
             time = Date.now();
 
-        var sphereShape,sphereBody;
+        var sphereShape,chrLink,chr,chrRad = 3;
 
         this.cannonInit = function(){
 
@@ -77,15 +78,17 @@
             this.linkWorld.addContactMaterial(physicsContactMaterial);
 
             // Create a sphere
-            var mass = 100, radius = 1;
-            sphereShape = new CANNON.Sphere(radius);
-            sphereBody = new CANNON.RigidBody(mass,sphereShape,physicsMaterial);
-            sphereBody.position.set(0,this.towerBlockInfo.blockNum*this.towerBlockInfo.blockHeight,0);
-            sphereBody.position.set(0,10,100);
-            sphereBody.linearDamping = 0.5;
+            var mass = 10, radius = 1;
+            sphereShape = new CANNON.Sphere(chrRad);
+            chrLink = new CANNON.RigidBody(mass,sphereShape,physicsMaterial);
+            chrLink.position.set(0,this.towerBlockInfo.blockNum*this.towerBlockInfo.blockHeight,0);
+            // chrLink.position.set(0,10,0);
+            // linkBody.linearDamping = 0.9;
+            chrLink.linearDamping = 0.5;
+            chrLink.angularDamping = 0.9;
 
-            // sphereBody.velocity.set(0,-100,0)
-            this.linkWorld.add(sphereBody);
+            // chrLink,chr.velocity.set(0,-100,0)
+            this.linkWorld.add(chrLink);
 
             var groundShape = new CANNON.Plane();
             var groundBody = new CANNON.RigidBody(0,groundShape,physicsMaterial);
@@ -127,9 +130,14 @@
             mesh.receiveShadow  = true;
             this.scene.add( mesh );
 
-            this.controls = new THREE.PointerLockControls( this.camera , sphereBody );
+            this.controls = new THREE.PointerLockControls( this.camera , chrLink,chr );
             this.world.add( this.controls.getObject()); 
             // controls.enabled = true;
+
+            var chrGeo  = new THREE.SphereGeometry( chrRad, 4, 4 );
+            var chrMat  = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+            chr     = new THREE.Mesh( chrGeo, chrMat );
+            this.scene.add(chr);
 
             this.addEvent();
         }
@@ -155,23 +163,37 @@
             delete this.rendererObjects[name];
         }
 
+        var clock = new THREE.Clock();
         var render = function(){
-            requestAnimationFrame(render);
+            delta = clock.getDelta();
             updatePhysics();
             for(var o in _this.rendererObjects){
-                _this.rendererObjects[o].update();
+                _this.rendererObjects[o].update(delta);
             }
-            _this.update();
-            
+            _this.update(delta);
+
+            requestAnimationFrame(render);
         }
         var timeStep=1/60
-        this.update = function(){
+        this.update = function(delta){
             this.renderer.shadowMapEnabled = true;
             this.renderer.setClearColor( this.scene.fog.color );
             this.renderer.render(this.scene, this.camera);
 
-           if(this.controls.enabled){
+            for(var o in this.birds){
+                var s = this.birds[o]; 
+                if(s.scope.controls.death){
+                    s.scope.update(delta);
+                }else{
+                    s.scope.update(delta);
+                }
+            }
+
+
+            if(this.controls.enabled){
                 _this.linkWorld.step(timeStep);
+                chrLink.position.copy(chr.position);
+                chrLink.quaternion.copy(chr.quaternion);
             }
 
             this.controls.update( Date.now() - time );
