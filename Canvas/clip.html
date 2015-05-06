@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1">
+        <meta name="description" content="">
+        <title></title>
+        <link rel="stylesheet" href="css/normalize.css">
+        <style>
+            body {
+                background-color: #fff4ed;
+                width: 100%; height: 100%;
+                padding: 0; margin : 0;
+                overflow: hidden;
+            }
+
+            #wrap{
+                position: absolute;
+                width: 648px;
+                height: 382px;
+                left:50%; margin-left: -324px;
+                top:50%; margin-top: -192px;
+                background-color: #000;
+
+            }
+
+            #img-color {
+                position: absolute;
+                /*left:300px;*/
+                /*top:200px;*/
+            }   
+
+            #canvasWrap,#canvasWrap2 {
+                position: absolute;
+            }
+
+            canvas {
+                /*width: 100%; height: 100%;*/
+                position: relative;
+                width: auto;
+                height: 100%;
+                margin : 0 auto;
+                /*border: solid 1px red;*/
+                /*box-sizing : boder-box;*/
+            }
+            #imgCon {
+                position: absolute;
+                width: 100%; height: 100%;
+                /*background-color: #fff;*/
+                /*overflow: hidden;*/
+            }
+
+        </style>
+        <script src="js/jquery-1.10.2.min.js"></script>
+        <script src="js/jquery.easing.1.3.js"></script>
+        <script src="js/jquery.imgfit.js"></script>
+        <script src="js/dat.gui.min.js"></script>
+
+    </head>
+    <body> 
+        <div id='imgCon'>
+            <img id="img" src="img/bg1.jpg">
+        </div>
+        
+        <script>
+            $(document).ready(function(){
+                var offset = {y:0};
+                var image = $('#img');
+                var canvas,ctx;
+                var point = {};
+
+                var img = new Image();
+                img.src = $('img').attr('src');
+
+                var w,h;
+                var mouse = {x:0,y:0};
+
+                var size = 100,t = 0, deg = 0, centerCopy = {x:0,y:0};
+                var offset = {
+                    percentX: 0,
+                    percentY: 0,
+                    centerX : 0,
+                    centerY : 0,
+                    totalW  : 0,
+                    totalH  : 0,
+                    rotate  : 0,
+                    scale   : 1,
+                    diagonal : 0,
+                    ratioX : 0,
+                    ratioY : 0,
+                    maskH : 100
+                }
+                var offsetCopy = {};
+
+                
+
+                var gui = new dat.GUI();
+
+                img.onload = function(){
+                    canvas = image.changeToCanvas()[0];
+                    ctx = canvas[0].getContext('2d');
+                    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+                    w = canvas.width;
+                    h = canvas.height;
+
+                    offset.isWide  = w>h?1:0;
+                    offset.diagonal = Math.sqrt(h*h+w*w);
+                    offset.rotate   = offset.isWide?Math.atan2(h,w):Math.atan2(w,h);
+                    offset.rotate   *= 180/Math.PI;
+
+                    offset.ratioX = w/h;
+                    offset.ratioY = h/w;
+
+                    offset.totalW = w;
+                    offset.totalH = offset.diagonal;
+
+                    var c = offset.diagonal*0.5;
+                    gui.add(offset, 'percentX',  -100, 100);
+                    gui.add(offset, 'percentY',  -100, 100);
+                    // gui.add(offset, 'centerX',  -offset.diagonal*offset.ratioX-offset.centerX, offset.diagonal*offset.ratioX*2);
+                    // gui.add(offset, 'centerY',  -h-offset.diagonal+offset.centerY, h+offset.diagonal);
+                    gui.add(offset, 'rotate',   -360, 360);
+                    gui.add(offset, 'scale', 0, 1);
+
+
+                    offsetCopy = $.extend({},offset);
+                    requestAnimationFrame(rendering);
+                }
+
+
+                var sp = 0.3;
+                function rendering(){
+                    offsetCopy.rotate   += (offset.rotate-offsetCopy.rotate)*sp;
+                    offsetCopy.scale    += (offset.scale-offsetCopy.scale)*sp;
+
+                    offsetCopy.percentX   += (offset.percentX-offsetCopy.percentX)*sp;
+                    offsetCopy.percentY   += (offset.percentY-offsetCopy.percentY)*sp;
+
+                    offset.totalW = offsetCopy.totalW * offsetCopy.scale; 
+                    offset.totalH = offsetCopy.totalH * offsetCopy.scale;
+
+                    var rad = offsetCopy.rotate*Math.PI/180;
+
+                    var rx = Math.atan(rad)*offset.totalH,
+                        ry = Math.atan(rad)*offset.totalW;
+                    
+
+                    var mw = (offset.totalW-w)*0.5,
+                        mh = (offset.totalH-h)*0.5;
+
+                    // offset.centerX  = offsetCopy.percentX*(rx+offset.totalW+offset.totalW*0.5-mw)*0.01 + offset.totalW*0.5 - mw;
+                    // offset.centerY  = offsetCopy.percentY*(ry+offset.totalH+offset.totalH*0.5-mh)*0.01 + offset.totalH*0.5 - mh;
+                    // var a = offset.totalW-ry,
+                        // b = offset.totalH-ry,
+
+                    offset.centerX = (rx*offsetCopy.percentX+offsetCopy.percentX*(w*1.5)- mw)*0.01 + offset.totalW*0.5 - mw;
+                    offset.centerY = (ry*offsetCopy.percentY+offsetCopy.percentY*(h*1.5)- mh)*0.01 + offset.totalH*0.5 - mh;
+
+                    var p1 = {x:offset.centerX-offset.totalW,y:offset.centerY-offset.totalH},
+                        p2 = {x:offset.centerX+offset.totalW,y:offset.centerY-offset.totalH},
+                        p3 = {x:offset.centerX+offset.totalW,y:offset.centerY+offset.totalH},
+                        p4 = {x:offset.centerX-offset.totalW,y:offset.centerY+offset.totalH};
+
+                    
+                    var centerP = {x:offset.centerX, y:offset.centerY};
+                    p1 = transformation(centerP,p1,rad);
+                    p2 = transformation(centerP,p2,rad);
+                    p3 = transformation(centerP,p3,rad);
+                    p4 = transformation(centerP,p4,rad);
+
+                    ctx.clearRect(0,0,w,h);
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.strokeStyle = "#df4b26";
+                    ctx.moveTo(p1.x,p1.y);
+                    ctx.lineTo(p2.x,p2.y);
+                    ctx.lineTo(p3.x,p3.y);
+                    ctx.lineTo(p4.x,p4.y);
+                    ctx.closePath();
+                    // ctx.fill();
+                    ctx.clip();
+                    ctx.drawImage(image[0],0,0,canvas.width,canvas.height);
+                    ctx.restore();
+
+                    ctx.save();
+                    ctx.fillStyle = 'rgba(255,0,0,0.9)';
+                    ctx.fillRect(offset.centerX-50,offset.centerY-50,100,100);
+                    ctx.restore();
+
+                    ctx.save();
+                    ctx.fillStyle = 'rgba(255,0,0,0.9)';
+                    ctx.fillRect(p1.x,p1.y,10,10);
+                    ctx.restore();
+
+                    ctx.save();
+                    ctx.fillStyle = 'rgba(255,0,0,0.9)';
+                    ctx.fillRect(p2.x-10,p2.y,10,10);
+                    ctx.restore();
+
+                    ctx.save();
+                    ctx.fillStyle = 'rgba(255,0,0,0.9)';
+                    ctx.fillRect(p3.x-10,p3.y-10,10,10);
+                    ctx.restore();
+
+                    ctx.save();
+                    ctx.fillStyle = 'rgba(255,0,0,0.9)';
+                    ctx.fillRect(p4.x,p4.y-10,10,10);
+                    ctx.restore();
+
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.moveTo(0,0);
+                    ctx.lineTo(w,h);
+                    ctx.lineTo(0,h);
+                    ctx.closePath();
+                    ctx.stroke();
+                    ctx.restore();
+
+
+
+                    requestAnimationFrame(rendering);
+                }
+
+                function transformation(center,position,rad){
+                    return { 
+                        x: ((position.x-center.x)*Math.cos(rad) - (position.y-center.y)*Math.sin(rad))+center.x, 
+                        y: ((position.x-center.x)*Math.sin(rad) + (position.y-center.y)*Math.cos(rad))+center.y
+                    }     
+                }
+
+                
+                function setMask(obj,complete){
+                    console.log(obj,offset);
+                    $(offset).animate(obj,{
+                        step : function(now,fx){
+                            ctx.save();
+                            ctx.moveTo(point.lt.x,point.lt.y);
+                            ctx.lineTo(point.rt.x,point.rt.y);
+                            ctx.lineTo(point.rb.x,point.rb.y);
+                            ctx.lineTo(point.lb.x,point.lb.y);
+                            ctx.clip();
+                            ctx.fillStyle = 'red';
+                            // ctx.fillRect(0,0,canvas.width,canvas.height);
+                            ctx.drawImage(image[0],0,0,canvas.width,canvas.height);
+                            ctx.restore();
+                        },
+                        duration : 1000,
+                        ease : 'easeOutExpo',
+                        complete : function(){
+                            if(complete)complete();
+                        }
+                    });
+                }
+                
+            });
+             
+        </script>
+    </body>
+</html>
+
+
+
+<!--  
+ HTMLCanvasElement
+
+    toDataURL()
+    getContext()
+
+ メソッド
+    addColorStop()
+    arc()
+    arcTo()
+    beginPath()
+    bezierCurveTo()
+    clearRect()
+    clip()
+    closePath()
+    createImageData()
+    createLinearGradient()
+    createPattern()
+    createRadialGradient()
+    drawFocusRing()
+    drawImage()
+    fill()
+    fillRect()
+    fillText()
+    getImageData()
+    isPointInPath()
+    lineTo()
+    measureText()
+    moveTo()
+    putImageData()
+    quadraticCurveTo()
+    rect()
+    restore()
+    rotate()
+    save()
+    scale()
+    setTransform()
+    stroke()
+    strokeRect()
+    strokeText()
+    translate()
+    transform()
+
+プロパティ
+    fillStyle
+    font
+    globalAlpha
+    globalCompositeOperation
+    lineCap
+    lineJoin
+    lineWidth
+    miterLimit
+    shadowBlur
+    shadowColor
+    shadowOffsetX
+    shadowOffsetY
+    strokeStyle
+    textAlign
+    textBaseline
+ */
+
+ -->

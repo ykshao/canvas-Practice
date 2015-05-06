@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1">
+        <meta name="description" content="">
+        <title></title>
+        <link rel="stylesheet" href="css/normalize.css">
+        <style>
+            body {
+                background-color: #fff4ed;
+                width: 100%; height: 100%;
+                padding: 0; margin : 0;
+                overflow: hidden;
+            }
+
+            #wrap{
+                position: absolute;
+                width: 648px;
+                height: 382px;
+                left:50%; margin-left: -324px;
+                top:50%; margin-top: -192px;
+                background-color: #000;
+
+            }
+
+            #img-color {
+                position: absolute;
+                /*left:300px;*/
+                /*top:200px;*/
+            }   
+
+            #canvasWrap,#canvasWrap2 {
+                position: absolute;
+            }
+
+            canvas {
+                /*width: 100%; height: 100%;*/
+                position: relative;
+                width: auto;
+                height: 100%;
+                margin : 0 auto;
+                /*border: solid 1px red;*/
+                /*box-sizing : boder-box;*/
+            }
+            #imgCon {
+                position: absolute;
+                width: 100%; height: 100%;
+                /*background-color: #fff;*/
+                /*overflow: hidden;*/
+            }
+
+            canvas {
+                -webkit-transition  : .4s cubic-bezier(.1,.56,.19,1);
+            }
+
+        </style>
+        <script src="js/jquery-1.10.2.min.js"></script>
+        <script src="js/jquery.easing.1.3.js"></script>
+        <script src="js/jquery.imgfit.js"></script>
+        <script src="js/dat.gui.min.js"></script>
+
+    </head>
+    <body> 
+        <div id='imgCon'>
+            <img id="img" src="img/bg1.jpg">
+        </div>
+        
+        <script>
+            $(document).ready(function(){
+
+                var canvasM = new CanvasMask($('#img'),{x:150,y:150});
+
+                setTimeout(function(){
+                    canvasM.mask({x:150,y:50});
+                },1000)
+
+                function CanvasMask(img,position){
+                    var _this = this;
+                    var centerP,points,percentage = {x:0,y:0};
+
+                    if(position){
+                        $.extend(percentage,position);
+                    }
+
+                    this.image  = new Image();
+                    this.width  = 0;
+                    this.height = 0;
+
+                    this.canvas;
+                    this.ctx;
+
+
+                    this.init = function(){
+                        this.imageLoad();
+
+
+                        return this;
+                    }
+
+                    this.imageLoad = function(){
+                        this.image.src = $('img').attr('src');
+                        this.image.onload = function(){
+                            _this.imageLoaded();
+                        }
+                    }
+                    this.imageLoaded = function(){
+                        this.width  = this.image.width;
+                        this.height = this.image.height;
+
+                        this.changeToCanvas();
+                    }
+
+                    this.changeToCanvas = function(){
+                        this.canvas  = $('<canvas width="'+this.width+'" height="'+this.height+'"></canvas>');
+                        this.ctx     = this.canvas[0].getContext("2d");
+
+                        this.canvas.addClass(img[0].className).css({display:'block'});
+                        this.ctx.drawImage(img[0], 0, 0, this.width, this.height);
+                        img.before(this.canvas);
+                        if(img[0].id)this.canvas.attr('id',img[0].id);
+                        img.remove();
+
+                        this.setMask();
+                    }
+
+                    this.mask = function(position,complete){
+                        // $.extend(percentage,position);
+
+                        $(percentage).animate(position,{
+                            step : function(now,fx){
+                                _this.setMask();
+                            },
+                            duration : 500,
+                            ease : 'easeInOutExpo',
+                            complete : function(){
+                                if(complete)complete();
+                            }
+                        });
+                    }
+
+
+                    this.setMask = function(){
+                        centerP = { x : (percentage.x)*this.width*0.01, y:(percentage.y)*this.height*0.01 };
+                        points = [
+                            {x:centerP.x-this.width,y:centerP.y},
+                            {x:centerP.x+this.width,y:centerP.y-this.height*2},
+                            {x:centerP.x+this.width,y:centerP.y},
+                            {x:centerP.x-this.width,y:centerP.y+this.height*2}
+                        ];
+
+                        this.ctx.clearRect(0,0,this.width,this.height);
+                        this.ctx.save();
+                        for(var i=0,n=points.length; i<n; i++){
+                            var p = points[i];
+                            if(i==0){
+                                this.ctx.beginPath();
+                                this.ctx.moveTo(p.x,p.y);
+                            }else{
+                                this.ctx.lineTo(p.x,p.y);
+                            }
+
+                            if(i == n-1 ){
+                                this.ctx.closePath();
+                                this.ctx.clip();  
+                                this.ctx.drawImage(img[0], 0, 0, this.width, this.height);
+                                this.ctx.restore(); 
+                            }
+                        }
+
+                    }
+
+                    
+                    return this.init();
+                };
+
+                CanvasMask.prototype.consttuctor = CanvasMask;
+
+                
+                // function setMask(obj,complete){
+                //     console.log(obj,offset);
+                //     $(offset).animate(obj,{
+                //         step : function(now,fx){
+                //             ctx.save();
+                //             ctx.moveTo(point.lt.x,point.lt.y);
+                //             ctx.lineTo(point.rt.x,point.rt.y);
+                //             ctx.lineTo(point.rb.x,point.rb.y);
+                //             ctx.lineTo(point.lb.x,point.lb.y);
+                //             ctx.clip();
+                //             ctx.fillStyle = 'red';
+                //             // ctx.fillRect(0,0,canvas.width,canvas.height);
+                //             ctx.drawImage(image[0],0,0,canvas.width,canvas.height);
+                //             ctx.restore();
+                //         },
+                //         duration : 1000,
+                //         ease : 'easeOutExpo',
+                //         complete : function(){
+                //             if(complete)complete();
+                //         }
+                //     });
+                // }
+                
+            });
+             
+        </script>
+    </body>
+</html>
+
+
+
+<!--  
+ HTMLCanvasElement
+
+    toDataURL()
+    getContext()
+
+ メソッド
+    addColorStop()
+    arc()
+    arcTo()
+    beginPath()
+    bezierCurveTo()
+    clearRect()
+    clip()
+    closePath()
+    createImageData()
+    createLinearGradient()
+    createPattern()
+    createRadialGradient()
+    drawFocusRing()
+    drawImage()
+    fill()
+    fillRect()
+    fillText()
+    getImageData()
+    isPointInPath()
+    lineTo()
+    measureText()
+    moveTo()
+    putImageData()
+    quadraticCurveTo()
+    rect()
+    restore()
+    rotate()
+    save()
+    scale()
+    setTransform()
+    stroke()
+    strokeRect()
+    strokeText()
+    translate()
+    transform()
+
+プロパティ
+    fillStyle
+    font
+    globalAlpha
+    globalCompositeOperation
+    lineCap
+    lineJoin
+    lineWidth
+    miterLimit
+    shadowBlur
+    shadowColor
+    shadowOffsetX
+    shadowOffsetY
+    strokeStyle
+    textAlign
+    textBaseline
+ */
+
+ -->
