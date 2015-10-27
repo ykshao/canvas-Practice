@@ -18,7 +18,7 @@
                 margin: 0 auto;
                 top:100px;
                 overflow: hidden;
-                background-color: #ff0;
+                background-color: #000;
             }
             .border-anim { 
                 position: absolute;
@@ -27,7 +27,7 @@
                 -webkit-box-sizing   : border-box;
                 -moz-box-sizing      : border-box;
                 box-sizing           : border-box;
-                border: 10px solid #f00;
+                border: 10px solid #333;
             }
             #img-wrap img { position: absolute; width: 100%; height: 100%;}
         </style>
@@ -50,11 +50,11 @@
                 });
 
                 function onOver(){
-                    border.stop().animate({width:parent.width()+border_width*2,height:parent.height()+border_width*2,margin:-border_width},300,'easeOutQuart');
+                    border.stop().animate({width:parent.width(),height:parent.height(),margin:0},300,'easeOutQuart');             
                 }
 
                 function onOut(){
-                    border.stop().animate({width:parent.width(),height:parent.height(),margin:0},300,'easeOutQuart');
+                    border.stop().animate({width:parent.width()+border_width*2,height:parent.height()+border_width*2,margin:-border_width},300,'easeOutQuart');
                 }
                 // $("#img-wrap").on('mouseover', function(){
                 //     $(this).find('.border-anim').stop().animate({'border-width':10},500,'easeOutExpo');
@@ -69,7 +69,7 @@
     <body>
         <div id="img-wrap">
             <img src="img/1.jpg" width="700" height="466">
-            <div class='border-anim' data-border-width="140"></div>
+            <div class='border-anim' data-border-width="10"></div>
         </div>
     </body>
 </html>

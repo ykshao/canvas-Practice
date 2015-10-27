@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1">
+        <meta name="description" content="">
+        <title>grain</title>
+        
+        <link rel="stylesheet" href="css/normalize.css">
+        <style>
+
+            #wrap {
+                position: relative;
+                overflow : hidden;
+                width: 700px;
+                height: 466px;
+                background: url(img/1.jpg);
+
+            }
+
+            #wrap:after {
+              background: url(img/noise.png);
+              content: "";
+              display: block;
+              height: 300%;
+              left: -100%;
+              position: absolute;
+              top: -100%;
+              width: 300%;
+              -webkit-animation: grain 5s steps(10) infinite;
+              animation: grain 5s steps(10) infinite;
+            }
+
+
+            /* animation to move noise */
+            @-webkit-keyframes grain {
+                0%, 100% {
+                    -webkit-transform: translate(0, 0);
+                    transform: translate(0, 0);
+                }
+                10% {
+                    -webkit-transform: translate(-5%, -10%);
+                    transform: translate(-5%, -10%);
+                }
+                20% {
+                    -webkit-transform: translate(-15%, 5%);
+                    transform: translate(-15%, 5%);
+                }
+                30% {
+                    -webkit-transform: translate(7%, -25%);
+                    transform: translate(7%, -25%);
+                }
+                40% {
+                    -webkit-transform: translate(-5%, 25%);
+                    transform: translate(-5%, 25%);
+                }
+                50% {
+                    -webkit-transform: translate(-15%, 10%);
+                    transform: translate(-15%, 10%);
+                }
+                60% {
+                    -webkit-transform: translate(15%, 0%);
+                    transform: translate(15%, 0%);
+                }
+                70% {
+                    -webkit-transform: translate(0%, 15%);
+                    transform: translate(0%, 15%);
+                }
+                80% {
+                    -webkit-transform: translate(3%, 35%);
+                    transform: translate(3%, 35%);
+                }
+                90% {
+                    -webkit-transform: translate(-10%, 10%);
+                    transform: translate(-10%, 10%);
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div id="wrap"></div>
+    </body>
+</html>

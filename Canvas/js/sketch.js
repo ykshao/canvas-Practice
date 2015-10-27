@@ -116,8 +116,6 @@
                 animateObjects[i] = p;
                 // console.log(i);
             }
-            console.log(animateObjects[i]);
-            
 
             $(animateObjects[i]).stop(true).delay(i*delay).animate({x:target.x,y:target.y}, {    
                 duration    : duration,
@@ -151,10 +149,6 @@
             lastPoint.x = crtPoint.x;
             lastPoint.y = crtPoint.y;
         }
-
-
-
-
 
         init();
         pointInit();

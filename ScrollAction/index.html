@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1">
+        <meta name="description" content="">
+        <title></title>
+        <link rel="stylesheet" href="css/normalize.css">
+        <!-- <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'> -->
+        <style>
+            body {
+                margin : 0;
+                font-size : 16px;
+                line-height: 1.6em;
+                font-weight: 400;
+                font-family: 'Titillium Web', 'Helvetica', 'ヒラギノ角ゴ Pro W3', 'Hiragino Kaku Gothic Pro' ,'HiraKakuPro-W3', 'Verdana','Arial','Helvetica','ＭＳ Ｐゴシック','MS PGothic','Osaka', sans-serif;
+                text-transform: uppercase;
+            }
+            #wrap {
+                width   : 1024px;
+                margin  : 0 auto;
+            }
+            p {
+                margin: 30px 0 30px 0;
+                color : #333333;
+            }
+
+
+            .scImgView {
+                position: relative;
+                width:100%;
+                display: inline-block;
+                overflow: hidden;
+
+                -webkit-perspective : 1000px;
+                perspective         : 1000px;
+            }
+
+            .scImgView img {
+                -webkit-transition  : 0.8s cubic-bezier(.48,.06,.31,1);
+                transition          : 0.8s cubic-bezier(.48,.06,.31,1);
+                width: 100%;
+            }
+    
+
+            /* change action class */
+
+            .scImgViewFilterOff {
+                background: blue;
+            }
+
+            .scImgViewFilterOn {
+            }
+
+            .scImgViewFilterOff img {
+                opacity: 0.5;
+
+                -webkit-transform : translateZ(300px);
+                transform : translateZ(300px);
+
+                -webkit-filter : grayscale(100%);
+                -moz-filter : grayscale(100%);
+            }
+
+            .scImgViewFilterOn img {
+                opacity: 1;
+                -webkit-transform : translateZ(0);
+                transform : translateZ(0px);
+                -webkit-filter : grayscale(0%);
+                filter : grayscale(0%);
+            }
+            
+        </style>
+
+        <script src="js/jquery-1.10.2.min.js"></script>
+        <script src="js/jquery.easing.1.3.js"></script>
+        <script src="js/jquery.scrollActoin.0.0.1.js"></script>
+    </head>
+    <body>
+        <div id="wrap">
+            <p>Lorem ipsum Veniam qui commodo fugiat dolore mollit cupidatat dolor qui cupidatat minim enim officia exercitation voluptate minim reprehenderit magna aute amet ut cupidatat eiusmod enim id aliqua esse magna pariatur Ut velit mollit laborum dolor cupidatat in fugiat dolor id dolor tempor enim id veniam aute ullamco labore magna in in ad labore id ut elit officia occaecat pariatur non in aliqua qui consectetur occaecat in fugiat mollit culpa do in cupidatat Ut cupidatat et dolore proident velit ea velit tempor magna voluptate ad sunt commodo elit voluptate qui deserunt elit elit aute sint cupidatat Ut ut labore ea aute officia proident et commodo officia exercitation incididunt sint in reprehenderit quis enim nulla voluptate est in enim dolor pariatur velit ex deserunt pariatur Ut in dolore est commodo mollit laboris Excepteur proident amet nisi mollit minim commodo laborum labore esse aliquip veniam id amet mollit enim Duis dolor velit culpa id est et qui aliqua Excepteur in est enim fugiat ut velit nostrud laboris anim enim eu laborum in culpa in do occaecat aliquip proident eu elit mollit laboris elit ex esse laborum fugiat quis dolor qui aute cillum ea dolor sed dolore fugiat incididunt dolor sint incididunt sint sed.</p>
+            <div id="aaa" class="scImgView"><img src="img/1.jpg"></div>
+            <p>Lorem ipsum Consequat Excepteur sit ad fugiat eu ea qui in dolore nisi fugiat nisi fugiat non irure dolore minim ad magna ut anim minim qui exercitation occaecat ad aliquip cupidatat tempor et commodo aute irure cillum ut do consectetur ullamco ut elit quis do sed sit laborum Duis deserunt cillum ut ullamco dolor occaecat dolor dolore consequat laboris eu voluptate sunt proident et dolore aute consequat qui pariatur anim aliqua deserunt dolore exercitation in dolore laboris in est aliqua sit deserunt enim adipisicing dolore quis in et commodo sunt ex ad dolore esse deserunt reprehenderit eu cillum dolore magna cupidatat tempor irure deserunt nisi in culpa pariatur velit quis cupidatat ad irure occaecat commodo mollit mollit laboris voluptate tempor Excepteur sit eu in qui proident Ut nostrud labore adipisicing do qui in dolore irure in voluptate nostrud dolore proident exercitation incididunt ut Excepteur mollit cupidatat anim eiusmod commodo proident aute qui Duis eu sed Ut reprehenderit dolor ut in veniam quis commodo mollit ex adipisicing sunt quis ex eu occaecat dolore consequat fugiat esse do proident eu nulla consequat id culpa occaecat veniam dolore aute amet adipisicing ex.</p>
+            <div class="scImgView"><img src="img/2.jpg"></div>
+            <p>Lorem ipsum Consequat Excepteur sit ad fugiat eu ea qui in dolore nisi fugiat nisi fugiat non irure dolore minim ad magna ut anim minim qui exercitation occaecat ad aliquip cupidatat tempor et commodo aute irure cillum ut do consectetur ullamco ut elit quis do sed sit laborum Duis deserunt cillum ut ullamco dolor occaecat dolor dolore consequat laboris eu voluptate sunt proident et dolore aute consequat qui pariatur anim aliqua deserunt dolore exercitation in dolore laboris in est aliqua sit deserunt enim adipisicing dolore quis in et commodo sunt ex ad dolore esse deserunt reprehenderit eu cillum dolore magna cupidatat tempor irure deserunt nisi in culpa pariatur velit quis cupidatat ad irure occaecat commodo mollit mollit laboris voluptate tempor Excepteur sit eu in qui proident Ut nostrud labore adipisicing do qui in dolore irure in voluptate nostrud dolore proident exercitation incididunt ut Excepteur mollit cupidatat anim eiusmod commodo proident aute qui Duis eu sed Ut reprehenderit dolor ut in veniam quis commodo mollit ex adipisicing sunt quis ex eu occaecat dolore consequat fugiat esse do proident eu nulla consequat id culpa occaecat veniam dolore aute amet adipisicing ex.</p>
+            <div class="scImgView" data-bg-color="#f2552d"><img src="img/3.jpg"></div>
+            <p>Lorem ipsum Consequat Excepteur sit ad fugiat eu ea qui in dolore nisi fugiat nisi fugiat non irure dolore minim ad magna ut anim minim qui exercitation occaecat ad aliquip cupidatat tempor et commodo aute irure cillum ut do consectetur ullamco ut elit quis do sed sit laborum Duis deserunt cillum ut ullamco dolor occaecat dolor dolore consequat laboris eu voluptate sunt proident et dolore aute consequat qui pariatur anim aliqua deserunt dolore exercitation in dolore laboris in est aliqua sit deserunt enim adipisicing dolore quis in et commodo sunt ex ad dolore esse deserunt reprehenderit eu cillum dolore magna cupidatat tempor irure deserunt nisi in culpa pariatur velit quis cupidatat ad irure occaecat commodo mollit mollit laboris voluptate tempor Excepteur sit eu in qui proident Ut nostrud labore adipisicing do qui in dolore irure in voluptate nostrud dolore proident exercitation incididunt ut Excepteur mollit cupidatat anim eiusmod commodo proident aute qui Duis eu sed Ut reprehenderit dolor ut in veniam quis commodo mollit ex adipisicing sunt quis ex eu occaecat dolore consequat fugiat esse do proident eu nulla consequat id culpa occaecat veniam dolore aute amet adipisicing ex.</p>
+            <div class="scImgView"><img src="img/4.jpg"></div>
+            <p>Lorem ipsum Consequat Excepteur sit ad fugiat eu ea qui in dolore nisi fugiat nisi fugiat non irure dolore minim ad magna ut anim minim qui exercitation occaecat ad aliquip cupidatat tempor et commodo aute irure cillum ut do consectetur ullamco ut elit quis do sed sit laborum Duis deserunt cillum ut ullamco dolor occaecat dolor dolore consequat laboris eu voluptate sunt proident et dolore aute consequat qui pariatur anim aliqua deserunt dolore exercitation in dolore laboris in est aliqua sit deserunt enim adipisicing dolore quis in et commodo sunt ex ad dolore esse deserunt reprehenderit eu cillum dolore magna cupidatat tempor irure deserunt nisi in culpa pariatur velit quis cupidatat ad irure occaecat commodo mollit mollit laboris voluptate tempor Excepteur sit eu in qui proident Ut nostrud labore adipisicing do qui in dolore irure in voluptate nostrud dolore proident exercitation incididunt ut Excepteur mollit cupidatat anim eiusmod commodo proident aute qui Duis eu sed Ut reprehenderit dolor ut in veniam quis commodo mollit ex adipisicing sunt quis ex eu occaecat dolore consequat fugiat esse do proident eu nulla consequat id culpa occaecat veniam dolore aute amet adipisicing ex.</p>
+            <div class="scImgView"><img src="img/5.jpg"></div>
+            <p>Lorem ipsum Consequat Excepteur sit ad fugiat eu ea qui in dolore nisi fugiat nisi fugiat non irure dolore minim ad magna ut anim minim qui exercitation occaecat ad aliquip cupidatat tempor et commodo aute irure cillum ut do consectetur ullamco ut elit quis do sed sit laborum Duis deserunt cillum ut ullamco dolor occaecat dolor dolore consequat laboris eu voluptate sunt proident et dolore aute consequat qui pariatur anim aliqua deserunt dolore exercitation in dolore laboris in est aliqua sit deserunt enim adipisicing dolore quis in et commodo sunt ex ad dolore esse deserunt reprehenderit eu cillum dolore magna cupidatat tempor irure deserunt nisi in culpa pariatur velit quis cupidatat ad irure occaecat commodo mollit mollit laboris voluptate tempor Excepteur sit eu in qui proident Ut nostrud labore adipisicing do qui in dolore irure in voluptate nostrud dolore proident exercitation incididunt ut Excepteur mollit cupidatat anim eiusmod commodo proident aute qui Duis eu sed Ut reprehenderit dolor ut in veniam quis commodo mollit ex adipisicing sunt quis ex eu occaecat dolore consequat fugiat esse do proident eu nulla consequat id culpa occaecat veniam dolore aute amet adipisicing ex.</p>
+            <div class="scImgView" data-bg-color="#123556"><img src="img/6.jpg"></div>
+            <p>Lorem ipsum Consequat Excepteur sit ad fugiat eu ea qui in dolore nisi fugiat nisi fugiat non irure dolore minim ad magna ut anim minim qui exercitation occaecat ad aliquip cupidatat tempor et commodo aute irure cillum ut do consectetur ullamco ut elit quis do sed sit laborum Duis deserunt cillum ut ullamco dolor occaecat dolor dolore consequat laboris eu voluptate sunt proident et dolore aute consequat qui pariatur anim aliqua deserunt dolore exercitation in dolore laboris in est aliqua sit deserunt enim adipisicing dolore quis in et commodo sunt ex ad dolore esse deserunt reprehenderit eu cillum dolore magna cupidatat tempor irure deserunt nisi in culpa pariatur velit quis cupidatat ad irure occaecat commodo mollit mollit laboris voluptate tempor Excepteur sit eu in qui proident Ut nostrud labore adipisicing do qui in dolore irure in voluptate nostrud dolore proident exercitation incididunt ut Excepteur mollit cupidatat anim eiusmod commodo proident aute qui Duis eu sed Ut reprehenderit dolor ut in veniam quis commodo mollit ex adipisicing sunt quis ex eu occaecat dolore consequat fugiat esse do proident eu nulla consequat id culpa occaecat veniam dolore aute amet adipisicing ex.</p>
+            <div class="scImgView" data-bg-color="#ff0000" data-loop = 'true'><img src="img/7.jpg"></div>
+            <p>Lorem ipsum Consequat Excepteur sit ad fugiat eu ea qui in dolore nisi fugiat nisi fugiat non irure dolore minim ad magna ut anim minim qui exercitation occaecat ad aliquip cupidatat tempor et commodo aute irure cillum ut do consectetur ullamco ut elit quis do sed sit laborum Duis deserunt cillum ut ullamco dolor occaecat dolor dolore consequat laboris eu voluptate sunt proident et dolore aute consequat qui pariatur anim aliqua deserunt dolore exercitation in dolore laboris in est aliqua sit deserunt enim adipisicing dolore quis in et commodo sunt ex ad dolore esse deserunt reprehenderit eu cillum dolore magna cupidatat tempor irure deserunt nisi in culpa pariatur velit quis cupidatat ad irure occaecat commodo mollit mollit laboris voluptate tempor Excepteur sit eu in qui proident Ut nostrud labore adipisicing do qui in dolore irure in voluptate nostrud dolore proident exercitation incididunt ut Excepteur mollit cupidatat anim eiusmod commodo proident aute qui Duis eu sed Ut reprehenderit dolor ut in veniam quis commodo mollit ex adipisicing sunt quis ex eu occaecat dolore consequat fugiat esse do proident eu nulla consequat id culpa occaecat veniam dolore aute amet adipisicing ex.</p>
+        </div>
+    
+        <script>
+
+            $(document).ready(function(){
+                var sci = $('.scImgView').scrollImgView({
+                    defaultClass    : 'scImgViewFilterOff',
+                    activeClass     : 'scImgViewFilterOn',
+                    showPoint : 0.2,
+                    loop : 0,
+                    bgColor : 'blue'
+                });
+
+                // $('#aaa').scrollImgView({
+                //     defaultClass    : 'scImgViewFilterOff',
+                //     activeClass     : 'scImgViewFilterOn',
+                //     showPoint : 0.2,
+                //     loop : 0,
+                //     bgColor : 'blue'
+                // });
+            })
+            
+        </script>
+    </body>
+</html>
