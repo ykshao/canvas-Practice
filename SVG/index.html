@@ -1,43 +1,30 @@
 <!DOCTYPE html>
-<html class="no-js" lang="en"> 
+<html>
     <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1">
+        <meta name="description" content="">
+
+        <meta name="copyright" content="" />
+        <meta name="description" content="" />
+        <meta name="keywords" content="">
+        
+        <meta property="og:title" content=""/>
+        <meta property="og:description" content="" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="" id="ogUrl" />
+        <meta property="og:image" content="" />
+
+        <meta name="tw_text" content="" id="twText" />
+        <meta name="tw_url" content="" id="twUrl" />
         <title></title>
-        <style>
-            body { background-color: #e0e0e0; }
-            #image-wrapper { 
-                position: relative; left: 100px;
-                top: 100px;
-                height: 100%;
-                background-color: #f00;
-            }
-            .svg-background, .svg-image { clip-path: url(#clip-triangle); }
-            .svg-image {
-                -webkit-transition: all 0.5s ease 0.2s;
-                -moz-transition: all 0.5s ease 0.2s;
-                opacity: 1;
-                transition: all 0.5s ease 0.2s;
-            }
-
-            svg.clip-svg { height: 250px; position: absolute; width: 250px; }
-            #svg-1 { left: 0px; top: 0px; }
-        </style>
+        
+        <link rel="stylesheet" href="css/normalize.css">
+        <script src="js/modernizr.custom.min.js"></script>
+        <script src="js/jquery-1.10.2.min.js"></script>
+        <script src="js/jquery.easing.1.3.js"></script>
     </head>
-
     <body>
-        <div>
-            <div id="image-wrapper">
-                <svg id="svg-1" class="clip-svg">
-                    <rect class='svg-background' width="300" height="300" fill="#ffffff" />
-                    <image id="img-1" class='svg-image' width="300" height="300" xlink:href="http://25.media.tumblr.com/tumblr_m5nre6cxkQ1qbs7p5o1_r1_500.jpg" />
-                </svg>
-            </div>
-        </div>
-        <svg id="svg-defs">
-            <defs>
-                <clipPath id="clip-triangle">
-                    <polygon points="0 0, 40 0, 112 13, 240 13, 140 150, 150 250"/>
-                </clipPath>
-            </defs>
-        </svg>
     </body>
 </html>

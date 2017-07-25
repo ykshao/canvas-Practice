@@ -1,0 +1,126 @@
+<html>
+  <head>
+      <title>first three.js app</title>
+      <style>
+          body {
+              margin: 0;
+          }
+      </style>
+  </head>
+  <body>
+      <script src="/build/three.min.js"></script>
+      <script src="/js/libs/dat.gui.min.js"></script>
+      <script type="text/javascript"></script>
+
+      <script id="vertexShader" type="x-shader/x-vertex">
+        varying vec2 vUv;                                             // fragmentShaderに渡すためのvarying変数
+        uniform float curlR;
+        uniform float rotZ;
+
+        mat4 rotationMatrix(vec3 axis, float angle)
+        {
+          axis = normalize(axis);
+          float s = sin(angle);
+          float c = cos(angle);
+          float oc = 1.0 - c;
+          
+          return mat4(
+            oc * axis.x * axis.x + c, oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,
+            oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,
+            oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,
+            0.0,                                0.0,                                0.0,                                1.0);
+        }
+
+        void main()
+        {
+          vUv = uv;
+          vec4 transp = rotationMatrix(vec3(0, 0, 1), rotZ) * vec4(position, 1.0);
+          float theta = transp.x / curlR;
+          float tx = curlR * sin(theta);
+          float ty = transp.y;
+          float tz = curlR * (1.0 - cos(theta));
+          vec3 p = vec3(tx, ty, tz);
+          vec4 backedp = rotationMatrix(vec3(0, 0, 1), -rotZ) * vec4(p, 1.0);
+          vec4 mvPosition = modelViewMatrix * backedp;
+          gl_Position = projectionMatrix * mvPosition;
+        }
+      </script>
+
+      <script id="fragmentShader" type="x-shader/x-fragment">
+        uniform sampler2D texture;                                    // uniform 変数としてテクスチャのデータを受け取る
+        varying vec2 vUv;                                             // vertexShaderで処理されて渡されるテクスチャ座標
+
+        void main()
+        {
+          gl_FragColor = texture2D(texture, vUv);                     // テクスチャの色情報をそのままピクセルに塗る
+        }
+        </script>
+
+      <script>
+          var scene   = new THREE.Scene();
+          var camera  = new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,10000);
+
+          var renderer = new THREE.WebGLRenderer();
+          renderer.setSize(window.innerWidth,window.innerHeight);
+          document.body.appendChild(renderer.domElement);
+
+          var card;
+          var loader = new THREE.TextureLoader();
+          var cardGeo,cardMat,card,cardTexture;
+          var cardMaterialShader;
+          var uniforms;
+          loader.load('./textures/card.png',function(texture){
+            console.log(texture);
+            cardGeo = new THREE.PlaneGeometry(160,256,20,32);
+
+            uniforms = {
+              texture:{type:'t',value:texture},
+              rotZ: { type: 'f', value: Math.PI / 6}, // 30deg // 追加
+              curlR: { type: 'f', value: 100.0}        // シェーダに曲げの半径をuniform変数として渡す
+            }
+            cardMaterialShader = new THREE.ShaderMaterial({
+              vertexShader:document.getElementById('vertexShader').textContent,
+              fragmentShader:document.getElementById('fragmentShader').textContent,
+              uniforms:uniforms
+            });
+
+            var gui = new dat.GUI();
+            gui.add(uniforms.rotZ, 'value', -100, 100);
+            gui.add(uniforms.curlR, 'value', -100, 100);
+
+
+            cardMaterialShader.side = THREE.DoubleSide;                    // 両面描画する
+            cardMaterialShader.transparent = true;                         // 透過、半透過の指定
+            cardMaterialShader.blending = THREE.NormalBlending;  
+
+            card = new THREE.Mesh(cardGeo,cardMaterialShader);
+            card.position.set(0,0,-5);
+            scene.add(card);
+          });
+          
+          // var geometry = new THREE.PlaneGeometry( 50, 20 ,10,10);
+          // var material = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
+          // var mesh = new THREE.Mesh(geometry,material);
+          // scene.add(mesh);
+
+          camera.position.z = 500;
+
+          var t = 0;
+          var clock = new THREE.Clock();
+          var render = function(){
+              requestAnimationFrame(render);
+              // mesh.rotation.y += 0.1;
+              // t+= 0.01;
+              // cube.position.z = Math.cos(t)*10;
+
+              if(uniforms){
+                var _curlR = 200.0 + 150.0 * Math.sin(clock.getElapsedTime() * 2.0);
+                uniforms.curlR.value = _curlR;  // uniform変数としてシェーダに送り込む
+              }
+              renderer.render(scene, camera);
+          }
+
+          render();
+      </script>
+  </body>
+</html>

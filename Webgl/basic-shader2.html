@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>three.js webgl</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+      body {
+        width:100%; height:100%;
+        background-color: #fff;
+        margin:0 auto;
+        overflow: hidden;
+      }
+    </style>
+    <script src="build/three.min.js"></script>
+    <script src="js/libs/jquery-1.10.2.min.js"></script>
+  </head>
+  <body>
+    <script type="x-shader/x-vertex" id="vertexshader">
+
+      // switch on high precision floats
+      // #ifdef GL_ES
+      // precision highp float;
+      // #endif
+
+      attribute float displacement;
+      varying vec3 vNormal;
+
+      void main()
+      {
+        vNormal = normal;
+
+        // push the displacement into the
+        // three slots of a 3D vector so
+        // it can be used in operations
+        // with other 3D vectors like
+        // positions and normals
+        vec3 newPosition = position +
+          normal * vec3(displacement);
+
+        gl_Position = projectionMatrix *
+                      modelViewMatrix *
+                      vec4(newPosition, 1.0);
+      }
+
+    </script>
+
+    <script type="x-shader/x-fragment" id="fragmentshader">
+
+      // #ifdef GL_ES
+      // precision highp float;
+      // #endif
+
+      varying vec3 vNormal;
+
+      void main()
+      {
+        // calc the dot product and clamp
+        // 0 -> 1 rather than -1 -> 1
+        vec3 light = vec3(0.5, 0.2, 1.0);
+
+        // ensure it's normalized
+        light = normalize(light);
+
+        // calculate the dot product of
+        // the light to the vertex normal
+        float dProd = max(0.0,
+                          dot(vNormal, light));
+
+        // feed into our frag colour
+        gl_FragColor = vec4(dProd, // R
+                            dProd, // G
+                            dProd, // B
+                            1.0);  // A
+      }
+
+    </script>
+    
+    <script>
+      var camera,renderer,scene;
+      var width,height,halfWidth,halfHeight,aspect;
+      var config = {
+        fov:45,
+        near:1,
+        far:10000
+      };
+      var mouse = {x:0,y:0};
+      var wheel = {x:0,y:0,ox:0,oy:0};
+      var renderID;
+
+      var texure;
+      var meshs = [];
+      var sphere,displacement,noise;
+      function setup(){
+        aspect  = window.innerWidth/window.innerHeight;
+        scene   = new THREE.Scene();
+        camera  = new THREE.PerspectiveCamera(config.fov,aspect,config.near,config.far);
+        renderer = new THREE.WebGLRenderer({});
+        renderer.setClearColor(0x000000,0);
+        camera.position.z = 500;
+
+
+        renderer.setSize(window.innerWidth,window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+        onResize();
+
+        addEvent(); 
+
+        // var attributes = {
+        //   displacement: {
+        //     type: 'f', // a float
+        //     value: [] // an empty array
+        //   }
+        // };
+
+
+        var vShader = $('#vertexshader');
+        var fShader = $('#fragmentshader');
+        var shaderMaterial = new THREE.ShaderMaterial({
+            vertexShader:   vShader.text(),
+            fragmentShader: fShader.text()
+          });
+
+        // set up the sphere vars
+        var radius = 150, segments = 116, rings = 116;
+
+        // create a new mesh with sphere geometry -
+        // we will cover the sphereMaterial next!
+        var geometry = new THREE.SphereBufferGeometry(radius, segments, rings);
+        sphere = new THREE.Mesh(geometry,shaderMaterial);
+        scene.add(sphere);
+
+        displacement = new Float32Array( geometry.attributes.position.count );
+        noise = new Float32Array( geometry.attributes.position.count );
+
+        geometry.addAttribute( 'displacement', new THREE.BufferAttribute( displacement, 1 ) );
+        for ( var i = 0; i < displacement.length; i ++ ) {
+          noise[ i ] = Math.random() * 5;
+        }
+
+        // sphere.geometry.addAttribute( 'displacement', new THREE.BufferAttribute(verts,3));
+
+        // for (var v = 0; v < verts.length; v++) {
+        //   values.push(Math.random() * 30);
+        // }
+
+
+
+      //   var geometry = new THREE.BufferGeometry();
+      //   var n = 100;
+      //   for(var i=0; i<n; i++){
+      //     var vertices = new Float32Array( [
+      //       -1.0, -1.0,  1.0,
+      //        1.0, -1.0,  1.0,
+      //        1.0,  1.0,  1.0
+      //     ] );
+
+      // //     // itemSize = 3 because there are 3 values (components) per vertex
+      //     geometry.addAttribute( 'position', new THREE.BufferAttribute(vertices,3));
+      //     var material = new THREE.MeshBasicMaterial( { color: 0xff0000, transparent:true, opacity:1 } );
+
+      //     // var shaderMaterial = new THREE.ShaderMaterial({
+      //     //   vertexShader:   $('#vertexshader').text(),
+      //     //   fragmentShader: $('#fragmentshader').text()
+      //     // });
+
+      //     var mesh = new THREE.Mesh( geometry, material );
+      //     mesh.scale.x = mesh.scale.y = 10;
+      //     mesh.position.z = Math.random()*200-100;
+      //     mesh.position.x = Math.random()*200-100;
+      //     mesh.position.y = Math.random()*200-100;
+      //     mesh.vx = Math.random()*0.1;
+      //     mesh.vy = Math.random()*0.1;
+      //     mesh.vz = Math.random()*0.001;
+      //     scene.add(mesh);
+      //     meshs.push(mesh);
+      //   }
+      }
+
+      function addEvent(){
+        document.addEventListener( 'mousemove', onMouseMove, false );
+        window.addEventListener( 'resize', onResize, false );
+        document.addEventListener( 'mousewheel', onScroll);
+      }
+
+      function setBG(){
+        var geomarty,material,mesh;
+        var w = texure.image.width, h = texure.image.height;
+        geomarty  = new THREE.PlaneGeometry(1,h/w,1,1);
+        material  = new THREE.MeshBasicMaterial({map:texure});
+        mesh      = new THREE.Mesh(geomarty,material);
+        mesh.position.z = 100;
+        mesh.scale.x = mesh.scale.y = 600;
+        // scene.add(mesh);
+      }
+      /* ************************************************************
+        Renering and Animation
+      ************************************************************ */
+      function animation(){
+        var time = Date.now() * 0.01;
+        wheel.y *= 0.95;
+        for ( var i = 0; i < displacement.length; i ++ ) {
+          displacement[ i ] = Math.sin( 0.1 * i + time ) + wheel.y;
+          noise[ i ] += 0.5 * ( 0.5 - Math.random() );
+          noise[ i ] = THREE.Math.clamp( noise[ i ], -5, 5 );
+          displacement[ i ] += noise[ i ];
+        }
+        sphere.geometry.attributes.displacement.needsUpdate = true;
+      }
+
+      function render(){
+        camera.position.x += ( mouse.x - camera.position.x ) * 0.05;
+        camera.position.y += ( - mouse.y - camera.position.y ) * 0.05;
+        camera.lookAt( scene.position );
+        renderer.render( scene, camera );
+      }
+
+      function update(){
+        animation();
+        render();
+        renderID = requestAnimationFrame( update );
+      }
+
+      /* ************************************************************
+          EVENT HANDLER
+      ************************************************************ */
+      function onResize(){
+        width   = window.innerWidth;
+        height  = window.innerHeight;
+        halfWidth = width*0.5;
+        halfHeight = height*0.5;
+        aspect  = width/height;
+        
+        camera.aspect = width/height;
+        renderer.setSize(width,height);
+        camera.updateProjectionMatrix();
+      }
+
+      function onMouseMove( e ) {
+        mouse.x = ( e.clientX - halfWidth );
+        mouse.y = ( e.clientY - halfHeight );
+      }
+
+      function onScroll(e){
+        wheel.y += e.deltaY;
+      }
+
+
+      
+      requestAnimationFrame( update );
+      setup();
+      update();
+
+    </script>
+  </body>
+</html>

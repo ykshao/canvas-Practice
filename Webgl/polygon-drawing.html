@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>three.js webgl</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+      body {
+        width:100%; height:100%;
+        background-color: #fff;
+        margin:0 auto;
+        overflow: hidden;
+      }
+
+    </style>
+    <script src="js/libs/jquery-1.10.2.min.js"></script>
+    <script src="build/three.min.js"></script>
+    <script src="js/polygon_engine.js"></script>
+  </head>
+  <body>
+    
+    <script>
+      var polygonG; 
+      var camera,renderer,scene;
+      var width,height,aspect;
+      var config = {
+        fov:75,
+        near:1,
+        far:1000
+      }
+      var mouse = {x:0,y:0};
+      var wheel = {x:0,y:0,ox:0,oy:0};
+      var renderID;
+      var texure;
+
+      var triangles = [];
+
+      function setup(){
+        aspect  = window.innerWidth/window.innerHeight;
+        scene   = new THREE.Scene();
+        camera  = new THREE.PerspectiveCamera(config.fov,aspect,config.near,config.far);
+        renderer = new THREE.WebGLRenderer({});
+        renderer.setClearColor(0x000000,1);
+        camera.position.z = 500;
+
+
+        renderer.setSize(window.innerWidth,window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+        onResize();
+        addEvent();
+
+        texure = new THREE.TextureLoader().load('textures/hollywood.jpg',function(){setBG()});
+        polygonG = new PolygonGenerator();
+        polygonG.getPolygon('textures/gallery/hollywood.jpg',function(polygons,width,height){
+          makePolygon(polygons,width,height);
+        });
+      }
+      function addEvent(){
+        document.addEventListener( 'mousemove', onMouseMove, false );
+        window.addEventListener( 'resize', onResize, false );
+        document.addEventListener( 'mousewheel', onScroll);
+      }
+      function setBG(){
+        var geomarty,material,mesh;
+        var w = texure.image.width,
+            h = texure.image.height;
+        geomarty  = new THREE.PlaneGeometry(1,h/w,1,1);
+        material  = new THREE.MeshBasicMaterial({map:texure});
+        mesh      = new THREE.Mesh(geomarty,material);
+        mesh.position.z = 100;
+        mesh.scale.x = mesh.scale.y = 400;
+        // scene.add(mesh);
+      }
+
+      var polygonContainer;
+      function makePolygon(polygons,width,height){
+        polygonContainer = new THREE.Object3D();
+        scene.add(polygonContainer);
+        // polygonContainer.position.y = height*0.5;
+        polygonContainer.rotation.x = Math.PI;
+        
+        for(var i=0; i<polygons.length; i++){
+          var p = polygons[i],
+              c = p.center,
+              n = p.nodes,
+              cr = p.color;
+          var geometry = new THREE.Geometry();
+          var color = new THREE.Color();
+          color.setRGB(cr.r/255,cr.g/255,cr.b/255);
+          var material = new THREE.MeshBasicMaterial({color:color});
+          material.side = THREE.DoubleSide;
+          for(var j=0; j<3; j++){
+            var point = n[j],
+                x = point.x-width*0.5,
+                y = point.y-height*0.5;
+            geometry.vertices[j] = new THREE.Vector3(x,y,0);
+          }
+          geometry.faces.push( new THREE.Face3( 0, 1, 2 ) );
+          var mesh = new THREE.Mesh(geometry,material);
+          mesh.vx = Math.random();
+          mesh.vy = Math.random();
+          mesh.vz = Math.random();
+          mesh.ox = mesh.position.x;
+          mesh.oy = mesh.position.y;
+          mesh.oz = mesh.position.z;
+          triangles.push(mesh)
+          // mesh.position.z = Math.random()*100;
+          polygonContainer.add(mesh);
+        }
+      }
+
+
+      function onResize(){
+        width   = window.innerWidth;
+        height  = window.innerHeight;
+        aspect  = width/height;
+        
+        camera.aspect = width/height;
+        renderer.setSize(width,height);
+        camera.updateProjectionMatrix();
+      }
+
+      function onMouseMove( e ) {
+        mouse.x = ( e.clientX - width*0.5 );
+        mouse.y = ( e.clientY - height*0.5 );
+      }
+
+      function onScroll(e){
+        wheel.y += e.deltaY;
+      }
+
+      function animation(){
+        var time = Date.now() * 0.001;
+        wheel.y *= 0.95;
+
+        for ( i = 0; i < triangles.length; i ++ ) {
+            mesh = triangles[ i ];
+            // mesh.position.x += mesh.vx*wheel.y*0.01;
+            // mesh.position.y += mesh.vy*wheel.y*0.01;
+            mesh.position.z += mesh.vz*wheel.y*0.1;
+
+            // mesh.rotation.x += mesh.vx*wheel.y*0.001;
+            // mesh.rotation.y += mesh.vy*wheel.y*0.001;
+          }
+      }
+
+      function render(){
+        camera.position.x += ( mouse.x - camera.position.x ) * 0.05;
+        camera.position.y += ( - mouse.y - camera.position.y ) * 0.05;
+        camera.lookAt( scene.position );
+        renderer.render( scene, camera );
+      }
+
+      function update(){
+        animation();
+        render();
+        renderID = requestAnimationFrame( update );
+      }
+      requestAnimationFrame( update );
+
+
+      setup();
+      update();
+
+    </script>
+  </body>
+</html>

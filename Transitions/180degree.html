@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1">
+    <meta name="description" content="">
+
+    <meta name="copyright" content="" />
+    <meta name="description" content="" />
+    <meta name="keywords" content="">
+    
+    <meta property="og:title" content=""/>
+    <meta property="og:description" content="" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="" id="ogUrl" />
+    <meta property="og:image" content="" />
+    <meta name="tw_text" content="" id="twText" />
+    <meta name="tw_url" content="" id="twUrl" />
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="css/normalize.css">
+    <style type="text/css">
+      body {
+        width:100%; height:100%;
+        overflow: hidden;
+        background-color: #000;
+      }
+      .frame {
+        position: absolute;
+        width: 100%; height:100%;
+        /*will-change : transform;*/
+        /*overflow: hidden;*/
+      }
+
+      .frame img {
+        margin:0;
+        display: block;
+        will-change : transform;
+        /*position: absolute;*/
+        /*width: 100%; height:auto;*/
+      }
+
+      .frame1 {
+        /*background : url('./img/dog1.jpg');*/
+        /*background-size: cover;*/
+      }
+
+      .frame2 {
+        /*background : url('./img/dog2.jpg');*/
+        /*background-size: cover;*/
+        /*background-position: center;*/
+      }
+
+      .btn {
+        position: absolute;
+        width:100px; height:25px;
+        background-color:#fff;
+        bottom: 50px; left:50%;
+        margin-left: -50px;
+        table-layout: center;
+        font-size:12px;
+        line-height: 25px;
+        text-align: center;
+        letter-spacing: 0.1em;
+        cursor: pointer;
+      }
+      .btn:hover {
+        opacity: 0.8;
+      }
+
+    </style>
+
+    <script src="js/jquery-1.10.2.min.js"></script>
+    <script src="js/jquery.easing.1.3.js"></script>
+    <script src="js/plugins.js"></script>
+    <script src="js/Fitsize.js"></script>
+  </head>
+  <body> 
+    <div class="frame">
+      <img src="./img/dog1.jpg" class="img1">
+      <img src="./img/dog2.jpg" class="img2">
+    </div>
+    <!-- <div class="frame frame2"></div> -->
+
+    <figure class="btn">CHANGE</figure>
+
+    <script type="text/javascript">
+      $(document).ready(function(){
+        new FitSize($('.frame img'),{align:'b'});
+        // new FitSize($('.frame2 img'),{align:'t'});
+
+        TweenLite.set($('.frame'),{transformOrigin:'50% 100%'});
+        TweenLite.set($('.img1'),{transformOrigin:'50% 100%',scale:1.2});
+        TweenLite.set($('.img2'),{transformOrigin:'50% 54.5%',rotation:180,scale:1.2,y:0});
+
+        // TweenLite.set('.frame',{y:'100%'});
+        // TweenLite.set('.frame img',{scale:1.5});
+        var rot = 0;
+        $('.btn').click(function(){
+          rot+= 180;
+          TweenLite.to('.frame',3,{rotation:-rot,ease:Power4.easeInOut});
+          // TweenLite.to('.frame',1,{y:100,ease:Power4.easeInOut});
+          // TweenLite.to('.frame',3,{delay:1,y:0,ease:Power4.easeInOut});
+          // TweenLite.to('.frame',1,{transformOrigin:'50% 150%',ease:Power4.easeInOut});
+          // TweenLite.to('.frame',1,{delay:1,transformOrigin:'50% 100%',ease:Power4.easeInOut});
+          // TweenLite.to('.frame',.5,{delay:.3,y:'-30%',ease:Power1.easeInOut});
+          // TweenLite.to('.frame',1.2,{delay:.8,y:'0%',ease:Power4.easeInOut});
+          // TweenLite.to('.frame2 img',2,{rotation:rot+180,ease:Power4.easeInOut});
+
+          // TweenLite.to('.frame1 img',2,{y:});
+          // TweenLite.to('.frame1 img',2,{rotation:-rot,ease:Power4.easeInOut});
+        })
+      });
+    </script>
+  </body>
+</html>

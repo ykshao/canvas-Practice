@@ -1,0 +1,74 @@
+<html>
+  <head>
+      <title>first three.js app</title>
+      <style>
+          body {
+              margin: 0;
+          }
+      </style>
+  </head>
+  <body>
+      <script src="/build/three.min.js"></script>
+      <script src="/js/libs/dat.gui.min.js"></script>
+      <!-- // <script src="./js/VerticalBlurShader.js"></script> -->
+      <script src="./js/shader/THREE.EffectComposer.js"></script>
+      <script src="./js/shader/THREE.CopyShader.js"></script>
+      <script src="./js/shader/THREE.RenderPass.js"></script>
+      <script src="./js/shader/THREE.MaskPass.js"></script>
+      <script src="./js/shader/THREE.ShaderPass.js"></script>
+      <script src="./js/shader/THREE.VerticalBlurShader.js"></script>
+      <script src="./js/shader/THREE.HorizontalBlurShader.js"></script>
+
+      <script>
+          var scene   = new THREE.Scene();
+          var camera  = new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,10000);
+
+          var renderer = new THREE.WebGLRenderer();
+          renderer.setSize(window.innerWidth,window.innerHeight);
+          document.body.appendChild(renderer.domElement);
+
+          composer = new THREE.EffectComposer( renderer );
+          composer.addPass( new THREE.RenderPass( scene, camera ) );
+
+          var imgSize = {w:1,h:1};
+          var blurOffset = {h:1,v:1};
+
+          shader_blur_h    = new THREE.ShaderPass( THREE.HorizontalBlurShader );
+          shader_blur_v   = new THREE.ShaderPass( THREE.VerticalBlurShader );
+
+          composer.addPass( shader_blur_h );
+          composer.addPass( shader_blur_v );
+
+          shader_blur_v.renderToScreen = true;
+
+          var geometry,material,mesh;
+          var loader = new THREE.TextureLoader();
+          loader.load('./textures/hollywood.jpg',function(texture){
+            imgSize.w = texture.image.width;
+            imgSize.h = texture.image.height;
+            geometry  = new THREE.PlaneGeometry( texture.image.width, texture.image.height ,10,10);
+            material  = new THREE.MeshBasicMaterial( {side: THREE.DoubleSide, map:texture} );
+            mesh      = new THREE.Mesh(geometry,material);
+            scene.add(mesh);
+
+            camera.position.z = 500;
+            var gui = new dat.GUI();
+            gui.add(camera.position, 'z', -1000, 1000);
+            gui.add(blurOffset, 'h', 0, 10);
+            gui.add(blurOffset, 'v', 0, 10);
+            render();
+          });
+          
+          var t = 0;
+          var clock = new THREE.Clock();
+          var render = function(){
+            shader_blur_h.uniforms[ 'h' ].value = blurOffset.h / imgSize.w;
+            shader_blur_v.uniforms[ 'v' ].value = blurOffset.v / imgSize.h;
+
+              requestAnimationFrame(render);
+              renderer.render(scene, camera);
+              composer.render();
+          }
+      </script>
+  </body>
+</html>

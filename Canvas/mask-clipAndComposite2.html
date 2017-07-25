@@ -20,7 +20,7 @@
                 position: absolute;
                 /*left:300px;*/
                 /*top:200px;*/
-            }   
+            }
 
             div {
                 position: absolute;
@@ -64,13 +64,18 @@
                 var $cvs = $('#cvs'),
                     ctx = $cvs[0].getContext('2d');
 
+                var bcvs = document.createElement('canvas');
+                bcvs.width = $cvs.width();
+                bcvs.height = $cvs.height();
+                bctx = bcvs.getContext('2d');
+
                 var imgs = $('.img');
                 var initRot = 0;
                 var rectPos = [
                         {width:300,height:300,vertexts:[],center:{x:200,y:150},speed:Math.random()*2-1,rotation:initRot,type:'composite'},
                         {width:300,height:300,vertexts:[],center:{x:500,y:150},speed:Math.random()*2-1,rotation:initRot,type:'composite'},
-                        {width:200,height:200,vertexts:[],center:{x:800,y:150},speed:Math.random()*2-1,rotation:initRot,type:'clip'},
-                        {width:200,height:200,vertexts:[],center:{x:200,y:400},speed:Math.random()*2-1,rotation:initRot,type:'clip'}
+                        {width:200,height:200,vertexts:[],center:{x:800,y:150},speed:Math.random()*2-1,rotation:initRot,type:'composite'},
+                        {width:200,height:200,vertexts:[],center:{x:200,y:400},speed:Math.random()*2-1,rotation:initRot,type:'composite'}
                         // {width:200,height:200,vertexts:[],center:{x:500,y:400},speed:Math.random2(10.5,rotation:initRot,type:'composite'},
                         // {width:200,height:200,vertexts:[],center:{x:800,y:400},speed:Math.random()*-0.5,rotation:initRot,type:'composite'}
                     ];
@@ -87,15 +92,15 @@
                 },100);
 
                 function draw(t){
-                    // draw_type1();   
-                    draw_type2();                 
-                }   
+                    draw_type1();
+                    // draw_type2();
+                }
 
                 function draw_type1(){
                     for(var o in rectPos){
                         var info = rectPos[o];
                         info.rotation = info.rotationOrigin+t*info.speed;
-                        ctx.globalCompositeOperation = 'source-over';
+                        bctx.globalCompositeOperation = 'source-over';
 
                         // ctx.save();
                         for(var i=0,n=info.vertexts.length; i<n; i++){
@@ -104,10 +109,10 @@
                             vts.x   = vts.x;
                             vts.y   = vts.y;
                             if(i==0){
-                                ctx.beginPath();
-                                ctx.moveTo(vts.x,vts.y);
+                                bctx.beginPath();
+                                bctx.moveTo(vts.x,vts.y);
                             }else{
-                                ctx.lineTo(vts.x,vts.y);
+                                bctx.lineTo(vts.x,vts.y);
                             }
                             if(i==n-1){
                                 // ctx.closePath();
@@ -121,11 +126,14 @@
                             ctx.drawImage(imgs[o],0,0);
                             ctx.restore();
                         }else{
-                            ctx.closePath();
+                            bctx.closePath();
                             // ctx.save();
-                            ctx.fill();
-                            ctx.globalCompositeOperation = 'source-in';
-                            ctx.drawImage(imgs[o],0,0);
+                            bctx.fill();
+                            bctx.globalCompositeOperation = 'source-in';
+                            bctx.drawImage(imgs[o],0,0);
+
+                            ctx.drawImage(bcvs, 0, 0);
+                            bctx.clearRect(0,0,1024,600);
                             // ctx.restore();
                             // ctx.globalCompositeOperation = 'source-over';
                         }
@@ -146,39 +154,44 @@
                     // ctx.save();
                     var w = 200, h = 200;
 
-                    ctx.save();
+                    bctx.save();
+                    bctx.beginPath();
+                    bctx.rotate(10*Math.PI/180);
+                    bctx.fillRect(700,100,w,h);
+                    bctx.globalCompositeOperation = 'source-in';
+                    bctx.drawImage(imgs[2],0,0);
+                    bctx.restore();
+                    bctx.globalCompositeOperation = 'source-over';
+
+                    ctx.drawImage(bcvs, 0, 0);
+
+                    bctx.clearRect(0,0,1024,600);
+                    bctx.save();
+                    bctx.beginPath();
+                    bctx.rotate(10*Math.PI/180);
+                    bctx.fillRect(100,100,w,h);
+                    bctx.globalCompositeOperation = 'source-in';
+                    bctx.drawImage(imgs[3],0,0);
+                    bctx.restore();
+                    bctx.globalCompositeOperation = 'source-over';
+
+                    ctx.drawImage(bcvs, 0, 0);
+
+                    // ctx.save();
                     // ctx.beginPath();
-                    ctx.rotate(10*Math.PI/180);
-                    ctx.fillRect(700,100,w,h);
-                    ctx.globalCompositeOperation = 'source-in';
-                    ctx.drawImage(imgs[2],0,0);
-                    ctx.restore();
-                    ctx.globalCompositeOperation = 'source-over';
-
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.rotate(10*Math.PI/180);
-                    ctx.fillRect(100,350,w,h);
-                    ctx.globalCompositeOperation = 'source-in';
-                    ctx.drawImage(imgs[3],0,0);
-                    ctx.restore();
-                    ctx.globalCompositeOperation = 'source-over';
-
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.rotate(10*Math.PI/180);
-                    ctx.rect(100,100,w,h);
-                    ctx.clip();
-                    ctx.drawImage(imgs[0],0,0);
-                    ctx.restore();
-
-                    ctx.save();
-                    ctx.rotate(10*Math.PI/180);
-                    ctx.beginPath();
-                    ctx.rect(400,100,w,h);
-                    ctx.clip();
-                    ctx.drawImage(imgs[1],0,0);
-                    ctx.restore();
+                    // ctx.rotate(10*Math.PI/180);
+                    // ctx.rect(100,100,w,h);
+                    // ctx.clip();
+                    // ctx.drawImage(imgs[0],0,0);
+                    // ctx.restore();
+                    //
+                    // ctx.save();
+                    // ctx.rotate(10*Math.PI/180);
+                    // ctx.beginPath();
+                    // ctx.rect(400,100,w,h);
+                    // ctx.clip();
+                    // ctx.drawImage(imgs[1],0,0);
+                    // ctx.restore();
 
 
 
@@ -212,11 +225,11 @@
                         {x:info.center.x+width*0.5,y:info.center.y+height*0.5},
                         {x:info.center.x-width*0.5,y:info.center.y+height*0.5}
                     ];
-
                 }
+                
                 function two_dimensional_rotate(center,position,rad){
-                    return { 
-                        x: ((position.x-center.x)*Math.cos(rad) - (position.y-center.y)*Math.sin(rad))+center.x, 
+                    return {
+                        x: ((position.x-center.x)*Math.cos(rad) - (position.y-center.y)*Math.sin(rad))+center.x,
                         y: ((position.x-center.x)*Math.sin(rad) + (position.y-center.y)*Math.cos(rad))+center.y
                     }
                 }
@@ -228,7 +241,7 @@
 
 
 
-<!--  
+<!--
  HTMLCanvasElement
 
     toDataURL()

@@ -1,0 +1,216 @@
+<html>
+  <head>
+    <title>first three.js app</title>
+    <style>
+      body {
+        margin: 0;
+      }
+    </style>
+
+    <script type="x-shader/x-vertex" id="vertexshader">
+
+      uniform float amplitude;
+
+      attribute vec3 customColor;
+      attribute vec3 displacement;
+
+      varying vec3 vNormal;
+      varying vec3 vColor;
+
+      void main() {
+
+        vNormal = normal;
+        vColor = customColor;
+
+        vec3 newPosition = position + normal * amplitude * displacement;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );
+
+      }
+
+    </script>
+
+    <script type="x-shader/x-fragment" id="fragmentshader">
+
+      // varying vec3 vNormal;
+      // varying vec3 vColor;
+
+      // void main() {
+
+      //   const float ambient = 0.4;
+
+      //   vec3 light = vec3( 1.0 );
+      //   light = normalize( light );
+
+      //   float directional = max( dot( vNormal, light ), 0.0 );
+
+      //   gl_FragColor = vec4( ( directional + ambient ) * vColor, 1.0 );
+
+      // }
+
+      precision highp float;
+
+    uniform sampler2D map;
+
+    varying vec2 vUv;
+
+    void main() {
+
+      gl_FragColor = texture2D(map, vUv);
+
+    }
+
+    </script>
+
+  </head>
+  <body>
+
+    <script src="build/three.min.js"></script>
+    <script src="js/modifiers/ExplodeModifier.js"></script>
+    <script src="js/modifiers/TessellateModifier.js"></script>
+    <script src="js/controls/TrackballControls.js"></script>
+    <script>
+      var scene   = new THREE.Scene();
+      // scene.fog = new THREE.Fog( 0xffffff, 100, 1000 );
+      // scene.fog.color.setHSL( 0.6, 0, 1 );
+
+      var camera  = new THREE.PerspectiveCamera(40,window.innerWidth/window.innerHeight,0.1,10000);
+
+      camera.position.z = 1000;
+
+      var renderer = new THREE.WebGLRenderer({antialias:true});
+      renderer.setClearColor( 0xDDF392 );
+      renderer.setSize(window.innerWidth,window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      var lights = [];
+      lights[ 0 ] = new THREE.PointLight( 0xffffff, 1, 0 );
+      lights[ 1 ] = new THREE.PointLight( 0xffffff, 1, 0 );
+      lights[ 2 ] = new THREE.PointLight( 0xffffff, 1, 0 );
+
+      lights[ 0 ].position.set( 0, 200, 110 );
+      lights[ 1 ].position.set( 100, 200, 100 );
+      lights[ 2 ].position.set( - 100, - 200, - 100 );
+
+      scene.add( lights[ 0 ] );
+
+      var geometry = new THREE.PlaneGeometry(16,9,1);
+      var texture  = new THREE.TextureLoader().load('./textures/gallery/hollywood.jpg');
+      // var material = new THREE.RawShaderMaterial({
+      //   uniforms: {
+      //     map: { value: texture }
+      //   },
+      //   // map:texture,
+      //   // color: 0x156289,
+      //   emissive: 0x072534,
+      //   side: THREE.DoubleSide,
+      //   shading: THREE.FlatShading,
+      //   wireframe:false
+      // } );
+
+        var material = new THREE.RawShaderMaterial( {
+
+        uniforms: {
+          map: { value: texture }
+        },
+        vertexShader: document.getElementById( 'vertexShader' ).textContent,
+        fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+        side: THREE.DoubleSide,
+        transparent: false
+
+      } );
+
+      // var tessellateModifier = new THREE.TessellateModifier( 2 );
+      // for ( var i = 0; i < 6; i ++ ) {
+      //   tessellateModifier.modify( geometry );
+      // }
+
+      var explodeModifier = new THREE.ExplodeModifier();
+      explodeModifier.modify( geometry );
+
+      var numFaces = geometry.faces.length;
+      console.log(numFaces)
+
+      geometry = new THREE.BufferGeometry().fromGeometry( geometry );
+
+      var colors = new Float32Array( numFaces * 3 * 3 );
+      var displacement = new Float32Array( numFaces * 3 * 3 );
+
+      var color = new THREE.Color();
+
+      for ( var f = 0; f < numFaces; f ++ ) {
+
+        var index = 9 * f;
+
+        var h = 0.2 * Math.random();
+        var s = 0.5 + 0.5 * Math.random();
+        var l = 0.5 + 0.5 * Math.random();
+
+        color.setHSL( h, s, l );
+
+        var d = 10 * ( 0.5 - Math.random() );
+
+        for ( var i = 0; i < 3; i ++ ) {
+
+          colors[ index + ( 3 * i )     ] = color.r;
+          colors[ index + ( 3 * i ) + 1 ] = color.g;
+          colors[ index + ( 3 * i ) + 2 ] = color.b;
+
+          displacement[ index + ( 3 * i )     ] = d;
+          displacement[ index + ( 3 * i ) + 1 ] = d;
+          displacement[ index + ( 3 * i ) + 2 ] = d;
+
+        }
+
+      }
+
+      // console.log(geometry.addAttribute);
+      geometry.addAttribute( 'customColor', new THREE.BufferAttribute( colors, 3 ) );
+      geometry.addAttribute( 'displacement', new THREE.BufferAttribute( displacement, 3 ) );
+
+      uniforms = {
+        amplitude: { type: "f", value: 0.0 }
+      };
+
+      var shaderMaterial = new THREE.ShaderMaterial( {
+        uniforms:       uniforms,
+        vertexShader:   document.getElementById( 'vertexshader' ).textContent,
+        fragmentShader: document.getElementById( 'fragmentshader' ).textContent
+      });
+
+      //
+
+      mesh = new THREE.Mesh( geometry, shaderMaterial );
+
+      scene.add( mesh );
+
+      
+
+      camera.position.z = 10;
+
+
+
+
+      // var plane = new THREE.Mesh( geometry, material );
+      // scene.add( plane );
+
+      window.addEventListener( 'resize', onWindowResize, false );
+      var controls = new THREE.TrackballControls( camera );
+
+      var render = function(){
+        var time = Date.now() * 0.001;
+        uniforms.amplitude.value = 1.0 + Math.sin( time * 0.5 )*10;
+        requestAnimationFrame(render);
+        controls.update();
+        renderer.render(scene, camera);
+      }
+
+      function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize( window.innerWidth, window.innerHeight );
+      }
+
+      render();
+    </script>
+  </body>
+</html>

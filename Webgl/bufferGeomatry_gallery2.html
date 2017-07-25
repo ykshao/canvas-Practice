@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>three.js webgl</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+      body {
+        width:100%; height:100%;
+        background-color: #fff;
+        margin:0 auto;
+        overflow: hidden;
+      }
+
+      .arr-l,.arr-r {
+        position: absolute;
+        width:50px; height:50px;
+        background-color: #fff;
+        border-radius: 50%;
+        top:50%;
+        padding-top: -25px;
+        margin:0;
+        text-align: center;
+        font-size: 11px;
+        color:#333;
+        text-transform: uppercase;
+        line-height: 50px;
+        font-family: Verdana, Arial, Helvetica, sans-serif;
+        transition:0.2s cubic-bezier(.43,.05,.17,1);
+        cursor:pointer;
+      }
+      .arr-l:hover,.arr-r:hover{
+        transform:scale(1.2);
+        -webkit-transform:scale(1.2);
+      }
+      .arr-l { left :20px;}
+      .arr-r { right:20px;}
+    </style>
+    <script src="js/libs/jquery-1.10.2.min.js"></script>
+    <script src="js/plugins.js"></script>
+    <script src="build/three.min.js"></script>
+    <script src="js/polygon_engine.js"></script>
+  </head>
+  <body>
+    <figure class="arr-l">prev</figure>
+    <figure class="arr-r">next</figure>
+    <script>
+      var camera,renderer,scene;
+      var width,height,halfWidth,halfHeight,aspect;
+      var config = {
+        fov:75,
+        near:1,
+        far:10000
+      };
+      var mouse = {x:0,y:0};
+      var wheel = {x:0,y:0,ox:0,oy:0};
+      var renderID;
+
+      var texture;
+      var texturePath = [
+          'textures/gallery/catanddog.jpg',
+          'textures/gallery/sanf.JPG',
+          'textures/gallery/hollywood.jpg',
+          'textures/gallery/sand_for_polygon.jpg',
+          'textures/gallery/sand2_for_polygon.jpg',
+          'textures/gallery/sand3_for_polygon.jpg',
+          'textures/gallery/house_for_polygon.jpg'
+        ];
+      var polygonInformation = [];
+      var crtID = 0, oldID = 0;
+      var isFirst   = true;
+      var isLoading = false;
+      var cameraZ = 500;
+
+      var triangles = 8000;
+      var n = 500, n2 = n/2;  // triangles spread in the cube
+      var d = 100, d2 = d/2; // individual triangle size
+      var radius = 2000;
+      var mesh,material,geometry;
+      var _triangles,_positions,_positions_old,_normals,_colors;
+      var rotDirection      = 1;
+      var updateDuration    = 1.5,
+          updateDelayOffset = 0.8,
+          initDuration      = 0.8,
+          initDelayOffset   = 1;
+
+      function setup(){
+        aspect  = window.innerWidth/window.innerHeight;
+        scene   = new THREE.Scene();
+        camera  = new THREE.PerspectiveCamera(config.fov,aspect,config.near,config.far);
+        renderer = new THREE.WebGLRenderer({antialias:true});
+        renderer.setClearColor(0x000000,0);
+        camera.position.z = cameraZ;
+
+        renderer.setSize(window.innerWidth,window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+        onResize();
+
+        addEvent();
+        
+        var light1 = new THREE.DirectionalLight( 0xffffff,1);
+        light1.position.set( 1, 1, -2 );
+        scene.add( light1 );
+
+        var light2 = new THREE.DirectionalLight( 0xffffff,1);
+        light2.position.set( 1,-1, 2 );
+        scene.add( light2 );
+
+        makeFragment();
+        imgLoad(0);
+      }
+
+      function addEvent(){
+        document.addEventListener( 'mousemove', onMouseMove, false );
+        window.addEventListener( 'resize', onResize, false );
+        document.addEventListener( 'mousewheel', onScroll);
+
+        $('.arr-r').on('click',function(){
+          rotDirection = -1;
+          if(!isLoading){
+            oldID = crtID;
+            crtID++;
+            if(crtID>texturePath.length-1)crtID = 0;
+            imgLoad(crtID);
+          }
+        });
+
+        $('.arr-l').on('click',function(){
+          rotDirection = 1;
+          if(!isLoading){
+            oldID = crtID;
+            crtID--;
+            if(crtID<0)crtID = texturePath.length-1;
+            imgLoad(crtID);
+          }
+        });
+      }
+
+      var bgs = [];
+      function setBG(texture,width,height){
+        var w = width, h = height;
+        var geometry  = new THREE.PlaneGeometry(w,h,1,1);
+        var material  = new THREE.MeshBasicMaterial({map:texture,side:THREE.DoubleSide,transparent:true,opacity:0});
+        var mesh      = new THREE.Mesh(geometry,material);
+        bgs[crtID] = {geometry:geometry,material:material,mesh:mesh};
+        mesh.position.z = -100;
+        // scene.add(mesh);
+      }
+
+      function imgLoad(id){
+        if(isLoading)return;
+        if(oldID!=crtID){
+          TweenLite.to(TweenLite.to(bgs[oldID].material,0.5,{opacity:0,ease:Power4.easeInOut}));
+          TweenLite.to(TweenLite.to(bgs[oldID].mesh.position,0.5,{z:-100,ease:Power4.easeInOut}));
+        }
+        isLoading = true;
+        if(!polygonInformation[id]){
+          var imgPath = texturePath[id];
+          var polygonG = new PolygonGenerator();
+          polygonG.getPolygon(imgPath,function(polygons,width,height){
+            var texture = new THREE.TextureLoader().load(imgPath,function(){
+              setBG(texture,width,height);
+            });
+            setFragment(id,polygons,texture,width,height);
+          });
+        }else{
+          changeImage(polygonInformation[id]);
+        }
+      }
+
+      function changeImage(fragmentInfo){
+        tgFragmentInfo = fragmentInfo;
+       
+        TweenLite.to(mesh.rotation,5,{y:mesh.rotation.y+Math.PI*4*rotDirection,ease:Expo.easeInOut,
+          onComplete:function(){
+          },
+          onStart:function(){
+            initFragment(1);
+            setTimeout(function(){
+              updateFragment(0);
+            },1500);
+          },
+          onComplete:function(){
+          }
+        });
+      }
+
+      function makeFragment(){
+        var positions = new Float32Array( triangles * 3 * 3 );
+        var normals = new Int16Array( triangles * 3 * 3 );
+        var colors = new Uint8Array( triangles * 3 * 3 );
+        var cnt = 0;
+        var pA = new THREE.Vector3();
+        var pB = new THREE.Vector3();
+        var pC = new THREE.Vector3();
+        var cb = new THREE.Vector3();
+        var ab = new THREE.Vector3();
+        var color = new THREE.Color();
+
+        var cnt = 0;
+        var t = 0.0003;//360/positions.length*0.001*Math.PI/180
+        var type = Math.floor(Math.random()*1);
+        console.log(type)
+        switch(type){
+          case 0 : type = 1; break;
+          case 1 : type = 10; break;
+          default : type = 1; break;
+        }
+        for ( var i = 0; i < positions.length; i += 9 ) {
+          /* ************************************************************
+            Position Set
+          ************************************************************ */
+          var  radianS = i*type*Math.PI/180;
+          var  radianT = i+1*Math.PI/180;
+          var  x = (radius+i*t) * Math.sin(radianS) * Math.cos(radianT);
+          var  y = (radius+i*t) * Math.cos(radianS);
+          var  z = (radius+i*t) * Math.sin(radianS) * Math.sin(radianT);
+
+          x += Math.random() * n - n2;
+          y += Math.random() * n - n2;
+          z += Math.random() * n - n2;
+          d = t*i;
+
+          // _x = Math.cos(theta) * Math.sin(phi) * radius;
+          // _y = Math.sin(theta) * Math.sin(phi) * radius;
+          // _z = -Math.cos(phi) * radius;
+
+          var limit = 500;
+
+          // if(i<positions.length*0.5){
+          //   x = x>0?Math.max(limit,x):Math.min(-limit,x);
+          //   y = y>0?Math.max(limit,y):Math.min(-limit,y);
+          //   z = z>0?Math.max(limit,z):Math.min(-limit,z);  
+          // }
+          
+ 
+          //vertex1
+          var ax = x + Math.random() * d - d2;
+          var ay = y + Math.random() * d - d2;
+          var az = z + Math.random() * d - d2;
+
+          //vertex2
+          var bx = x + Math.random() * d - d2;
+          var by = y + Math.random() * d - d2;
+          var bz = z + Math.random() * d - d2;
+
+          //vertex3
+          var cx = x + Math.random() * d - d2;
+          var cy = y + Math.random() * d - d2;
+          var cz = z + Math.random() * d - d2;
+
+          cnt++;
+
+          //vertex1
+          positions[ i ]     = ax;
+          positions[ i + 1 ] = ay;
+          positions[ i + 2 ] = az;
+          //vertex2
+          positions[ i + 3 ] = bx;
+          positions[ i + 4 ] = by;
+          positions[ i + 5 ] = bz;
+          //vertex3
+          positions[ i + 6 ] = cx;
+          positions[ i + 7 ] = cy;
+          positions[ i + 8 ] = cz;
+
+
+          // flat face normals
+          pA.set( ax, ay, az );
+          pB.set( bx, by, bz );
+          pC.set( cx, cy, cz );
+          /* ************************************************************
+            normals Set
+          ************************************************************ */
+          cb.subVectors( pC, pB );
+          ab.subVectors( pA, pB );
+          cb.cross( ab );
+          cb.normalize();
+
+          var nx = cb.x;
+          var ny = cb.y;
+          var nz = cb.z;
+
+          normals[ i ]     = nx * 32767;
+          normals[ i + 1 ] = ny * 32767;
+          normals[ i + 2 ] = nz * 32767;
+          normals[ i + 3 ] = nx * 32767;
+          normals[ i + 4 ] = ny * 32767;
+          normals[ i + 5 ] = nz * 32767;
+          normals[ i + 6 ] = nx * 32767;
+          normals[ i + 7 ] = ny * 32767;
+          normals[ i + 8 ] = nz * 32767;
+
+          // colors
+          var r = Math.random()*255, 
+              g = Math.random()*255,
+              b = Math.random()*255;
+
+          color.setRGB( r, g, b );
+
+          colors[ i ]     = color.r;
+          colors[ i + 1 ] = color.g;
+          colors[ i + 2 ] = color.b;
+          colors[ i + 3 ] = color.r;
+          colors[ i + 4 ] = color.g;
+          colors[ i + 5 ] = color.b;
+          colors[ i + 6 ] = color.r;
+          colors[ i + 7 ] = color.g;
+          colors[ i + 8 ] = color.b;
+          cnt++;
+        }
+
+        _positions_old = [];
+        for(var i=0; i<positions.length; i++){
+          _positions_old[i] = positions[i];
+        }
+        _triangles = triangles,
+        _positions = positions,
+        _normals = normals;
+        _colors = colors;
+        geometry = new THREE.BufferGeometry();
+        geometry.addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
+        geometry.addAttribute( 'normal', new THREE.BufferAttribute( normals, 3, true ) );
+        geometry.addAttribute( 'color', new THREE.BufferAttribute( colors, 3, true ) );
+        geometry.computeBoundingSphere();
+        var material = new THREE.MeshPhongMaterial( {
+          shininess: 30,
+          bumpScale: 1,
+          side: THREE.DoubleSide,
+          vertexColors: THREE.VertexColors
+        } );
+        mesh = new THREE.Mesh( geometry, material );
+        scene.add( mesh );
+        mesh.rotation.x = Math.PI;
+        isLoading = false;
+        isFirst = false;
+      }
+
+      function setFragment(id,polygons,texture,width,height){
+        var triangles = polygons.length;
+        var positions = new Float32Array( triangles * 3 * 3 );
+        var normals = new Int16Array( triangles * 3 * 3 );
+        var colors = new Uint8Array( triangles * 3 * 3 );
+        var pA = new THREE.Vector3();
+        var pB = new THREE.Vector3();
+        var pC = new THREE.Vector3();
+        var cb = new THREE.Vector3();
+        var ab = new THREE.Vector3();
+        var color = new THREE.Color();
+        var cnt = 0;
+        for(var i=0; i<positions.length; i += 9) {
+          
+          /* ************************************************************
+            Position Set
+          ************************************************************ */
+          var p = polygons[cnt],
+              node = p.nodes,
+              c = p.color;
+          cnt++;
+
+          var z = 0;
+          //vertex1
+          var ax = node[0].x;
+          var ay = node[0].y;
+          var az = z;
+
+          //vertex2
+          var bx = node[1].x;
+          var by = node[1].y;
+          var bz = z;
+
+          //vertex3
+          var cx = node[2].x;
+          var cy = node[2].y;
+          var cz = z;
+
+          ax -= width*0.5;
+          bx -= width*0.5;
+          cx -= width*0.5;
+
+          ay += -height*0.5;
+          by += -height*0.5;
+          cy += -height*0.5;
+
+          //vertex1
+          positions[ i ]     = ax;
+          positions[ i + 1 ] = ay;
+          positions[ i + 2 ] = az;
+
+          //vertex2
+          positions[ i + 3 ] = bx;
+          positions[ i + 4 ] = by;
+          positions[ i + 5 ] = bz;
+
+          //vertex3
+          positions[ i + 6 ] = cx;
+          positions[ i + 7 ] = cy;
+          positions[ i + 8 ] = cz;
+
+          // console.log(positions[ i + 2 ],positions[ i + 5 ],positions[ i + 8 ]);
+
+          // flat face normals
+          pA.set( ax, ay, az );
+          pB.set( bx, by, bz );
+          pC.set( cx, cy, cz );
+
+
+          /* ************************************************************
+            normals Set
+          ************************************************************ */
+
+          cb.subVectors( pC, pB );
+          ab.subVectors( pA, pB );
+          cb.cross( ab );
+          cb.normalize();
+
+          var nx = cb.x;
+          var ny = cb.y;
+          var nz = cb.z;
+
+          normals[ i ]     = nx * 32767;
+          normals[ i + 1 ] = ny * 32767;
+          normals[ i + 2 ] = nz * 32767;
+          normals[ i + 3 ] = nx * 32767;
+          normals[ i + 4 ] = ny * 32767;
+          normals[ i + 5 ] = nz * 32767;
+          normals[ i + 6 ] = nx * 32767;
+          normals[ i + 7 ] = ny * 32767;
+          normals[ i + 8 ] = nz * 32767;
+
+          // colors
+          var r = c.r, 
+              g = c.g,
+              b = c.b;
+
+          color.setRGB( r, g, b );
+
+          colors[ i ]     = color.r;
+          colors[ i + 1 ] = color.g;
+          colors[ i + 2 ] = color.b;
+
+          colors[ i + 3 ] = color.r;
+          colors[ i + 4 ] = color.g;
+          colors[ i + 5 ] = color.b;
+
+          colors[ i + 6 ] = color.r;
+          colors[ i + 7 ] = color.g;
+          colors[ i + 8 ] = color.b;
+        }
+            
+        polygonInformation[id] = {
+          polygons:polygons,
+          positions:positions,
+          normals:normals,
+          colors:colors,
+          width:width,
+          height:height,
+          texture:texture
+        }
+        changeImage(polygonInformation[id]);
+      }
+
+      function updateFragment(del){
+        if(tgFragmentInfo){
+          var sp = 1;
+          var fp = tgFragmentInfo.positions,
+              fc = tgFragmentInfo.colors;
+
+          var pA = new THREE.Vector3();
+          var pB = new THREE.Vector3();
+          var pC = new THREE.Vector3();
+          var cb = new THREE.Vector3();
+          var ab = new THREE.Vector3();
+
+          var cnt = 0;
+          var duration = updateDuration, delay = 0, delayOffset = updateDelayOffset/fp.length;
+          var po = _positions_old,
+              c = _colors;
+          isLoading = false;
+          for(var i=0; i<fp.length; i+=9){
+            var ax = fp[i];
+            var ay = fp[i+1];
+            var az = fp[i+2];
+            var bx = fp[i+3];
+            var by = fp[i+4];
+            var bz = fp[i+5];
+            var cx = fp[i+6];
+            var cy = fp[i+7];
+            var cz = fp[i+8];
+
+            delay = i*delayOffset+del;
+
+            if(i == fp.length-9){
+              TweenLite.to(TweenLite.to(bgs[crtID].material,duration,{delay:delay+1,opacity:1,ease:Power4.easeInOut}));
+              TweenLite.to(TweenLite.to(bgs[crtID].mesh.position,0.5,{z:-10,ease:Power4.easeInOut}));
+              // isLoading = false;
+            }
+
+            /* ************************************************************
+              normals Set
+            ************************************************************ */
+            // flat face normals
+            pA.set( ax, ay, az );
+            pB.set( bx, by, bz );
+            pC.set( cx, cy, cz );
+            cb.subVectors( pC, pB );
+            ab.subVectors( pA, pB );
+            cb.cross( ab );
+            cb.normalize();
+
+            var nx = cb.x * 32767;
+            var ny = cb.y * 32767;
+            var nz = cb.z * 32767;
+
+            // changeFramentPosition2(i,_positions,fp,[nx,ny,nz],duration,delay,true);
+            changeFramentPosition(i+0,po[i+0],ax,nx,duration,delay+0*0.01,true);
+            changeFramentPosition(i+1,po[i+1],ay,ny,duration,delay+1*0.01,true);
+            changeFramentPosition(i+2,po[i+2],az,nz,duration,delay+2*0.01,true);
+            changeFramentPosition(i+3,po[i+3],bx,nx,duration,delay+3*0.01,true);
+            changeFramentPosition(i+4,po[i+4],by,ny,duration,delay+4*0.01,true);
+            changeFramentPosition(i+5,po[i+5],bz,nz,duration,delay+5*0.01,true);
+            changeFramentPosition(i+6,po[i+6],cx,nx,duration,delay+6*0.01,true);
+            changeFramentPosition(i+7,po[i+7],cy,ny,duration,delay+7*0.01,true);
+            changeFramentPosition(i+8,po[i+8],cz,nz,duration,delay+8*0.01,true);
+
+            // _normals[i+0] = nx;
+            // _normals[i+1] = ny;
+            // _normals[i+2] = nz;
+            // _normals[i+3] = nx;
+            // _normals[i+4] = ny;
+            // _normals[i+5] = nz;
+            // _normals[i+6] = nx;
+            // _normals[i+7] = ny;
+            // _normals[i+8] = nz;
+            // geometry.attributes.normal.needsUpdate = true;
+
+            changeFramentColor(i+0,fc[i+0],duration,delay);
+            changeFramentColor(i+1,fc[i+1],duration,delay);
+            changeFramentColor(i+2,fc[i+2],duration,delay);
+            changeFramentColor(i+3,fc[i+3],duration,delay);
+            changeFramentColor(i+4,fc[i+4],duration,delay);
+            changeFramentColor(i+5,fc[i+5],duration,delay);
+            changeFramentColor(i+6,fc[i+6],duration,delay);
+            changeFramentColor(i+7,fc[i+7],duration,delay);
+            changeFramentColor(i+8,fc[i+8],duration,delay);
+            cnt++;
+          }
+
+          // geometry.attributes.position.needsUpdate = true;
+          // geometry.attributes.normal.needsUpdate = true;
+          // geometry.attributes.color.needsUpdate = true;
+        }
+      }
+
+      function initFragment(del){
+        var po = _positions_old;
+        var pA = new THREE.Vector3();
+        var pB = new THREE.Vector3();
+        var pC = new THREE.Vector3();
+        var cb = new THREE.Vector3();
+        var ab = new THREE.Vector3();
+
+        var cnt = 0;
+        var fp = polygonInformation[oldID].positions;
+        var duration = initDuration, delay = 0, delayOffset = initDelayOffset/fp.length;
+
+        // console.log(_positions.length,fp.length);
+        var p = _positions,
+            c = _colors;
+        for(var i=0; i<fp.length; i+=9){
+          var ax = po[i];
+          var ay = po[i+1];
+          var az = po[i+2];
+          var bx = po[i+3];
+          var by = po[i+4];
+          var bz = po[i+5];
+          var cx = po[i+6];
+          var cy = po[i+7];
+          var cz = po[i+8];
+
+          delay = i*delayOffset+del;
+          // flat face normals
+          pA.set( ax, ay, az );
+          pB.set( bx, by, bz );
+          pC.set( cx, cy, cz );
+          /* ************************************************************
+            normals Set
+          ************************************************************ */
+          cb.subVectors( pC, pB );
+          ab.subVectors( pA, pB );
+          cb.cross( ab );
+          cb.normalize();
+
+          var nx = cb.x  * 32767;
+          var ny = cb.y  * 32767;
+          var nz = cb.z  * 32767;
+
+          changeFramentPosition2(i,p,_positions_old,[nx,ny,nz],duration,delay,false);
+
+          var r = 255,g = 255, b = 255;
+          // delay = 0;
+          changeFramentColor(i,r,duration,delay);
+          changeFramentColor(i+1,g,duration,delay);
+          changeFramentColor(i+2,b,duration,delay);
+          changeFramentColor(i+3,r,duration,delay);
+          changeFramentColor(i+4,g,duration,delay);
+          changeFramentColor(i+5,b,duration,delay);
+          changeFramentColor(i+6,r,duration,delay);
+          changeFramentColor(i+7,g,duration,delay);
+          changeFramentColor(i+8,b,duration,delay);
+          cnt++;
+        }
+
+        // geometry.attributes.position.needsUpdate = true;
+        // geometry.attributes.normal.needsUpdate = true;
+        // geometry.attributes.color.needsUpdate = true;
+      }
+
+      function changeFramentPosition(id,from,to,normal,duration,delay,updateNomal){
+        var p = _positions[id],
+            n = _normals[id],
+            offset = {a:from,b:n};
+        TweenLite.to(offset,duration,{delay:delay,a:to,b:normal,ease:Expo.easeInOut,
+          onUpdate:function(){
+            _positions[id]  = offset.a;
+            geometry.attributes.position.needsUpdate = true;
+            _normals[id]    = offset.b;
+            geometry.attributes.normal.needsUpdate = true;
+          },
+          onComplete:function(){
+            if(updateNomal){
+              // _normals[id]    = offset.b;
+              // geometry.attributes.normal.needsUpdate = true;
+            }
+          }
+        });
+      }
+
+      function changeFramentPosition2(id,from,to,normal,duration,delay,updateNomal){
+        var offset = {p:0};
+        TweenLite.to(offset,duration,{delay:delay,p:1,ease:Expo.easeInOut,
+          onUpdate:function(){
+            for(var i=0; i<9; i++){
+              var p0 = from[i+id],
+                  p1 = to[i+id],
+                  pp = offset.p;
+              _positions[i+id] += (p1-p0)*pp;
+
+              if(updateNomal)_normals[i+id] = normal[i%3];
+            }
+            geometry.attributes.position.needsUpdate = true;
+            if(updateNomal)geometry.attributes.normal.needsUpdate = true;
+          }
+        });
+      }
+
+      function changeFramentColor(id,tg,duration,delay){
+        var p = _colors[id],offset = {a:p};
+        TweenLite.to(offset,duration,{delay:delay,a:tg,ease:Power4.easeInOut,onUpdate:function(){
+          _colors[id] = offset.a;
+          geometry.attributes.color.needsUpdate = true;
+        }})
+      }
+
+      function shuffle(array){
+        var n = array.length, t, i;
+        while (n) {
+          i = Math.floor(Math.random() * n--);
+          t = array[n];
+          array[n] = array[i];
+          array[i] = t;
+        }
+        return array;
+      }
+
+      /* ************************************************************
+        Renering and Animation
+      ************************************************************ */
+      var tgFragmentInfo = null;
+      function animation(){
+        var time = Date.now() * 0.001;
+        wheel.y *= 0.95;
+      }
+
+
+      function render(){
+        var time = performance.now();
+        // camera.position.x += ( -mouse.x - camera.position.x ) * 0.05;
+        camera.position.y += ( mouse.y - camera.position.y ) * 0.05;
+        camera.position.z += wheel.y*0.01;
+        camera.lookAt( scene.position );
+        renderer.render( scene, camera );
+      }
+
+      function update(){
+        animation();
+        render();
+        renderID = requestAnimationFrame( update );
+      }
+
+      /* ************************************************************
+          EVENT HANDLER
+      ************************************************************ */
+      function onResize(){
+        width   = window.innerWidth;
+        height  = window.innerHeight;
+        halfWidth = width*0.5;
+        halfHeight = height*0.5;
+        aspect  = width/height;
+        
+        camera.aspect = width/height;
+        renderer.setSize(width,height);
+        camera.updateProjectionMatrix();
+      }
+
+      function onMouseMove( e ) {
+        mouse.x = ( e.clientX - halfWidth );
+        mouse.y = ( e.clientY - halfHeight );
+      }
+
+      function onScroll(e){
+        wheel.y += e.deltaY;
+      }
+
+      setup();
+      update();
+
+    </script>
+  </body>
+</html>

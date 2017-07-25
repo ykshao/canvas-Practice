@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1">
+        <meta name="description" content="">
+
+        <meta name="copyright" content="" />
+        <meta name="description" content="" />
+        <meta name="keywords" content="">
+        
+        <meta property="og:title" content=""/>
+        <meta property="og:description" content="" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="" id="ogUrl" />
+        <meta property="og:image" content="" />
+
+        <meta name="tw_text" content="" id="twText" />
+        <meta name="tw_url" content="" id="twUrl" />
+        <title></title>
+        
+        <link rel="stylesheet" href="css/normalize.css">
+        <style>
+            #a {
+                position: absolute;
+                width: 100px;
+                height: 100px;
+                left:0;
+                background-color: #f00;
+            }
+        </style>
+        <script src="js/modernizr.custom.min.js"></script>
+        <script src="js/jquery-1.10.2.min.js"></script>
+        <script src="js/jquery.easing.1.3.js"></script>
+        <script src="js/plugins.js"></script>
+        <script>
+            $.easing.quake = function(t) {
+                var b;
+                b = Math.exp(-t * 10) * Math.cos(Math.PI * 2 * t * 10);
+                if (t >= 1) {
+                  return 1;
+                }
+                return 1 - b;
+              };
+        </script>
+        <script>
+            function myEase(t, s, c, d) {
+                // return s+(t=t/d);
+                var s;
+                s = Math.exp(-t * 10) * Math.cos(Math.PI * 2 * t * 10);
+                if (t >= 1) {
+                  return 1;
+                }
+                return 1 - s;
+            }
+
+            //http://www.timotheegroleau.com/Flash/experiments/easing_function_generator.htm
+
+
+            var ease = {
+                myEase : function(t, s, c, d){
+                    var s;
+                    s = Math.exp(-t * 10) * Math.cos(Math.PI * 2 * t * 10);
+                    if (t >= 1) {
+                      return 1;
+                    }
+                    return 1 - s
+                },
+                myEase2 :function(t, s, c, d){
+                    if ((t/=d/2) < 1) return c/2*t*t + s;
+                    return c/2*((t-=2)*t*t + 2) + s;
+                },
+
+                myEase3 :function(t, s, c, d){
+                    var ts=(t/=d)*t;
+                    var tc=ts*t;
+                    return s+c*(0.847500000000002*tc*ts + 0.0575000000000001*ts*ts + -7.305*tc + 9.5*ts + -2.1*t);
+                },
+
+                easeInBack2: function (x, t, b, c, d, s) {
+                    if (s == undefined) s = 1.70158;
+                    return c*(t/=d)*t*((s+1)*t - s) + b;
+                },
+                easeOutBack2: function (x, t, b, c, d, s) {
+                    if (s == undefined) s = 1.70158;
+                    return c*((t=t/d-1)*t*((s+1)*t + s) + 1) + b;
+                },
+                easeInOutBack2: function (x, t, b, c, d, s) {
+                    if (s == undefined) s = 0; 
+                    if ((t/=d/2) < 1) return c/2*(t*t*(((s*=(0))+1)*t - s)) + b;
+                    return c/2*((t-=2)*t*(((s*=(0))+1)*t + s) + 2) + b;
+                },
+                easeInQuint2: function (x, t, b, c, d) {
+                    return c*(t/=d)*t*t*t*t + b;
+                },
+                easeOutQuint2: function (x, t, b, c, d) {
+                    return c*((t=t/d-1)*t*t*t*t*t*t + 1) + b;
+                },
+                easeInOutQuint2: function (x, t, b, c, d) {
+                    if ((t/=d/2) < 1) return c/2*t*t*t*t*t + b;
+                    return c/2*((t-=2)*t*t*t*t*t*t + 2) + b;
+                },
+                easeInOutQuint3: function (x, t, b, c, d) {
+                    if ((t/=d/2) < 1) return c/2*t*t + b;
+                    return c/2*((t-=2)*t*t + 2) + b;
+                }
+            }
+
+            console.log(ease);
+
+            $(document).ready(function(){
+                // $("#a").stop().animate({left:100},1000,'quake')  
+
+                TweenLite.to($("#a"),1,{x:500,ease:new Ease(ease.myEase3)});
+            });
+        </script>
+    </head>
+    <body>
+        <div id="a"></div>
+    </body>
+</html>

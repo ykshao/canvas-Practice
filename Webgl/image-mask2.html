@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>three.js webgl</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+      body {
+        position: absolute;
+        width: 100%; height:100%;
+        background-color: #fff;
+        margin:0 auto;
+        overflow: hidden;
+      }
+
+    </style>
+    <script src="build/three.min.js"></script>
+  </head>
+  <body>
+    
+    <script>
+      var camera,renderer,scene;
+      var width,height,aspect;
+      var config = {
+        fov:75,
+        near:1,
+        far:10000
+      }
+      var mouse = {x:0,y:0};
+      var wheel = {x:0,y:0,ox:0,oy:0};
+      var renderID;
+
+      var texture;
+      var cube_count,
+          meshes = [],
+          materials = [],
+          xgrid = 20,
+          ygrid = 10;
+
+      function setup(){
+        aspect  = window.innerWidth/window.innerHeight;
+        scene   = new THREE.Scene();
+        camera  = new THREE.PerspectiveCamera(config.fov,aspect,config.near,config.far);
+        renderer = new THREE.WebGLRenderer({});
+        renderer.setClearColor(0xffffff,0.5);
+        camera.position.z = 300;
+
+        var light = new THREE.DirectionalLight( 0xffffff );
+        light.position.set( 0.5, 1, 1 ).normalize();
+        scene.add( light );
+
+        renderer.setSize(window.innerWidth,window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+        onResize();
+        addEvent();
+
+        texture = new THREE.TextureLoader().load('textures/hollywood.jpg',function(){setBG()});
+      }
+
+
+      var triangles = [], triangle_num = 0;
+      function setBG(){
+        var aspectW = 1; aspectH = texture.image.height/texture.image.width;
+        var xgrid = 20, ygrid = Math.floor(xgrid*aspectH);
+        var xsize = xgrid/aspectW;
+        var ysize = xsize*aspectH;
+        var size = 1;
+        
+
+        triangle_num = xgrid*ygrid;
+        for ( i = 0; i < xgrid; i ++ ) {
+        for ( j = 0; j < ygrid; j ++ ) {
+          var ox = i,
+              oy = j;
+
+          var geometry = new THREE.Geometry();
+          
+          geometry.vertices[0] = new THREE.Vector3(xsize,ysize,0);
+          geometry.vertices[1] = new THREE.Vector3(-xsize,ysize,0);
+          geometry.vertices[2] = new THREE.Vector3(0,-ysize,0);
+
+          if(i%2 == 0){
+            geometry.vertices[0] = new THREE.Vector3(0,ysize,0);
+            geometry.vertices[1] = new THREE.Vector3(-xsize,-ysize,0);
+            geometry.vertices[2] = new THREE.Vector3(xsize,-ysize,0);
+          }
+
+          var material = new THREE.MeshBasicMaterial({map:texture,opacity:1,transparent:true});
+          material.side = THREE.DoubleSide;
+          geometry.faces.push( new THREE.Face3( 0, 1, 2 ) );
+          geometry.faceVertexUvs[0].push([
+            new THREE.Vector2(geometry.vertices[0].x/xsize, geometry.vertices[0].y/ysize*0.5),
+            new THREE.Vector2(geometry.vertices[1].x/xsize, geometry.vertices[1].y/ysize*0.5),
+            new THREE.Vector2(geometry.vertices[2].x/xsize, geometry.vertices[2].y/ysize*0.5)
+          ]);
+
+          // geometry = new THREE.PlaneGeometry( xsize, ysize, xsize );
+
+          change_uvs( geometry, 1/xgrid, 1/ygrid, ox, oy );
+          var mesh = new THREE.Mesh(geometry,material);
+          mesh.position.x = ox*xsize-xsize*xgrid*0.5;
+          mesh.position.y = oy*ysize*2-ysize*ygrid;
+          mesh.position.z = 150;
+
+
+          mesh.vx = Math.random();
+          mesh.vy = Math.random();
+          mesh.vz = Math.random();
+
+          mesh.ox = mesh.position.x;
+          mesh.oy = mesh.position.y;
+          mesh.oz = mesh.position.z;
+
+          triangles.push(mesh);
+
+          scene.add(mesh);
+        }}
+      }
+
+      function addEvent(){
+        document.addEventListener( 'mousemove', onMouseMove, false );
+        window.addEventListener( 'resize', onResize, false );
+        document.addEventListener( 'mousewheel', onScroll);
+      }
+
+      function change_uvs( geometry, unitx, unity, offsetx, offsety ) {
+        var faceVertexUvs = geometry.faceVertexUvs[ 0 ];
+        for ( var i = 0; i < faceVertexUvs.length; i ++ ) {
+          var uvs = faceVertexUvs[ i ];
+          for ( var j = 0; j < uvs.length; j ++ ) {
+            var uv = uvs[ j ];
+            uv.x = ( uv.x + offsetx ) * unitx;
+            uv.y = ( uv.y + offsety ) * unity;
+          }
+        }
+      }
+
+
+      function onResize(){
+        width   = window.innerWidth;
+        height  = window.innerHeight;
+        aspect  = width/height;
+        
+        camera.aspect = width/height;
+        renderer.setSize(width,height);
+        camera.updateProjectionMatrix();
+      }
+
+      function onMouseMove( e ) {
+        mouse.x = ( e.clientX - width*0.5 );
+        mouse.y = ( e.clientY - height*0.5 );
+      }
+
+      function onScroll(e){
+        wheel.y += e.deltaY;
+      }
+
+      function animation(){
+        var time = Date.now() * 0.001;
+        wheel.y *= 0.95;
+
+        for ( i = 0; i < triangle_num; i ++ ) {
+            mesh = triangles[ i ];
+            mesh.position.x += mesh.vx*wheel.y*0.01;
+            mesh.position.y += mesh.vy*wheel.y*0.01;
+            mesh.position.z += mesh.vz*wheel.y*0.1;
+
+            mesh.rotation.x += mesh.vx*wheel.y*0.001;
+            mesh.rotation.y += mesh.vy*wheel.y*0.001;
+            
+
+          }
+      }
+
+      var time;
+      function render(){
+        camera.position.x += ( mouse.x - camera.position.x ) * 0.05;
+        camera.position.y += ( - mouse.y - camera.position.y ) * 0.05;
+        camera.lookAt( scene.position );
+        renderer.render( scene, camera );
+      }
+
+      function update(){
+        animation();
+        render();
+        renderID = requestAnimationFrame( update );
+      }
+      requestAnimationFrame( update );
+
+
+      setup();
+      update();
+
+    </script>
+  </body>
+</html>

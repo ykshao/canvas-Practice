@@ -1,0 +1,365 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>three.js webgl</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+      body {
+        color: #ffffff;
+        font-family:Monospace;
+        font-size:13px;
+        text-align:center;
+        font-weight: bold;
+
+        margin: 0px;
+        overflow: hidden;
+        background:url(./textures/bg-boy01.jpg);
+        background-size: cover;
+      }
+
+    </style>
+  </head>
+
+  <body>
+    <div id="container"></div>
+    <script src="build/three.min.js"></script>
+    <script src="js/Detector.js"></script>
+    <script src="js/libs/stats.min.js"></script>
+    <script src="js/plugins.js"></script>
+    <script>
+      if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+      var _bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+      var Particles = function(){
+        var scene,camera,renderer;
+        var config = {
+          fov:45,
+          near:1,
+          far:1000
+        }
+        var aspect = 1;
+        var aspectW = 1,aspectH = 1;
+        var renderID;
+        var planContainer = null, plane = null;
+        var pointObj1 = {container:null,out:null,inner:null};
+        var pointObj2 = {container:null,out:null,inner:null};
+        var mouse = new THREE.Vector2();
+        var mouseOld = new THREE.Vector2();
+        var mousePoint = new THREE.Vector3();
+        var mouseSpeed = {vx:0,vy:0,dis:0};
+        var raycaster,currentIntersected;
+        var isDown = false;
+        var worldOffset = {vx:1,vy:1,scale:.2};
+        var particles = {};
+        var types = ['cross','plus','cube','circle','square'];
+        this.gender = 'woman';
+
+        function setup(){
+          aspect    = window.innerWidth/window.innerHeight;
+          scene     = new THREE.Scene();
+          camera    = new THREE.PerspectiveCamera(config.fov,aspect,config.near,config.far);
+          renderer  = new THREE.WebGLRenderer({antialias:true,transparent:true,alpha:true});
+          renderer.setClearColor(0xffffff,0);
+          camera.position.z = 10;
+
+          renderer.setSize(window.innerWidth,window.innerHeight);
+          document.body.appendChild(renderer.domElement);
+          this.onResize();
+
+          raycaster = new THREE.Raycaster();
+
+          this.update = _bind(this.update,this);
+          this.onMouseMove  = _bind(this.onMouseMove,this);
+          this.onMouseDown  = _bind(this.onMouseDown,this);
+          this.onMouseUp    = _bind(this.onMouseUp,this);
+
+          addEvent.call(this);
+          textureCross = new THREE.TextureLoader().load( 'textures/cross.png' );
+          texturePlus = new THREE.TextureLoader().load( 'textures/plus.png' );
+          textureCircle = new THREE.TextureLoader().load( 'textures/circle.png' );
+
+          planContainer = new THREE.Object3D();
+          plane = new THREE.Mesh(new THREE.PlaneGeometry( aspectW*10, 1*10, 0, 0),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0}));
+          planContainer.add(plane);
+          scene.add(planContainer);
+
+          pointObj1.container = new THREE.Object3D();
+          pointObj2.container = new THREE.Object3D();
+
+          var lineMaterial = new THREE.LineBasicMaterial({
+            transparent:true,
+            color:0xffffff,
+            linejoin:"bevel",
+            linecap:"square",
+            linewidth:1
+          });
+
+          var geometry = new THREE.Geometry();
+          geometry.vertices.push(
+            new THREE.Vector3( -1, -1, 0),
+            new THREE.Vector3( 1, -1, 0 ),
+            new THREE.Vector3( 1, 1, 0 ),
+            new THREE.Vector3( -1, 1, 0 ),
+            new THREE.Vector3( -1, -1, 0 )
+          );
+
+
+          pointObj1.out = new THREE.Line( geometry, lineMaterial );
+          pointObj1.out.scale.x = worldOffset.scale;
+          pointObj1.out.scale.y = worldOffset.scale;
+          pointObj1.container.add(pointObj1.out);
+          scene.add(pointObj1.container);
+
+          var radius   = 100,
+              segments = 64,
+              geometry = new THREE.CircleGeometry( 1, segments );
+          geometry.vertices.shift();
+          geometry.computeLineDistances();
+
+          pointObj2.out = new THREE.Line(geometry, lineMaterial);
+          pointObj2.out.scale.x = worldOffset.scale;
+          pointObj2.out.scale.y = worldOffset.scale;
+          pointObj2.container.add(pointObj2.out);
+          scene.add(pointObj2.container);
+
+          pointObj1.out.scale.x = pointObj2.out.scale.x = pointObj1.out.scale.y = pointObj2.out.scale.y = 0.001;
+        }
+
+        function addEvent(){
+          window.addEventListener( 'resize', this.onResize, false );
+          document.addEventListener( 'mousemove', this.onMouseMove, false );
+          document.addEventListener( 'mousedown', this.onMouseDown, false );
+          document.addEventListener( 'mouseup', this.onMouseUp, false );
+        }
+
+        this.onResize = function(){
+          aspect = window.innerWidth/window.innerHeight;
+          aspectW = aspect*10;
+          aspectH = window.innerHeight/window.innerWidth;
+          camera.aspect = window.innerWidth / window.innerHeight;
+          camera.updateProjectionMatrix();
+          renderer.setSize( window.innerWidth, window.innerHeight );
+        }
+
+        this.onMouseMove = function(e){
+          e.preventDefault();
+          mouse.x = ( e.clientX / window.innerWidth ) * 2 - 1;
+          mouse.y = - ( e.clientY / window.innerHeight ) * 2 + 1;
+          this.mouseSpeedUpdate();
+
+          if(isDown){
+            var dis = Math.abs(mouseSpeed.dis);
+            if(dis < 0.02){
+
+            }else if(dis > 0.02 && dis < 0.05){
+              if(this.gender == 'woman'){
+                this.makeParticle('circle',mousePoint);
+              }else{
+                this.makeParticle('square',mousePoint);
+              }
+
+            }else if(dis> 0.05 && dis < 0.1){
+              this.makeParticle('cross',mousePoint);
+            }else if(dis> 0.15 && dis < 0.2){
+              this.makeParticle('plus',mousePoint);
+            }else{
+              if(this.gender == 'woman'){
+                this.makeParticle('sphere',mousePoint);
+              }else{
+                this.makeParticle('cube',mousePoint);  
+              }
+            }
+
+
+            // var p = this.makeParticle('',mousePoint);
+            // this.makeParticle('cross',mousePoint);
+            // this.addLine(p.mesh.position);
+          }
+
+          mouseOld = mouse.clone();
+
+        };
+        this.onMouseDown = function(){
+          if(!isDown){
+            if(this.gender == 'man')TweenLite.to(pointObj1.out.scale,0.6,{x:0.2,y:0.2,ease:Back.easeOut});
+            if(this.gender == 'woman')TweenLite.to(pointObj2.out.scale,0.6,{x:0.2,y:0.2,ease:Back.easeOut});
+            
+            this.makeParticle(types[Math.floor(types.length*Math.random())],mousePoint);
+          }
+          isDown = true;
+        };
+        this.onMouseUp = function(){
+          if(isDown){
+            var scale = 0.001;
+            if(this.gender == 'man')TweenLite.to(pointObj1.out.scale,0.6,{delay:0.2,x:scale,y:scale,ease:Back.easeInOut});
+            if(this.gender == 'woman')TweenLite.to(pointObj2.out.scale,0.6,{delay:0.2,x:scale,y:scale,ease:Back.easeInOut});
+          }
+          isDown = false;
+        };
+        
+        this.mouseSpeedUpdate = function(){
+          mouseSpeed.vx = mouse.x - mouseOld.x;
+          mouseSpeed.vy = mouse.y - mouseOld.y;
+          mouseSpeed.directionX = mouseSpeed.vx<0?-1:1;
+          mouseSpeed.directionY = mouseSpeed.vy<0?-1:1;
+          mouseSpeed.dis = Math.sqrt(mouseSpeed.vx*mouseSpeed.vx+mouseSpeed.vy*mouseSpeed.vy);
+        }
+
+        this.startRendering = function(){
+          renderID = requestAnimationFrame( this.update );
+        }
+
+        this.stopRendering = function(){
+        }
+
+        this.update = function(){
+          renderID = requestAnimationFrame( this.update );
+          raycaster.setFromCamera( mouse, camera );
+
+          var intersects = raycaster.intersectObjects( planContainer.children, true);
+          if ( intersects.length > 0 ) {
+            if ( currentIntersected !== undefined ) {
+            }
+            currentIntersected = intersects[ 0 ].object;
+            var point = intersects[0].point;
+            mousePoint.set(point.x,point.y,point.z);
+          } else {
+            if ( currentIntersected !== undefined ) {
+            }
+            currentIntersected = undefined;
+          }
+
+          this.animation();
+
+          renderer.render( scene, camera );
+        }
+        this.animation = function(){
+          pointObj1.out.rotation.z -= isDown?0.05:0;
+
+          this.slidingMove(pointObj1.container,mousePoint,0.3);
+          this.slidingMove(pointObj2.container,mousePoint,0.3);
+
+          for(var o in particles){
+            particles[o].update();
+          }
+
+          
+        }
+
+        this.slidingMove = function(tg,pos,speed){
+          tg.position.x += (pos.x-tg.position.x)*speed;
+          tg.position.y += (pos.y-tg.position.y)*speed;
+          tg.position.z += (pos.z-tg.position.z)*speed;
+        }
+        setup.call(this);
+
+        var makeNum = 0;
+        this.makeParticle = function(type,position){
+          var geo,mat,
+              matOption = {},
+              offsets = {scale:0.5,marginX:0,marginY:0,vx:0,vy:0,vr:Math.random()*0.2,duration:1000};
+
+          switch(type){
+            case 'cross'    : geo = new THREE.PlaneGeometry( worldOffset.scale, worldOffset.scale, 1,1);
+                              matOption.map = textureCross;
+                              break;
+            case 'plus'     : geo = new THREE.PlaneGeometry( worldOffset.scale, worldOffset.scale, 1,1);
+                              matOption.map = texturePlus;
+                              break;
+            case 'cube'     : var geo = new THREE.BoxGeometry( worldOffset.scale, worldOffset.scale, worldOffset.scale, 1);
+                              matOption.vertexColors = THREE.FaceColors;
+                              for ( var i = 0; i < geo.faces.length; i += 2 ) {
+                                var hex = i%6==0?0xffffff:0x64b0da;
+                                geo.faces[ i ].color.setHex( hex );
+                                geo.faces[ i + 1 ].color.setHex( hex );
+                              }
+                              break;
+            case 'sphere'   : var geo = new THREE.IcosahedronGeometry( worldOffset.scale, 0 );
+                              matOption.vertexColors = THREE.FaceColors;
+                              for ( var i = 0; i < geo.faces.length; i += 1 ) {
+                                var hex = i%3==0?0xffffff:0xfc6396;
+                                geo.faces[ i ].color.setHex( hex );
+                                // geo.faces[ i + 1 ].color.setHex( hex );
+                              }
+                              matOption.color = 0xffffff;
+                              break;
+            case 'circle'   : geo = new THREE.CircleGeometry( worldOffset.scale, 12 );
+                              matOption.color = 0xffffff;
+                              break;
+
+            case 'square'   : geo = new THREE.PlaneGeometry( worldOffset.scale, worldOffset.scale, 1,1);
+                              matOption.color = 0xffffff;
+                              break;
+          }
+          
+          var mat = new THREE.MeshBasicMaterial(matOption);
+          var mesh = new THREE.Mesh(geo,mat);
+          mesh.rotation.z = -pointObj1.out.rotation.z;
+          var obj = {
+            name:'particle_'+makeNum,
+            mesh:mesh,
+            id:makeNum,
+            isReady:false,
+            startTime : new Date().getTime(),
+            progress:0,
+            progressR:1,
+            duration:offsets.duration,
+            scale:0,
+            x:position.x+offsets.marginX,
+            y:position.y+offsets.marginY,
+            z:position.z,
+            vr:offsets.vr,
+            vx:mouseSpeed.vx*0.2,
+            vy:mouseSpeed.vy*0.2,
+            update:function(){
+              
+              if(type == 'cube' || type == 'sphere'){
+                this.mesh.rotation.x += this.vr;
+                this.mesh.rotation.y += this.vr;
+                // this.mesh.rotation.z += this.vr;
+              }else{
+                this.mesh.rotation.z += this.vr;
+              }
+              this.x += this.vx*worldOffset.vx;
+              this.y += this.vy*worldOffset.vy;
+
+              this.scale = (this.scale)*this.progressR+0.001;
+              this.mesh.position.set(this.x,this.y,this.z);
+              if(!this.isReady)return;
+              this.x += offsets.vx
+              this.y += offsets.vy
+              // this.z -= this.progress;
+              this.mesh.scale.x = this.scale;
+              this.mesh.scale.y = this.scale;
+              this.mesh.scale.z = this.scale;
+              this.progress = (new Date().getTime() - this.startTime)/this.duration;
+              this.progressR = 1-this.progress;
+              if(this.progress>=1){
+                delete particles[this.name];
+                scene.remove(obj.mesh);
+                delete this;
+              }
+            }
+          }
+          TweenLite.to(obj,0.2,{scale:1,ease:Back.easeOut,onComplete:function(){
+            obj.startTime = new Date().getTime();
+            obj.isReady = true;
+          }});
+
+          particles[obj.name] = obj;
+          obj.update();
+          scene.add(mesh);
+          makeNum++;
+          return obj;
+        }
+      }
+      Particles.prototype.constructor = Particles;
+
+      var particle = new Particles();
+      particle.startRendering();
+
+    </script>
+
+  </body>
+</html>

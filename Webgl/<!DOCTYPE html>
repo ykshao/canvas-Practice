@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>three.js webgl</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+      body {
+        width:100%; height:100%;
+        background-color: #fff;
+        margin:0 auto;
+        overflow: hidden;
+      }
+    </style>
+    <script src="build/three.min.js"></script>
+  </head>
+  <body>
+    
+    <script>
+      var camera,renderer,scene;
+      var width,height,halfWidth,halfHeight,aspect;
+      var config = {
+        fov:45,
+        near:1,
+        far:1000
+      };
+      var mouse = {x:0,y:0};
+      var wheel = {x:0,y:0,ox:0,oy:0};
+      var renderID;
+
+      var texure;
+
+      function setup(){
+        aspect  = window.innerWidth/window.innerHeight;
+        scene   = new THREE.Scene();
+        camera  = new THREE.PerspectiveCamera(config.fov,aspect,config.near,config.far);
+        renderer = new THREE.WebGLRenderer({});
+        renderer.setClearColor(0x000000,0);
+        camera.position.z = 500;
+
+
+        renderer.setSize(window.innerWidth,window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+        onResize();
+
+        texure = new THREE.TextureLoader().load('textures/hollywood.jpg',function(){setBG()});
+        addEvent();
+      }
+
+      function addEvent(){
+        document.addEventListener( 'mousemove', onMouseMove, false );
+        window.addEventListener( 'resize', onResize, false );
+        document.addEventListener( 'mousewheel', onScroll);
+      }
+
+      function setBG(){
+        var geomarty,material,mesh;
+        var w = texure.image.width, h = texure.image.height;
+        geomarty  = new THREE.PlaneGeometry(1,h/w,1,1);
+        material  = new THREE.MeshBasicMaterial({map:texure});
+        mesh      = new THREE.Mesh(geomarty,material);
+        mesh.position.z = 190;
+        mesh.scale.x = mesh.scale.y = 490;
+        scene.add(mesh);
+      }
+      /* ************************************************************
+        Renering and Animation
+      ************************************************************ */
+      function animation(){
+        var time = Date.now() * 0.001;
+        wheel.y *= 0.95;
+      }
+
+      function render(){
+        camera.position.x += ( mouse.x - camera.position.x ) * 0.05;
+        camera.position.y += ( - mouse.y - camera.position.y ) * 0.05;
+        camera.lookAt( scene.position );
+        renderer.render( scene, camera );
+      }
+
+      function update(){
+        animation();
+        render();
+        renderID = requestAnimationFrame( update );
+      }
+
+      /* ************************************************************
+          EVENT HANDLER
+      ************************************************************ */
+      function onResize(){
+        width   = window.innerWidth;
+        height  = window.innerHeight;
+        halfWidth = width*0.5;
+        halfHeight = height*0.5;
+        aspect  = width/height;
+        
+        camera.aspect = width/height;
+        renderer.setSize(width,height);
+        camera.updateProjectionMatrix();
+      }
+
+      function onMouseMove( e ) {
+        mouse.x = ( e.clientX - halfWidth );
+        mouse.y = ( e.clientY - halfHeight );
+      }
+
+      function onScroll(e){
+        wheel.y += e.deltaY;
+      }
+
+
+      
+      requestAnimationFrame( update );
+      setup();
+      update();
+
+    </script>
+  </body>
+</html>
