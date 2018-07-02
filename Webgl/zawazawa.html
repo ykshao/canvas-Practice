@@ -1,0 +1,213 @@
+<html>
+	<head>
+		<title>first three.js app</title>
+		<style>
+			body {
+				margin: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<script src="build/three.min.js"></script>
+		<script src="js/dat.gui.min.js"></script>
+		<script>
+			var scene   = new THREE.Scene();
+			var camera  = new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,10000);
+
+			var renderer = new THREE.WebGLRenderer();
+			renderer.setSize(window.innerWidth,window.innerHeight);
+			document.body.appendChild(renderer.domElement);
+		   
+			// instantiate a loader
+			var container = new THREE.Object3D();
+			var width = 0; height = 0;
+			var loaded = 0;
+
+			var geometry,material,mesh;
+			var textureKaori,textureZawa,textureKaoriMask;
+
+			var zawas = [];
+			var zawaLength = 100;
+			var gui;
+			var width,height,aspect;
+			var mouse = new THREE.Vector2();
+
+			var maskData = [];
+			var raycaster = new THREE.Raycaster();
+			var isReady = false;
+
+			// load a resource
+			new THREE.TextureLoader().load(
+				'textures/kaori.jpg',
+				function ( texture ) {
+					loaded++;
+					textureKaori = texture;
+					setup();
+				}
+			);
+
+			new THREE.TextureLoader().load(
+				'textures/zawa.png',
+				function ( texture ) {
+					loaded++;
+					textureZawa = texture;
+					setup();
+				}
+			);
+
+			new THREE.TextureLoader().load(
+				'textures/kaori-mask.png',
+				function ( texture ) {
+					textureKaoriMask = texture;
+					var cvs = document.createElement('canvas');
+					var ctx = cvs.getContext('2d');
+
+					cvs.width = texture.image.width;
+					cvs.height = texture.image.height;
+					ctx.drawImage(texture.image,0,0);
+
+					var imgData = ctx.getImageData(0,0, texture.image.width, texture.image.height);
+					var length  = imgData.width * imgData.height;
+
+	                for(var i = 0; i<length; i++) {  
+	                    var r = imgData.data[i*4],
+	                        g = imgData.data[i*4+1],
+	                        b = imgData.data[i*4+2],
+	                        a = imgData.data[i*4+3];
+
+	                        var x = i%imgData.width,
+	                            y = Math.floor(i/imgData.width);
+
+
+	                         if(r == 255){
+	                         	maskData.push({x:(x-texture.image.width*0.5)/texture.image.width*0.5,y:-(y-texture.image.height*0.5)/texture.image.height});
+	                         }
+
+	                    if(i==length-1){
+	                    	loaded++;
+	                        setup();
+	                    }
+	                };
+					
+				}
+			);
+
+			
+			camera.position.z = 800;
+
+			document.addEventListener( 'mousemove', onMouseMove, false );
+			window.addEventListener( 'resize', onResize, false );
+			document.body.addEventListener( 'scroll', onScroll);
+
+			function onResize(){
+				width   = window.innerWidth;
+				height  = window.innerHeight;
+				aspect  = width/height;
+				
+				camera.aspect = width/height;
+				renderer.setSize(width,height);
+				camera.updateProjectionMatrix();
+				renderer.render(scene, camera);
+		 	}
+
+
+			function setup(){
+				if(loaded < 3) return;
+				
+				var gui = new dat.GUI();
+				gui.add(camera.position, 'z',-1000,5000);
+
+				geometry = new THREE.PlaneBufferGeometry( textureKaori.image.width, textureKaori.image.height ,10,10);
+				material = new THREE.MeshBasicMaterial( {map: textureKaori, side: THREE.DoubleSide} );
+				mesh = new THREE.Mesh(geometry,material);
+				scene.add(mesh);
+
+				newMaskData = shuffle(maskData);
+
+				// camera.updateMatrixWorld();
+				// raycaster.setFromCamera( new THREE.Vector2(x,y), camera );
+				// var intersects = raycaster.intersectObject( level );
+
+				onResize();
+
+
+				for(var i=0; i<zawaLength; i++){
+
+					var Zgeo = new THREE.PlaneBufferGeometry( textureZawa.image.width, textureZawa.image.height ,10,10);
+					var Zmat = new THREE.MeshBasicMaterial( {map: textureZawa, side: THREE.DoubleSide, transparent:true} );
+					var Zmesh = new THREE.Mesh(Zgeo,Zmat);
+
+					raycaster.setFromCamera( new THREE.Vector2(newMaskData[i].x,newMaskData[i].y), camera );
+					var point = raycaster.intersectObject( mesh )[0];
+
+					if(point){
+						point = point.point;
+						Zmesh.position.z = Math.random()*500-500;
+						// Zmesh.position.x = Math.random()*textureKaori.image.width-textureKaori.image.width*0.5;
+						// Zmesh.position.y = Math.random()*textureKaori.image.height-textureKaori.image.height*0.5;
+						Zmesh.position.set(point.x,point.y,point.z);
+						zawas.push({geo:Zgeo,mat:Zmat,mesh:Zmesh,sppedZ:Math.random()*5+2,point:point});
+						scene.add(Zmesh);
+					}
+				}
+
+				isReady = true;
+				console.log("isReady", isReady);
+			}
+
+			function onScroll(e){
+		        console.log('e');
+		    }
+
+		    function shuffle(array) {
+			  var currentIndex = array.length, temporaryValue, randomIndex;
+
+			  // While there remain elements to shuffle...
+			  while (0 !== currentIndex) {
+
+			    // Pick a remaining element...
+			    randomIndex = Math.floor(Math.random() * currentIndex);
+			    currentIndex -= 1;
+
+			    // And swap it with the current element.
+			    temporaryValue = array[currentIndex];
+			    array[currentIndex] = array[randomIndex];
+			    array[randomIndex] = temporaryValue;
+			  }
+
+			  return array;
+			}
+
+			function onMouseMove( e ) {
+				mouse.x = ( e.clientX / window.innerWidth ) * 2 -1;
+				mouse.y = ( e.clientY / window.innerHeight) * 2 -1;
+				// raycaster.setFromCamera( mouse, camera );
+				// var intersects = raycaster.intersectObject( mesh );
+			}
+
+			var t = 0;
+			var render = function(){
+				requestAnimationFrame(render);
+				if(!isReady)return
+				camera.position.x += ( mouse.x * window.innerWidth - camera.position.x ) * 0.05;
+        		camera.position.y += ( - mouse.y * window.innerHeight - camera.position.y ) * 0.05;
+
+				camera.lookAt( scene.position );
+				renderer.render(scene, camera);
+
+				for(var i=0; i<zawas.length; i++){
+					zawas[i].mesh.position.z += zawas[i].sppedZ;
+
+					if(zawas[i].mesh.position.z > 1000){
+						zawas[i].mesh.position.z = -10;
+					}
+					// console.log("zawas[i].mesh", zawas[i].mesh);
+					// console.log("zawas[i]", zawas[i]);
+				}
+
+			}
+
+			render();
+		</script>
+	</body>
+</html>

@@ -1,0 +1,185 @@
+<html>
+    <head>
+        <title>shader</title>
+        <style>
+            body {
+                margin: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <script src="build/three.min.js"></script>
+        <script src="js/libs/dat.gui.min.js"></script>
+        <script type="x-shader/x-vertex" id="vertexShader">
+            // switch on high precision floats
+            #ifdef GL_ES
+            precision highp float;
+            #endif
+
+            void main()
+            {
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+            }
+
+        </script>
+
+        <script type="x-shader/x-fragment" id="fragmentShader">
+
+            #ifdef GL_ES
+            precision highp float;
+            #endif
+
+            uniform float time;
+            uniform float amplitude;
+            uniform float frequency;
+            uniform sampler2D texture;
+            uniform vec2 resolution;
+            uniform vec2 mouse;
+            uniform float distX;
+            uniform float powerX;
+            uniform float powerY;
+
+            float Pi = 3.1415926;
+
+            void main()
+            {       
+                vec2 uv  = gl_FragCoord.xy / resolution.xy;
+                vec2 uv2 = gl_FragCoord.xy / resolution.xy;
+                float distanceX = uv.x-mouse.x;
+                float distanceY = (uv.y/1.0)*2.0-1.0;
+                float ratio     = distanceX/distX;
+                float ratioR    = 1.0 - ratio; 
+
+                if(abs(distanceX)  <= distX){
+                    //uv.x = uv.x + distX * ratioR * powerX;
+                    //uv.x = uv.x + (distanceX-distX);
+                    uv.x += (distX * ratioR * abs(powerX) + (abs(distanceX)/distX) * powerX * 0.5);
+                    //uv.y += uv.y + sin((ratio-0.5)*Pi) * powerY * 0.5;
+                }
+
+                //cos(frequency+time)*amplitude+uv2.x;
+                //uv.x += sin(uv.y*frequency*10.+time)*amplitude;
+                uv.y += cos(uv.x*frequency+time)*amplitude;
+                vec3 color = texture2D(texture, uv).xyz;
+                gl_FragColor = vec4(color,1.0);
+            }
+
+        </script>
+
+        <script>
+            var scene,camera,renderer;
+            var geo,mat,mesh;
+            var _texture;
+            var gui;
+            var width,height,aspect;
+            var pixelRatio = window.devicePixelRatio;
+            var mouse = new THREE.Vector2();
+            var mouseOld = new THREE.Vector2();
+            var uniforms = {
+                texture:{type:'t',value:null},
+                time:{type:'f',value:0},
+                speed:{type:'f',value:0.01},
+                amplitude:{type:'f',value:0.1},
+                frequency:{type:'f',value:10.},
+                distX:{type:'f',value:0.05},
+                powerX:{type:'f',value:0},
+                powerY:{type:'f',value:0},
+                mouse:{type:'v',value:new THREE.Vector2()},
+                resolution: { type:'v',value: new THREE.Vector2() }
+            }
+
+            function imageLoad(imageURL,cb){
+                new THREE.TextureLoader().load(
+                    imageURL,
+                    function ( texture ) {
+                        _texture = texture;
+                        _texture.minFilter = THREE.LinearFilter;
+                        uniforms.texture.value = texture;
+                        cb();
+                    }
+                );
+            }
+
+            function setup(){
+                scene   = new THREE.Scene();
+                camera  = new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,1000);
+                renderer = new THREE.WebGLRenderer();
+                renderer.setPixelRatio(pixelRatio);
+                renderer.setSize(window.innerWidth,window.innerHeight);
+                document.body.appendChild(renderer.domElement);
+
+                geo     = new THREE.PlaneGeometry( 50, 20 ,10,10);
+                // mat     = new THREE.MeshBasicMaterial({side: THREE.DoubleSide,map:_texture} );
+                mat     = new THREE.ShaderMaterial({
+                    uniforms:uniforms,
+                    vertexShader: document.getElementById( 'vertexShader' ).textContent,
+                    fragmentShader: document.getElementById( 'fragmentShader' ).textContent
+                });
+                mesh    = new THREE.Mesh(geo,mat);
+                scene.add(mesh);
+                camera.position.z = 14;
+
+                gui = new dat.GUI();
+                gui.add(camera.position,'z',-1000,1000);
+                gui.addFolder('amplitude').add(uniforms.amplitude,'value',-10,10).step(0.001);
+                gui.addFolder('frequency').add(uniforms.frequency,'value',-100,100).step(0.001);
+                gui.addFolder('speed').add(uniforms.speed,'value',-100,100).step(0.001);
+                gui.addFolder('distX').add(uniforms.distX,'value',-1,1).step(0.001);
+                gui.addFolder('powerX').add(uniforms.powerX,'value',-1,1).step(0.001);
+                gui.addFolder('powerY').add(uniforms.powerY,'value',-1,1).step(0.001);
+                // gui.add(uniforms.frequency'value,',-100,100);
+
+                onResize();
+                render();
+
+                window.addEventListener('resize',onResize);
+                document.addEventListener( 'mousemove', onMouseMove, false );
+            }
+
+            function onResize(){
+                width   = window.innerWidth;
+                height  = window.innerHeight;
+                aspect  = width/height;
+
+                uniforms.resolution.value.x = width * pixelRatio;
+                uniforms.resolution.value.y = height * pixelRatio;
+                
+                camera.aspect = width/height;
+                renderer.setSize(width,height);
+                camera.updateProjectionMatrix();
+                renderer.render(scene, camera);
+            }
+
+            function onMouseMove( e ) {
+                mouse.x = ( e.clientX / window.innerWidth);
+                mouse.y = ( e.clientY / window.innerHeight);
+            }
+
+            function render(){
+
+                uniforms.mouse.value.x += (mouse.x-uniforms.mouse.value.x) * 0.1;
+                uniforms.mouse.value.y += (mouse.y-uniforms.mouse.value.y) * 0.1;
+
+                uniforms.powerX.value = (uniforms.mouse.value.x - mouseOld.x) * 10;
+                uniforms.powerX.value *= 0.98;
+
+                uniforms.powerY.value = (uniforms.mouse.value.x - mouseOld.x) * 10;
+                uniforms.powerY.value *= 0.5;
+
+                uniforms.distX.value = Math.abs(uniforms.powerX.value) * 0.3 + 0.03;
+
+                uniforms.time.value += uniforms.speed.value;
+                requestAnimationFrame(render);
+                renderer.render(scene, camera);
+
+                mouseOld.x = uniforms.mouse.value.x;
+                mouseOld.y = uniforms.mouse.value.y;
+            }
+
+
+            // imageLoad('textures/bg-boy01.jpg',setup);
+            imageLoad('textures/background.jpg',setup);
+            
+        </script>
+    </body>
+</html>
