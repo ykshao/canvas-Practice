@@ -9,6 +9,8 @@
     </head>
     <body>
         <script src="build/three.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.0.1/plugins/EaselPlugin.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.0.1/TweenLite.min.js"></script>
         <script src="js/libs/dat.gui.min.js"></script>
         <script type="x-shader/x-vertex" id="vertexShader">
             // switch on high precision floats
@@ -38,6 +40,9 @@
             uniform float distX;
             uniform float powerX;
             uniform float powerY;
+            uniform float progress;
+            uniform float acc;
+            uniform float opacity;
 
             float Pi = 3.1415926;
 
@@ -49,19 +54,50 @@
                 float distanceY = (uv.y/1.0)*2.0-1.0;
                 float ratio     = distanceX/distX;
                 float ratioR    = 1.0 - ratio; 
+                float distance = distX * abs(acc) + 0.02;
+                
+                if(abs(distanceX) <= distance){
+                    float direct = distanceX<0.0?1.0:-1.0;
+                    float ratioC    = 1.0 - (abs(distanceX)/distance);
 
-                if(abs(distanceX)  <= distX){
-                    //uv.x = uv.x + distX * ratioR * powerX;
+                    uv.x += -distanceX/distance*acc*0.1;
+                    uv.y += sin(ratioC*Pi*0.5)*sin(uv.y*Pi)*amplitude*acc;
+
+
+                    //float ratioC    = 1.0 - (abs(distanceX)/distance);
+                    //uv.x = uv.x + distX * ratioR * powerX * acc;
                     //uv.x = uv.x + (distanceX-distX);
-                    uv.x += (distX * ratioR * abs(powerX) + (abs(distanceX)/distX) * powerX * 0.5);
-                    //uv.y += uv.y + sin((ratio-0.5)*Pi) * powerY * 0.5;
+                    //uv.x += (distX * ratioR * abs(powerX) + (abs(distanceX)/distX) * powerX * 0.5);
+                    //uv.x += -acc * 0.1 * sin(ratioC);
+                    //uv.y = uv.y + sin(ratioC * Pi) * powerY * amplitude * acc;
+                    //uv.x = uv2.x + acc;
                 }
+
+
+
+                //uv.x += (mouse.x - uv.x)*acc;
+                //uv.x = acc * (mouse.x - uv.x);
+
+                //uv.x += mouse.x*acc;
+
+                //uv.x += (uv2.x-uv.x) * 0.4;
+                //uv.y += (uv2.y-uv.y) * 0.2;
 
                 //cos(frequency+time)*amplitude+uv2.x;
                 //uv.x += sin(uv.y*frequency*10.+time)*amplitude;
-                uv.y += cos(uv.x*frequency+time)*amplitude;
-                vec3 color = texture2D(texture, uv).xyz;
-                gl_FragColor = vec4(color,1.0);
+                //uv.y += cos(uv.x*frequency+time)*amplitude;
+
+                vec2 cPos      = -1.0 + 2.0 * gl_FragCoord.xy / resolution.xy;
+                float cLength  = length(cPos);
+                //uv.x += cos(uv.x*frequency-time)*0.1;
+                //uv.y += sin(uv.x*frequency+time)*amplitude;
+
+                //uv.x += cos(uv.x*frequency+time+progress)*amplitude;
+                //uv.y += sin(cPos.y*frequency+time+progress)*amplitude*.1;
+
+                vec4 tColor = texture2D(texture, uv);
+                vec4 color = vec4(0.0, 0.0, 0.0, opacity);
+                gl_FragColor = vec4(mix(tColor.rgb,color.rgb,color.a),1.0);
             }
 
         </script>
@@ -79,11 +115,14 @@
                 texture:{type:'t',value:null},
                 time:{type:'f',value:0},
                 speed:{type:'f',value:0.01},
-                amplitude:{type:'f',value:0.1},
-                frequency:{type:'f',value:10.},
+                amplitude:{type:'f',value:0.03},
+                frequency:{type:'f',value:30},
                 distX:{type:'f',value:0.05},
-                powerX:{type:'f',value:0},
-                powerY:{type:'f',value:0},
+                powerX:{type:'f',value:10},
+                powerY:{type:'f',value:10},
+                progress:{type:'f',value:0},
+                opacity:{type:'f',value:0},
+                acc:{type:'f',value:0},
                 mouse:{type:'v',value:new THREE.Vector2()},
                 resolution: { type:'v',value: new THREE.Vector2() }
             }
@@ -125,8 +164,19 @@
                 gui.addFolder('frequency').add(uniforms.frequency,'value',-100,100).step(0.001);
                 gui.addFolder('speed').add(uniforms.speed,'value',-100,100).step(0.001);
                 gui.addFolder('distX').add(uniforms.distX,'value',-1,1).step(0.001);
-                gui.addFolder('powerX').add(uniforms.powerX,'value',-1,1).step(0.001);
-                gui.addFolder('powerY').add(uniforms.powerY,'value',-1,1).step(0.001);
+                gui.addFolder('powerX').add(uniforms.powerX,'value',-100,100).step(0.01);
+                gui.addFolder('powerY').add(uniforms.powerY,'value',-100,100).step(0.01);
+                gui.addFolder('progress').add(uniforms.progress,'value',0,1).step(0.01);
+
+                gui.add({wave:function(){
+                    //TweenLite.to(uniforms.progress,2,{value:uniforms.progress.value+Math.PI,ease:Power1.easeInOut});
+                    TweenLite.to(uniforms.speed,2,{value:0.2,ease:Power1.easeInOut});
+                    TweenLite.to(uniforms.speed,2,{delay:1,value:0.01,ease:Power1.easeInOut});
+                    TweenLite.to(uniforms.amplitude,0.5,{value:0.03,ease:Power1.easeInOut});
+                    TweenLite.to(uniforms.amplitude,1.5,{delay:1,value:0,ease:Power1.easeInOut});
+                    TweenLite.to(uniforms.opacity,0.3,{value:1,ease:Power1.easeInOut});
+                    TweenLite.to(uniforms.opacity,0.3,{delay:1,value:0,ease:Power1.easeInOut});
+                }},'wave');
                 // gui.add(uniforms.frequency'value,',-100,100);
 
                 onResize();
@@ -153,6 +203,10 @@
             function onMouseMove( e ) {
                 mouse.x = ( e.clientX / window.innerWidth);
                 mouse.y = ( e.clientY / window.innerHeight);
+
+                // uniforms.acc.value += Math.abs(mouse.x-mouseOld.x) * 0.05;
+                // mouseOld.x = mouse.x;
+                // mouseOld.y = uniforms.mouse.value.y;
             }
 
             function render(){
@@ -160,25 +214,33 @@
                 uniforms.mouse.value.x += (mouse.x-uniforms.mouse.value.x) * 0.1;
                 uniforms.mouse.value.y += (mouse.y-uniforms.mouse.value.y) * 0.1;
 
-                uniforms.powerX.value = (uniforms.mouse.value.x - mouseOld.x) * 10;
-                uniforms.powerX.value *= 0.98;
+                // uniforms.powerX.value = (uniforms.mouse.value.x - mouseOld.x) * 10;
+                // uniforms.powerX.value *= 0.98;
 
-                uniforms.powerY.value = (uniforms.mouse.value.x - mouseOld.x) * 10;
-                uniforms.powerY.value *= 0.5;
+                uniforms.acc.value = (uniforms.mouse.value.x - mouseOld.x) * 20;
+                uniforms.acc.value *= 0.999;
 
-                uniforms.distX.value = Math.abs(uniforms.powerX.value) * 0.3 + 0.03;
+                // uniforms.powerY.value = (uniforms.mouse.value.x - mouseOld.x) * 10;
+                // uniforms.powerY.value *= 0.5;
+
+                // uniforms.distX.value = Math.abs(uniforms.acc.value);
+                // uniforms.distX.value *= 0.98;
 
                 uniforms.time.value += uniforms.speed.value;
                 requestAnimationFrame(render);
                 renderer.render(scene, camera);
 
-                mouseOld.x = uniforms.mouse.value.x;
-                mouseOld.y = uniforms.mouse.value.y;
+                mouseOld.x += (uniforms.mouse.value.x - mouseOld.x)*0.3;
+                // mouseOld.y = uniforms.mouse.value.y;
             }
 
 
+            var images = ['water2.jpg','background.jpg','kamada.png'];
+            imageLoad('textures/'+images[0],setup);
             // imageLoad('textures/bg-boy01.jpg',setup);
-            imageLoad('textures/background.jpg',setup);
+            // imageLoad('textures/background.jpg',setup);
+            // imageLoad('textures/kamada.png',setup);
+            
             
         </script>
     </body>
