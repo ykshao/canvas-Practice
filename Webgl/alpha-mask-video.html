@@ -1,0 +1,276 @@
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width initial-scale=1">
+		<title>first three.js app</title>
+		<script type="text/javascript" src="build/three.js"></script>
+		<script type="text/javascript" src="js/dat.gui.min.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenLite.min.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/gsap/latest/plugins/CSSPlugin.min.js"></script>
+		<script type="x-shader/x-vertex" id="vertexshader">
+			varying vec2 vUv;
+
+			void main()
+			{
+				vUv = uv;
+				gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+			}
+
+		</script>
+
+		<script type="x-shader/x-fragment" id="fragmentshader">
+			varying vec2 vUv;
+
+			uniform sampler2D tArray[4];
+			uniform sampler2D tMask;
+			uniform sampler2D texture;
+	    uniform vec2 mouse;
+	    uniform float scale;
+	    uniform float p;
+	    uniform float tp[4];
+
+			void main()
+			{
+
+				vec2 tUv = vUv;
+				float uvScale 		= scale-1.0;
+				float uvScaleHalf = uvScale*0.5;
+				tUv.x *= 1.0-uvScale;
+				tUv.y *= 1.0-uvScale;
+				tUv.x += uvScaleHalf;
+				tUv.y += uvScaleHalf;
+
+				tUv -= mouse*uvScaleHalf;
+
+				vec4 tColor 	= texture2D(tArray[0], tUv);
+				vec4 mask 		= texture2D(tMask, vUv);
+				gl_FragColor 	= vec4(tColor.rgb,mask.r);
+			}
+		</script>
+		<style>
+			body {
+				margin: 0;
+			}
+
+			#container {
+				width:100%; height:auto;
+				background-color:#22658c;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="container">
+				<div id="three"></div>
+		</div>
+		<video id="video" width="2500" height="1314" style="display:none; width:100%; height:auto; background:#f00" controls>
+			<source src="./video/handwrite.mp4" type="video/mp4" />
+		</video>
+		<!-- <img src="./video/handwrite-last-black.png" id="video-mask" style="display:none"> -->
+		<img src="./video/handwrite-last.jpg" id="video-mask" style="display:none">
+		<img src="./textures/bg-boy01.jpg" id="background" style="display:none">
+
+		<script>
+
+			var container	 	= document.getElementById('container');
+			var viewWidth 	= container.clientWidth;
+			var viewHeight 	= container.clientHeight;
+
+			// Basic THREE
+			var scene   = new THREE.Scene();
+			var camera  = new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,1000);
+			camera.position.z = 50;
+
+			var renderer = new THREE.WebGLRenderer({alpha: true});
+			renderer.setSize(window.innerWidth,window.innerHeight);
+			renderer.setPixelRatio(window.devicePixelRatio);
+			renderer.setClearColor(0x000000, 0);
+			// renderer.autoClear = false;
+			container.appendChild(renderer.domElement);
+
+			// Event
+			window.addEventListener('resize',function(e){
+				viewWidth 	= container.clientWidth;
+				viewHeight 	= container.clientHeight;
+				camera.aspect = viewWidth/viewHeight;
+				renderer.setSize(viewWidth,viewHeight);
+				camera.updateProjectionMatrix();
+			});
+
+			// Texuture Load
+			var textureRatio 				= 16/9;
+			var video 							= document.getElementById( 'video' );
+			var videoTexture 				= new THREE.VideoTexture( video );
+			var imgTexture 					= new TextureCanvas(video.width,video.height); 
+			videoTexture.minFilter 	= THREE.LinearFilter;
+			videoTexture.magFilter 	= THREE.LinearFilter;
+			videoTexture.format 		= THREE.RGBFormat;
+
+			var videoTextureCanvas = new TextureCanvas(video.width,video.height);
+
+			video.addEventListener('play',function(e){
+				isPlay = true;
+			});
+
+			video.addEventListener('ended',function(e){
+				isPlay = false;
+			});
+
+			TextureLoad(
+				[
+					'./textures/draft/photo1.jpg',
+					'./textures/draft/photo2.jpg',
+					'./textures/draft/photo3.jpg',
+					'./textures/draft/photo4.jpg'
+				],
+				start
+			);
+
+			var mouse 	= new THREE.Vector2();
+			var mouse2 	= new THREE.Vector2();
+			window.addEventListener("mousemove", function(event) {
+			  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+			  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+			}, false)
+
+			// Make Contents
+			var planeSize = 100;
+			var dat 			= new dat.GUI();
+			var isPlay 		= false;
+			var progress  = 0;
+			var geometry;
+			var material;
+			var texturesOffset = [getOffset(),getOffset(),getOffset(),getOffset()];
+			function getOffset(){
+				return {opacity:1,scale:1,flag:false,rotate:0};
+			}
+			function start(textures){
+				dat.add({play:function(){
+					video.play();
+					texturesOffset = [getOffset(),getOffset(),getOffset(),getOffset()];
+					// TweenLite.to();
+				}},'play');
+
+				imgTexture.draw = function(textures,progress){
+					this.clear();
+					let offset,divideP = 1/textures.length;
+					for(let i=0; i<textures.length; i++){
+						offset = texturesOffset[i];
+						// this.context.save();
+						this.context.globalAlpha = offset.opacity;
+						this.context.translate(this.width*0.5,this.height*0.5);
+						this.context.scale(offset.scale,offset.scale);
+						this.context.rotate(offset.rotate);
+						this.context.translate(-this.width*0.5,-this.height*0.5);
+						this.context.drawImage(textures[i].image,0,0,this.width,this.height);	
+						// this.context.restore();
+						this.context.setTransform(1,0,0,1,0,0);   // reset matrix
+						if(1-progress < i*divideP){
+							if(!offset.flag){
+								offset.flag = true;
+								// TweenLite.to(offset,0,{opacity:0,ease:Power3.easeInOut});
+								// TweenLite.to(offset,1,{scale:1,rotate:0,ease:Power3.easeInOut});
+							}
+						}
+					}
+					
+					this.texture.needsUpdate  = true;
+				}
+
+				geometry = new THREE.PlaneGeometry( planeSize, planeSize/textureRatio ,10,10);
+				material = new THREE.ShaderMaterial({
+					// wireframe:true,
+					transparent:true,
+					uniforms:{
+						tArray:{type:'tv',value:textures},
+						texture:{type:'t',value:imgTexture.texture},
+						tMask:{type:'t',value:videoTextureCanvas.texture},
+						mouse:{type:'v',value:mouse2},
+						scale:{type:'f',value:1.05},
+						progress:{type:'f',value:0}
+					},
+					vertexShader:   document.getElementById('vertexshader').textContent,
+					fragmentShader: document.getElementById('fragmentshader').textContent
+				});
+
+				// var material = new THREE.MeshBasicMaterial( {wireframe:false,map:textures.background} );
+
+				var mesh = new THREE.Mesh(geometry,material);
+				scene.add(mesh);
+
+				var render = function(){
+					requestAnimationFrame(render);
+					renderer.render(scene, camera);
+
+					mouse2.x += (-mouse.x-mouse2.x)*0.05;
+					mouse2.y += (-mouse.y-mouse2.y)*0.05;
+					progress = video.currentTime/video.duration;
+					// if(isPlay){
+						videoTextureCanvas.draw(video);
+						imgTexture.draw(textures,progress);
+						material.uniforms.tMask.value 	= videoTextureCanvas.texture;
+						material.uniforms.texture.value = imgTexture.texture;
+					// }
+				}
+
+				render();
+			}
+
+			function TextureLoad(urls,cb){
+				var textures = [],loadedCount = 0;
+				var loader = new THREE.TextureLoader();
+				for(var i=0; i<urls.length; i++){
+					(function(id){
+						loader.load(urls[i],function(t){
+							loadedCount++;
+							textures[id] = t;
+							if(loadedCount==urls.length){
+								cb(textures);
+							}
+						});
+					})(i);
+				}
+			}
+
+			function TextureCanvas(width,height){
+				this.canvas;
+				this.context;
+				this.texture;
+				this.width  = width;
+				this.height = height;
+				this.x = 0;
+				this.y = 0;
+				function setup(){
+					this.canvas = document.createElement('canvas');
+					this.canvas.width  = width;
+					this.canvas.height = height;
+
+					this.context = this.canvas.getContext( '2d' );
+					this.context.imageSmoothingEnabled = true;
+					this.context.translate(0.5,0.5);
+
+					this.texture = new THREE.Texture(this.canvas);
+					this.texture.format			=	THREE.RGBAFormat;
+					this.texture.magFilter	=	THREE.NearestFilter;
+					this.texture.minFilter	=	THREE.NearestFilter;
+
+					this.clear();
+					return this;
+				}
+
+				this.clear = function(){
+					this.context.clearRect(0,0,this.width,this.height);
+				}
+
+				this.draw = function(texture){
+					this.clear();
+					this.context.drawImage(texture,0,0);
+					this.texture.needsUpdate  = true;
+				}
+				
+				setup.call(this);
+				
+			};
+
+			TextureCanvas.prototype.constructor = TextureCanvas;
+		</script>
+	</body>
+</html>

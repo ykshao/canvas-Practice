@@ -1,74 +1,134 @@
 <html>
-		<head>
-				<title>first three.js app</title>
-				<style>
-						body {
-								margin: 0;
-						}
-				</style>
-        <script src="build/three.min.js"></script>
-        <script src="js/postprocessing/THREE.ShaderPass.js"></script>
-		</head>
-		<body>
-				<video id="video" width="2500" height="1314" style="display:none; width:100%; height:auto; background:#f00" controls>
-					<source src="./video/handwrite_black.mp4" type="video/mp4" />
-				</video>
-				<script>
+	<head>
+		<title>first three.js app</title>
+		<script type="text/javascript" src="build/three.js"></script>
+		<script type="x-shader/x-vertex" id="vertexshader">
+			varying vec2 vUv;
+      precision highp float;
 
-						var scene   = new THREE.Scene();
-						var camera  = new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,1000);
+      void main()
+      {
+      	vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+      }
 
-						var renderer = new THREE.WebGLRenderer();
-						renderer.setSize(window.innerWidth,window.innerHeight);
-						document.body.appendChild(renderer.domElement);
+    </script>
 
-					 
-						var geometry = new THREE.PlaneGeometry( 50, 20 ,10,10);
-						var material = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
-            console.log("THREE.ShaderPass", THREE);
-						var maskPass = new THREE.ShaderPass({
-              uniforms: {
-                // the underlying image
-                "tDiffuse": { value: null },
-                // the alpha mask
-                "tMask": { value: null }
-              },
-              vertexShader: [
-                "varying vec2 vUv;",
-                
-                "void main() {",
-                  "vUv = uv;",
-                  "gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);",
-                "}"
-              ].join("\n"),
-              fragmentShader: [
-                "uniform sampler2D tDiffuse;",
-                "uniform sampler2D tMask;",
-                "varying vec2 vUv;",
+    <script type="x-shader/x-fragment" id="fragmentshader">
+      uniform sampler2D tDiffuse;
+      uniform sampler2D texture;
+      uniform sampler2D tMask;
+      varying vec2 vUv;
+      varying vec4 textureCoord;
 
-                "void main() {",
-                  // get the current pixel color
-                  "vec4 texel = texture2D(tDiffuse, vUv);",
-                  // get alpha based on the color of the mask image
-                  "float alpha = texture2D(tMask, vUv).r;",
-                  // apply the alpha to the current pixel
-                  "gl_FragColor = texel * alpha;",
-                "}"
-              ].join("\n")
-            });
-						var mesh = new THREE.Mesh(geometry,shaderMaterial);
-						scene.add(mesh);
+      void main()
+      {
+        vec4 tColor = texture2D(texture, vUv);
+        vec4 mask = texture2D(tMask, vUv);
+				gl_FragColor = vec4(tColor.rgb,mask.r);
+      }
+    </script>
+    <style>
+			body {
+				margin: 0;
+			}
 
+			#container {
+				width:100%; height:auto;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="container">
+				<div id="three"></div>
+		</div>
+		<video id="video" width="2500" height="1314" style="display:none; width:100%; height:auto; background:#f00" controls>
+			<source src="./video/handwrite.mp4" type="video/mp4" />
+		</video>
+		<!-- <img src="./video/handwrite-last-black.png" id="video-mask" style="display:none"> -->
+		<img src="./video/handwrite-last.jpg" id="video-mask" style="display:none">
+		<img src="./textures/bg-boy01.jpg" id="background" style="display:none">
 
-						camera.position.z = 50;
+		<script>
 
-						var t = 0;
-						var render = function(){
-								requestAnimationFrame(render);
-								renderer.render(scene, camera);
-						}
+			var container	 	= document.getElementById('container');
+			var viewWidth 	= container.clientWidth;
+			var viewHeight 	= container.clientHeight;
 
-						render();
-				</script>
-		</body>
+			// Basic THREE
+			var scene   = new THREE.Scene();
+			var camera  = new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,1000);
+			camera.position.z = 50;
+
+			var renderer = new THREE.WebGLRenderer({alpha: true});
+			renderer.setSize(window.innerWidth,window.innerHeight);
+			renderer.setPixelRatio(window.devicePixelRatio);
+			renderer.setClearColor(0xff0000, 1);
+			// renderer.autoClear = false;
+			container.appendChild(renderer.domElement);
+
+			// Event
+			window.addEventListener('resize',function(e){
+				viewWidth 	= container.clientWidth;
+				viewHeight 	= container.clientHeight;
+		    camera.aspect = viewWidth/viewHeight;
+		    renderer.setSize(viewWidth,viewHeight);
+		    camera.updateProjectionMatrix();
+			});
+
+			// Texuture Load
+			var loadedCount = 0;
+			var textureRatio = 16/9;
+			var loader 			= new THREE.TextureLoader();
+			var textures 		= {mask:null,background:null};
+			var maskImage 	= document.getElementById('video-mask');
+			var backImage 	= document.getElementById('background');
+			loader.load(maskImage.getAttribute("src"),function(t){
+				textures.mask = t;
+				loadedCount++;
+				loadedCheck();
+			});
+
+			loader.load(backImage.getAttribute("src"),function(t){
+				textures.background = t;
+				textureRatio = textures.background.image.width/textures.background.image.height;
+				loadedCount++;
+				loadedCheck();
+			});
+
+			function loadedCheck(){
+				if(loadedCount == 2){
+					start();
+				}
+			}
+				
+			// Make Contents
+			var planeSize = 100;
+			function start(){
+				var geometry = new THREE.PlaneGeometry( planeSize, planeSize/textureRatio ,10,10);
+				var material = new THREE.ShaderMaterial({
+					// wireframe:true,
+					transparent:true,
+	        uniforms:{
+	        	texture:{type:'t',value:textures.background},
+	        	tMask:{type:'t',value:textures.mask}
+	        },
+	        vertexShader:   document.getElementById('vertexshader').textContent,
+	        fragmentShader: document.getElementById('fragmentshader').textContent
+	      });
+
+	      // var material = new THREE.MeshBasicMaterial( {wireframe:false,map:textures.background} );
+
+				var mesh = new THREE.Mesh(geometry,material);
+				scene.add(mesh);
+
+				var render = function(){
+					requestAnimationFrame(render);
+					renderer.render(scene, camera);
+				}
+
+				render();
+			}
+		</script>
+	</body>
 </html>

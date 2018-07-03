@@ -6,34 +6,6 @@
                 margin: 0;
             }
         </style>
-        <script type="x-shader/x-vertex" id="vertexShader">
-            varying vec3 vNormal;
-            uniform float posX;
-            uniform float posY;
-            // uniform flot time;
-            void main(){
-                vNormal = normal;
-                float _x = cos(posX);
-                float _y = sin(posY);
-                vec4 p = vec4(_x+vNormal.x, _y+vNormal.y, 1.0,1.0);
-                gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0)+p;
-                
-            }
-        </script>
-        <script type="x-shader/x-fragment" id="fragmentShader">
-            varying vec3 vNormal;
-            uniform float time;
-            void main(){
-
-                vec3 light = vec3(time,0.2,1.0);
-
-                light = normalize(light);
-
-                float dProd = max(0.0,dot(vNormal,light));
-
-                gl_FragColor = vec4(dProd,dProd,dProd,1.0);
-            }
-        </script>
     </head>
     <body>
         <script src="build/three.min.js"></script>
@@ -48,30 +20,13 @@
            
             var geometry = new THREE.PlaneGeometry( 50, 20 ,10,10);
             var material = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
-            var uniforms = {
-                time:{value:0},
-                posX:{value:1},
-                posY:{value:1}
-            }
-            var shaderMaterial = new THREE.ShaderMaterial({
-                uniforms:uniforms,
-                vertexShader:document.getElementById('vertexShader').textContent,
-                fragmentShader:document.getElementById('fragmentShader').textContent
-            })
-            var mesh = new THREE.Mesh(geometry,shaderMaterial);
+            var mesh = new THREE.Mesh(geometry,material);
             scene.add(mesh);
-
 
             camera.position.z = 50;
 
             var t = 0;
             var render = function(){
-                t = new Date().getTime() * 0.001;
-
-                uniforms.time.value = Math.abs(Math.sin(t));
-                uniforms.posX.value = Math.cos(t)*Math.sin(t)*10;
-                uniforms.posY.value = Math.sin(t)*10;
-                console.log("uniforms.time.value", uniforms.time.value);
                 requestAnimationFrame(render);
                 // mesh.rotation.y += 0.1;
                 // t+= 0.01;
