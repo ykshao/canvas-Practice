@@ -1,0 +1,74 @@
+<html>
+		<head>
+				<title>first three.js app</title>
+				<style>
+						body {
+								margin: 0;
+						}
+				</style>
+        <script src="build/three.min.js"></script>
+        <script src="js/postprocessing/THREE.ShaderPass.js"></script>
+		</head>
+		<body>
+				<video id="video" width="2500" height="1314" style="display:none; width:100%; height:auto; background:#f00" controls>
+					<source src="./video/handwrite_black.mp4" type="video/mp4" />
+				</video>
+				<script>
+
+						var scene   = new THREE.Scene();
+						var camera  = new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,1000);
+
+						var renderer = new THREE.WebGLRenderer();
+						renderer.setSize(window.innerWidth,window.innerHeight);
+						document.body.appendChild(renderer.domElement);
+
+					 
+						var geometry = new THREE.PlaneGeometry( 50, 20 ,10,10);
+						var material = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
+            console.log("THREE.ShaderPass", THREE);
+						var maskPass = new THREE.ShaderPass({
+              uniforms: {
+                // the underlying image
+                "tDiffuse": { value: null },
+                // the alpha mask
+                "tMask": { value: null }
+              },
+              vertexShader: [
+                "varying vec2 vUv;",
+                
+                "void main() {",
+                  "vUv = uv;",
+                  "gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);",
+                "}"
+              ].join("\n"),
+              fragmentShader: [
+                "uniform sampler2D tDiffuse;",
+                "uniform sampler2D tMask;",
+                "varying vec2 vUv;",
+
+                "void main() {",
+                  // get the current pixel color
+                  "vec4 texel = texture2D(tDiffuse, vUv);",
+                  // get alpha based on the color of the mask image
+                  "float alpha = texture2D(tMask, vUv).r;",
+                  // apply the alpha to the current pixel
+                  "gl_FragColor = texel * alpha;",
+                "}"
+              ].join("\n")
+            });
+						var mesh = new THREE.Mesh(geometry,shaderMaterial);
+						scene.add(mesh);
+
+
+						camera.position.z = 50;
+
+						var t = 0;
+						var render = function(){
+								requestAnimationFrame(render);
+								renderer.render(scene, camera);
+						}
+
+						render();
+				</script>
+		</body>
+</html>
