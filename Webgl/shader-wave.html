@@ -41,6 +41,7 @@
             uniform float powerX;
             uniform float powerY;
             uniform float progress;
+            uniform float progress2;
             uniform float acc;
             uniform float opacity;
 
@@ -60,8 +61,8 @@
                     float direct = distanceX<0.0?1.0:-1.0;
                     float ratioC    = 1.0 - (abs(distanceX)/distance);
 
-                    uv.x += -distanceX/distance*acc*0.1;
-                    uv.y += sin(ratioC*Pi*0.5)*sin(uv.y*Pi)*amplitude*acc;
+                    //uv.x += -distanceX/distance*acc*0.1;
+                    //uv.y += sin(ratioC*Pi*0.5)*sin(uv.y*Pi)*amplitude*acc;
 
 
                     //float ratioC    = 1.0 - (abs(distanceX)/distance);
@@ -89,11 +90,12 @@
 
                 vec2 cPos      = -1.0 + 2.0 * gl_FragCoord.xy / resolution.xy;
                 float cLength  = length(cPos);
-                //uv.x += cos(uv.x*frequency-time)*0.1;
-                //uv.y += sin(uv.x*frequency+time)*amplitude;
+                uv.x += cos(uv.x*frequency+progress+Pi)*amplitude;
+                uv.x += sin((uv.x-0.5)/0.5*frequency*1.*Pi+time)*amplitude;
+                //uv.y += sin(cos(cLength)*frequency*1.*Pi+time)*amplitude*0.3;
 
-                //uv.x += cos(uv.x*frequency+time+progress)*amplitude;
-                //uv.y += sin(cPos.y*frequency+time+progress)*amplitude*.1;
+                uv.x += sin(uv.x*Pi)*progress2*0.1;
+
 
                 vec4 tColor = texture2D(texture, uv);
                 vec4 color = vec4(0.0, 0.0, 0.0, opacity);
@@ -115,12 +117,13 @@
                 texture:{type:'t',value:null},
                 time:{type:'f',value:0},
                 speed:{type:'f',value:0.01},
-                amplitude:{type:'f',value:0.03},
-                frequency:{type:'f',value:30},
+                amplitude:{type:'f',value:-0.03},
+                frequency:{type:'f',value:4},
                 distX:{type:'f',value:0.05},
                 powerX:{type:'f',value:10},
                 powerY:{type:'f',value:10},
                 progress:{type:'f',value:0},
+                progress2:{type:'f',value:0},
                 opacity:{type:'f',value:0},
                 acc:{type:'f',value:0},
                 mouse:{type:'v',value:new THREE.Vector2()},
@@ -167,6 +170,7 @@
                 gui.addFolder('powerX').add(uniforms.powerX,'value',-100,100).step(0.01);
                 gui.addFolder('powerY').add(uniforms.powerY,'value',-100,100).step(0.01);
                 gui.addFolder('progress').add(uniforms.progress,'value',0,1).step(0.01);
+                gui.addFolder('progress2').add(uniforms.progress2,'value',0,1).step(0.01);
 
                 gui.add({wave:function(){
                     //TweenLite.to(uniforms.progress,2,{value:uniforms.progress.value+Math.PI,ease:Power1.easeInOut});
@@ -176,6 +180,10 @@
                     TweenLite.to(uniforms.amplitude,1.5,{delay:1,value:0,ease:Power1.easeInOut});
                     TweenLite.to(uniforms.opacity,0.3,{value:1,ease:Power1.easeInOut});
                     TweenLite.to(uniforms.opacity,0.3,{delay:1,value:0,ease:Power1.easeInOut});
+
+                    //TweenLite.to(uniforms.progress2,0,{delay:0.3,value:0.5,ease:Power1.easeInOut});
+                    //TweenLite.to(uniforms.progress2,2,{delay:0.3,value:0,ease:Power1.easeInOut});
+
                 }},'wave');
                 // gui.add(uniforms.frequency'value,',-100,100);
 
@@ -235,8 +243,8 @@
             }
 
 
-            var images = ['water2.jpg','background.jpg','kamada.png'];
-            imageLoad('textures/'+images[0],setup);
+            var images = ['water2.jpg','background.jpg','kamada.png','visual.jpg'];
+            imageLoad('textures/'+images[3],setup);
             // imageLoad('textures/bg-boy01.jpg',setup);
             // imageLoad('textures/background.jpg',setup);
             // imageLoad('textures/kamada.png',setup);
