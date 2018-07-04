@@ -41,7 +41,6 @@
             uniform float powerX;
             uniform float powerY;
             uniform float progress;
-            uniform float progress2;
             uniform float acc;
             uniform float opacity;
 
@@ -55,24 +54,21 @@
                 float distanceY = (uv.y/1.0)*2.0-1.0;
                 float ratio     = distanceX/distX;
                 float ratioR    = 1.0 - ratio; 
-                float distance = distX * abs(acc) + 0.02;
+                float distance = distX * abs(acc) + 0.05 * abs(acc);
                 
                 if(abs(distanceX) <= distance){
                     float direct = distanceX<0.0?1.0:-1.0;
                     float ratioC    = 1.0 - (abs(distanceX)/distance);
 
-                    //uv.x += -distanceX/distance*acc*0.1;
-                    //uv.y += sin(ratioC*Pi*0.5)*sin(uv.y*Pi)*amplitude*acc;
-
-
-                    //float ratioC    = 1.0 - (abs(distanceX)/distance);
-                    //uv.x = uv.x + distX * ratioR * powerX * acc;
-                    //uv.x = uv.x + (distanceX-distX);
-                    //uv.x += (distX * ratioR * abs(powerX) + (abs(distanceX)/distX) * powerX * 0.5);
-                    //uv.x += -acc * 0.1 * sin(ratioC);
-                    //uv.y = uv.y + sin(ratioC * Pi) * powerY * amplitude * acc;
-                    //uv.x = uv2.x + acc;
+                    uv.x += -0.1*sin(ratioC*Pi*0.5)*acc*amplitude;
+                    uv.y += -0.1*sin(ratioC*Pi*0.5)*acc*amplitude*0.1;
+                }else{
+                    
                 }
+
+
+                //uv.x += -0.1*sin(uv.x*Pi*0.5*frequency+time)*amplitude;
+                //uv.y += -0.1*sin(uv.x*Pi*0.5*frequency+time)*amplitude*0.1;
 
 
 
@@ -90,12 +86,11 @@
 
                 vec2 cPos      = -1.0 + 2.0 * gl_FragCoord.xy / resolution.xy;
                 float cLength  = length(cPos);
-                uv.x += cos(uv.x*frequency+progress+Pi)*amplitude;
-                uv.x += sin((uv.x-0.5)/0.5*frequency*1.*Pi+time)*amplitude;
-                //uv.y += sin(cos(cLength)*frequency*1.*Pi+time)*amplitude*0.3;
+                //uv.x += cos(uv.x*frequency-time)*0.1;
+                //uv.y += sin(uv.x*frequency+time)*amplitude;
 
-                uv.x += sin(uv.x*Pi)*progress2*0.1;
-
+                //uv.x += cos(uv.x*frequency+time+progress)*amplitude;
+                //uv.y += sin(cPos.y*frequency+time+progress)*amplitude*.1;
 
                 vec4 tColor = texture2D(texture, uv);
                 vec4 color = vec4(0.0, 0.0, 0.0, opacity);
@@ -117,13 +112,12 @@
                 texture:{type:'t',value:null},
                 time:{type:'f',value:0},
                 speed:{type:'f',value:0.01},
-                amplitude:{type:'f',value:-0.03},
-                frequency:{type:'f',value:4},
+                amplitude:{type:'f',value:1},
+                frequency:{type:'f',value:30},
                 distX:{type:'f',value:0.05},
                 powerX:{type:'f',value:10},
                 powerY:{type:'f',value:10},
                 progress:{type:'f',value:0},
-                progress2:{type:'f',value:0},
                 opacity:{type:'f',value:0},
                 acc:{type:'f',value:0},
                 mouse:{type:'v',value:new THREE.Vector2()},
@@ -170,20 +164,15 @@
                 gui.addFolder('powerX').add(uniforms.powerX,'value',-100,100).step(0.01);
                 gui.addFolder('powerY').add(uniforms.powerY,'value',-100,100).step(0.01);
                 gui.addFolder('progress').add(uniforms.progress,'value',0,1).step(0.01);
-                gui.addFolder('progress2').add(uniforms.progress2,'value',0,1).step(0.01);
 
                 gui.add({wave:function(){
                     //TweenLite.to(uniforms.progress,2,{value:uniforms.progress.value+Math.PI,ease:Power1.easeInOut});
                     TweenLite.to(uniforms.speed,2,{value:0.2,ease:Power1.easeInOut});
                     TweenLite.to(uniforms.speed,2,{delay:1,value:0.01,ease:Power1.easeInOut});
-                    TweenLite.to(uniforms.amplitude,0.5,{value:0.03,ease:Power1.easeInOut});
+                    TweenLite.to(uniforms.amplitude,0.5,{value:1,ease:Power1.easeInOut});
                     TweenLite.to(uniforms.amplitude,1.5,{delay:1,value:0,ease:Power1.easeInOut});
                     TweenLite.to(uniforms.opacity,0.3,{value:1,ease:Power1.easeInOut});
                     TweenLite.to(uniforms.opacity,0.3,{delay:1,value:0,ease:Power1.easeInOut});
-
-                    //TweenLite.to(uniforms.progress2,0,{delay:0.3,value:0.5,ease:Power1.easeInOut});
-                    //TweenLite.to(uniforms.progress2,2,{delay:0.3,value:0,ease:Power1.easeInOut});
-
                 }},'wave');
                 // gui.add(uniforms.frequency'value,',-100,100);
 
@@ -243,8 +232,8 @@
             }
 
 
-            var images = ['water2.jpg','background.jpg','kamada.png','visual.jpg'];
-            imageLoad('textures/'+images[3],setup);
+            var images = ['water2.jpg','background.jpg','kamada.png','bandsome.jpg'];
+            imageLoad('textures/'+images[0],setup);
             // imageLoad('textures/bg-boy01.jpg',setup);
             // imageLoad('textures/background.jpg',setup);
             // imageLoad('textures/kamada.png',setup);
