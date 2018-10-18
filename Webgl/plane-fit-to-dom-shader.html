@@ -1,0 +1,220 @@
+<html>
+	<head>
+  	<title>first three.js app</title>
+  	<style>
+  		body {
+  				margin: 0;
+  		}
+
+  		img {
+  				position: absolute;
+  				left: 0; top:0;
+
+  				width: 50%;
+  				left: 25%;
+  				top:50%;
+  				transform: translate3d(0,-50%,0);
+  				opacity: 0;
+  		}
+  	</style>
+  	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/97/three.min.js"></script>
+  	<script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.3/dat.gui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.0.2/TweenLite.min.js"></script>
+  	<script id="vertexShader" type="x-shader/x-vertex">
+  		#ifdef GL_ES
+  		precision highp float;
+  		#endif
+      
+      varying vec2 vUv;
+  		void main(){
+        vUv = uv;
+  			gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+  		}
+  	</script>
+  	<script id="fragmentShader" type="x-shader/x-fragment">
+      varying vec2 vUv;
+
+      uniform sampler2D texture;
+      uniform vec2 mouse;
+      uniform float time;
+      uniform float progress;
+
+      void main(){
+        vec2 uv = vUv;
+
+        float distanceX = vUv.x - mouse.x;
+        float distanceY = vUv.y - mouse.y;
+
+        uv.x = sin(vUv.x+time)*progress+vUv.x;
+        uv.y = sin(vUv.x-time)*progress+vUv.y;
+          
+        vec4 tColor = texture2D(texture,uv);
+        gl_FragColor = tColor;
+      }
+
+  	</script>
+  </head>
+  <body>
+	 <img src="./textures/gallery/sand_for_polygon.jpg" class="img" id="image" alt="">
+	 <script>
+			let scene   = new THREE.Scene();
+			let camera  = new THREE.PerspectiveCamera(45,window.innerWidth/window.innerHeight,0.1,5000);
+
+			let renderer = new THREE.WebGLRenderer();
+			let aspect = window.innerWidth / window.innerHeight;
+			renderer.setSize(window.innerWidth,window.innerHeight);
+			document.body.appendChild(renderer.domElement);
+
+			let img = document.getElementById('image');
+      let imgRect = img.getBoundingClientRect();
+			let texture = new THREE.TextureLoader().load(img.getAttribute('src'));
+			texture.minFilter = THREE.LinearFilter;
+
+
+      let mouse = {x:0,y:0};
+      let time = 0;
+      let isExpend = false;
+
+      let option = {speed:0.01,progress:0}
+      let uniforms = {
+        texture:{type:'t',value:texture},
+        mouse:{type:'v2',value:mouse},
+        time:{type:'f',value:0},
+        progress:{type:'f',value:option.prgress}
+      }
+
+			let geo = new THREE.PlaneGeometry(img.width,img.height,1);
+			// let mat = new THREE.MeshBasicMaterial({map:texture});
+      let mat = new THREE.ShaderMaterial({
+        uniforms:uniforms,
+        vertexShader: document.getElementById( 'vertexShader' ).textContent,
+        fragmentShader: document.getElementById( 'fragmentShader' ).textContent
+      });
+			let mesh = new THREE.Mesh(geo,mat);
+			geo.computeBoundingBox();
+			scene.add(mesh);
+
+			camera.position.z = 1;
+
+			let gui = new dat.GUI();
+			var guiF = gui.addFolder('camera');
+			guiF.add(camera.position,'x',-1000,1000);
+			guiF.add(camera.position,'y',-1000,1000);
+			guiF.add(camera.position,'z',-1000,1000);
+
+			var guiF = gui.addFolder('plane');
+			guiF.add(mesh.position,'x',-5000,1000);
+			guiF.add(mesh.position,'y',-5000,1000);
+			guiF.add(mesh.position,'z',-5000,1000);
+
+      var guiF = gui.addFolder('option');
+      guiF.add(option,'speed',-100,100).step(0.01);
+      guiF.add(option,'progress',0,1).step(0.01);
+
+      gui.add({zoomIn:zoomIn},'zoomIn');
+      gui.add({zoomOut:zoomOut},'zoomOut');
+
+			let vFov = camera.fov * Math.PI / 180;
+
+
+
+			window.addEventListener('resize',resize);
+      img.addEventListener( 'mousemove', onMouseMove, false );
+
+      function render(){
+        requestAnimationFrame(render);
+        renderer.render(scene, camera);
+        uniforms.time.value += option.speed;
+
+        uniforms.progress.value = option.progress;
+        // uniforms.time.value *= option.progress;
+      }
+
+      function zoomIn(){
+        isExpend = true;
+        let z = computeZ(mesh,camera,img,window.innerHeight).z;
+        console.log("z", z);
+        TweenLite.to(mesh.position,1,{z:-z,ease:Power4.easeInOut});
+      }
+
+      function zoomOut(){
+        isExpend = false;
+        let z = computeZ(mesh,camera,img,imgRect.height).z;
+        TweenLite.to(mesh.position,1,{z:-z,ease:Power4.easeInOut});
+      }
+
+      function onMouseMove(e){
+        mouse.x = ( e.offsetX / imgRect.width);
+        mouse.y = ( e.offsetY / imgRect.height);
+      }
+
+			function resize(){
+          imgRect = img.getBoundingClientRect();
+					aspect = window.innerWidth / window.innerHeight;
+					camera.aspect = aspect;
+					renderer.setSize(window.innerWidth,window.innerHeight);
+					camera.updateProjectionMatrix();
+
+					setZ();
+			}
+
+			function setZ(){
+				var rect = img.getBoundingClientRect();
+        if(!isExpend){
+          newPosition = computeZ(mesh,camera,img,rect.height);
+          mesh.position.z = -newPosition.z;
+        }else{
+          newPosition = computeZ(mesh,camera,img,window.innerHeight);
+          mesh.position.z = -newPosition.z;
+        }
+			}
+
+			resize();
+			render();
+
+			function computeZ(mesh,camera,targetDom,targetHeight){
+					mesh.geometry.computeBoundingBox();
+					var face = mesh.geometry.vertices[0];
+					var faceHeight = mesh.geometry.boundingBox.max.y-mesh.geometry.boundingBox.min.y;
+					var vFOV = camera.fov * Math.PI / 180;  
+					var vHeightPartial = 2 * Math.tan( vFOV / 2 );
+					var p1 = faceHeight * window.innerHeight;
+					var p2 = face.z * vHeightPartial;
+					var p3 = targetHeight * vHeightPartial;
+					var p4 = targetHeight * p2;
+					var p5 = p1 + p4;
+					var z = p5/p3;
+		
+					//calculate dom element center coordinate
+					var screenPositionX = 0;
+					var screenPositionY = 0;
+					var divDim = targetDom.getBoundingClientRect();
+					screenPositionX = (divDim.left + divDim.right) / 2;
+					screenPositionY = (divDim.bottom + divDim.top) / 2;
+					var vector = new THREE.Vector3((screenPositionX / window.innerWidth) * 2 -1, (screenPositionY / window.innerHeight) * 2 -1, 0.5);
+
+					//unproject camera
+					vector = vector.unproject(camera);
+					var distanceZ = camera.position.z - vector.z ;
+					var offsetX = vector.x * (z-10) / distanceZ;
+					var offsetY = vector.y * (z-10) / distanceZ;
+					var cameraPosition = new THREE.Vector3(offsetX,offsetY,z);
+					return cameraPosition;
+			}
+
+			function computeX(){
+					var div = document.getElementById('box');
+					var divDim = div.getBoundingClientRect();
+					var y =  ((divDim.left + (targetWidth/2)) / window.innerHeight ) * 2 + 1;
+					return y;
+			}
+		
+			function computeY(){
+					var div = document.getElementById('box');
+					var divDim = div.getBoundingClientRect();
+					var y =  ((divDim.top + (targetHeight/2)) / window.innerHeight ) * 2 + 1;
+					return y;
+			}
+	 </script>
+	</body>
+</html>
