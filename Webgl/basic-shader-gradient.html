@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>three.js webgl</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+      body {
+        width:100%; height:100%;
+        background-color: #fff;
+        margin:0 auto;
+        overflow: hidden;
+      }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/108/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.0.1/plugins/EaselPlugin.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.0.1/TweenLite.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.6/dat.gui.min.js"></script>
+  </head>
+  <body>
+    <script type="x-shader/x-vertex" id="vertexshader">
+
+      varying vec2 vUv;
+      void main()
+      {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+      }
+
+    </script>
+
+    <script type="x-shader/x-fragment" id="fragmentshader">
+
+      uniform sampler2D tDiffuse;
+      uniform vec2 uCenter;
+      varying vec2 vUv;
+
+
+      void main()
+      {
+        vec4 tColor = texture2D( tDiffuse, vUv );
+        float a = 1.0;
+        float dx = vUv.x - uCenter.x;
+        
+        
+        if(dx<0.0){
+          a = (1.0 + dx/1.0);
+        }else if(dx>1.0){
+          a = (2.0 - dx/1.0);
+        }
+
+        gl_FragColor  = vec4(tColor.xyz,a);
+      }
+
+    </script>
+    
+    <script>
+      var camera,renderer,scene;
+      var width,height,halfWidth,halfHeight,aspect;
+      var config = {
+        fov:45,
+        near:1,
+        far:10000
+      };
+      var mouse = {x:0,y:0};
+      var wheel = {x:0,y:0,ox:0,oy:0};
+      var renderID;
+
+      var texure;
+      var mesh;
+
+      function setup(){
+        aspect  = window.innerWidth/window.innerHeight;
+        scene   = new THREE.Scene();
+        camera  = new THREE.PerspectiveCamera(config.fov,aspect,config.near,config.far);
+        renderer = new THREE.WebGLRenderer({});
+        renderer.setClearColor(0xffffff,1);
+        camera.position.z = 1500;
+
+
+        renderer.setSize(window.innerWidth,window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+        onResize();
+
+        addEvent();
+
+        var geometry = new THREE.PlaneBufferGeometry(1920,1080,1);
+        let texture = new THREE.TextureLoader().load('./textures/bandsome.jpg',()=>{
+          console.log(texture);
+        });
+        texture.minFilter = THREE.LinearFilter;
+
+        var shaderMaterial = new THREE.ShaderMaterial({
+          uniforms:{
+            tDiffuse:{value:texture},
+            uCenter:{value:new THREE.Vector2(0.0,0)},
+          },
+          vertexShader: document.getElementById('vertexshader').textContent,
+          fragmentShader: document.getElementById('fragmentshader').textContent,
+          transparent:true
+        });
+
+        var gui = new dat.GUI();
+        
+        gui.add(shaderMaterial.uniforms.uCenter.value,'x',-2,2).step(0.01);
+
+        mesh = new THREE.Mesh( geometry, shaderMaterial );
+        scene.add(mesh);
+      }
+
+      function addEvent(){
+        document.addEventListener( 'mousemove', onMouseMove, false );
+        window.addEventListener( 'resize', onResize, false );
+        document.addEventListener( 'mousewheel', onScroll);
+      }
+
+      function setBG(){
+        var geomarty,material,mesh;
+        var w = texure.image.width, h = texure.image.height;
+        geomarty  = new THREE.PlaneGeometry(1,h/w,1,1);
+        material  = new THREE.MeshBasicMaterial({map:texure});
+        mesh      = new THREE.Mesh(geomarty,material);
+        mesh.position.z = 100;
+        mesh.scale.x = mesh.scale.y = 600;
+        // scene.add(mesh);
+      }
+      /* ************************************************************
+        Renering and Animation
+      ************************************************************ */
+      function animation(){
+      }
+
+      function render(){
+        // camera.lookAt( scene.position );
+        // camera.position.x += ( mouse.x - camera.position.x ) * 0.05;
+        // camera.position.y += ( - mouse.y - camera.position.y ) * 0.05;
+        
+        // let time = Date.now() * 0.001;
+        // wheel.y *= 0.95;
+        // mesh.rotation.z += wheel.y;
+
+        renderer.render( scene, camera );
+      }
+
+      function update(){
+        animation();
+        render();
+        renderID = requestAnimationFrame( update );
+      }
+
+      /* ************************************************************
+          EVENT HANDLER
+      ************************************************************ */
+      function onResize(){
+        width   = window.innerWidth;
+        height  = window.innerHeight;
+        halfWidth = width*0.5;
+        halfHeight = height*0.5;
+        aspect  = width/height;
+        
+        camera.aspect = width/height;
+        renderer.setSize(width,height);
+        camera.updateProjectionMatrix();
+
+      }
+
+      function onMouseMove( e ) {
+        mouse.x = ( e.clientX - halfWidth );
+        mouse.y = ( e.clientY - halfHeight );
+      }
+
+      function onScroll(e){
+        // wheel.y = e.deltaY;
+      }
+
+
+      
+      requestAnimationFrame( update );
+      setup();
+      update();
+
+    </script>
+  </body>
+</html>
